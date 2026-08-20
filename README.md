@@ -1,5 +1,7 @@
 # Activity Hub
 
+[![CI](https://github.com/Danielededo/activity-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/Danielededo/activity-hub/actions/workflows/ci.yml)
+
 Self-hosted fitness aggregator. Upload TCX/GPX files, store them in PostgreSQL,
 query your training through a REST API and (from phase 2) a React dashboard.
 
@@ -48,6 +50,19 @@ ruff check .
 The suite runs against an in-memory SQLite database, so there is nothing to
 provision. `JSONB` and `BIGSERIAL` columns fall back to portable types outside
 PostgreSQL.
+
+### CI
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request:
+
+| Job | What it proves |
+| --- | --- |
+| Lint and test | `ruff check` is clean and all tests pass |
+| Migrations on PostgreSQL | The schema applies to a real PostgreSQL 16, `alembic check` finds no drift from the models, and the downgrade path works |
+| Docker image | The image builds, and a container started against PostgreSQL migrates itself and reports healthy |
+
+The last two exercise what the SQLite test suite cannot: the actual `JSONB` and
+`BIGSERIAL` DDL, and the image's migrate-then-serve entrypoint.
 
 ### Docker
 
