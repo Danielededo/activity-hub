@@ -132,3 +132,24 @@ backend/
 ├── alembic/               migrations (0001 creates the whole schema)
 └── tests/                 parsers, analyzer, API
 ```
+
+Repository-level files: `LICENSE`, `.gitignore`, `.editorconfig` (shared
+indentation rules across Python, JS and YAML) and `.github/workflows/ci.yml`.
+
+## Contributing
+
+`main` is the default branch and is never committed to directly. Each change
+lands as a pull request, and CI must be green before it merges.
+
+```bash
+git switch -c my-change main
+# ... work ...
+cd backend && ruff check . && pytest
+```
+
+Environment files are the one thing to watch: `.env.example` is tracked, every
+real `.env` is ignored. Never commit credentials.
+
+## License
+
+Released under the [MIT License](LICENSE).
