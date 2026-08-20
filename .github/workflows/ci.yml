@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A second push to a PR makes the first run's result irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  lint-and-test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Test
+        run: pytest --cov=app --cov-report=term-missing
+
+  migrations:
+    name: Migrations on PostgreSQL
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: activity
+          POSTGRES_PASSWORD: activity
+          POSTGRES_DB: activity_hub
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U activity -d activity_hub"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+psycopg2://activity:activity@localhost:5432/activity_hub
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply migrations
+        run: alembic upgrade head
+
+      - name: Check the migrations match the models
+        # Fails if a model changed without a matching revision.
+        run: alembic check
+
+      - name: Check the downgrade path
+        run: alembic downgrade base
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: activity
+          POSTGRES_PASSWORD: activity
+          POSTGRES_DB: activity_hub
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U activity -d activity_hub"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build the image
+        run: docker build -t activity-hub-api:ci ./backend
+
+      - name: Start the container
+        # --network host lets the container reach the postgres service on localhost.
+        run: |
+          docker run -d --name activity-hub-ci --network host \
+            -e DATABASE_URL=postgresql+psycopg2://activity:activity@localhost:5432/activity_hub \
+            activity-hub-api:ci
+
+      - name: Wait for the API to report healthy
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/api/health | tee /dev/stderr | grep -q '"status":"ok"'; then
+              echo "API is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API did not become healthy in 60s"
+          docker logs activity-hub-ci
+          exit 1
+
+      - name: Container logs
+        if: always()
+        run: docker logs activity-hub-ci
+
+      - name: Stop the container
+        if: always()
+        run: docker rm -f activity-hub-ci
