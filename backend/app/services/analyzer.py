@@ -6,10 +6,12 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.models import Workout
 from app.services.parsers.base_parser import ParsedTrackPoint, ParsedWorkout
 
@@ -180,23 +182,56 @@ def user_summary(db: Session, user_id: int) -> dict:
     }
 
 
-def weekly_summary(db: Session, user_id: int, weeks: int = 12) -> dict:
+def local_start_date(start_time: datetime, utc_offset_minutes: int | None, fallback: ZoneInfo):
+    """The calendar date an activity started on, locally.
+
+    A 23:30 ride in Rome belongs to that Sunday, not to the Monday it falls on
+    in UTC. The offset the file stated wins; the configured zone is the
+    fallback for the common case of a file that only wrote 'Z'.
+    """
+    moment = start_time if start_time.tzinfo is not None else start_time.replace(tzinfo=UTC)
+    if utc_offset_minutes is not None:
+        return (moment.astimezone(UTC) + timedelta(minutes=utc_offset_minutes)).date()
+    return moment.astimezone(fallback).date()
+
+
+def _midnight(day, zone: ZoneInfo) -> datetime:
+    return datetime.combine(day, datetime.min.time(), tzinfo=zone)
+
+
+def weekly_summary(
+    db: Session, user_id: int, weeks: int = 12, zone: ZoneInfo | None = None
+) -> dict:
     """Per-ISO-week totals for the last `weeks` weeks, most recent last.
 
-    Weeks with no activity are returned as zeroed buckets so the chart keeps
-    an even x axis.
+    Weeks are local weeks, and weeks with no activity are returned as zeroed
+    buckets so the chart keeps an even x axis.
     """
-    today = datetime.now(UTC).date()
+    zone = zone or settings.timezone
+    today = datetime.now(zone).date()
     current_week_start = today - timedelta(days=today.weekday())
     first_week_start = current_week_start - timedelta(weeks=weeks - 1)
+
+    # Bound the scan to the window instead of reading the user's whole history.
+    # A day of slack on each side covers every possible UTC offset; the
+    # bucketing below discards the overhang. Both bounds are converted to UTC
+    # because that is how start_time is stored.
+    window_end = current_week_start + timedelta(days=7)
+    lower = (_midnight(first_week_start, zone) - timedelta(days=1)).astimezone(UTC)
+    upper = (_midnight(window_end, zone) + timedelta(days=1)).astimezone(UTC)
 
     rows = db.execute(
         select(
             Workout.start_time,
+            Workout.utc_offset_minutes,
             Workout.total_distance,
             Workout.total_time,
             Workout.total_elevation_gain,
-        ).where(Workout.user_id == user_id)
+        ).where(
+            Workout.user_id == user_id,
+            Workout.start_time >= lower,
+            Workout.start_time < upper,
+        )
     ).all()
 
     grouped: dict[date, dict] = defaultdict(
@@ -207,15 +242,15 @@ def weekly_summary(db: Session, user_id: int, weeks: int = 12) -> dict:
             "total_elevation_gain": 0.0,
         }
     )
-    for start_time, distance, time, elevation in rows:
-        started = start_time.date()
+    for start_time, offset_minutes, distance, duration, elevation in rows:
+        started = local_start_date(start_time, offset_minutes, zone)
         week_start = started - timedelta(days=started.weekday())
         if week_start < first_week_start or week_start > current_week_start:
             continue
         bucket = grouped[week_start]
         bucket["workout_count"] += 1
         bucket["total_distance"] += float(distance or 0.0)
-        bucket["total_time"] += float(time or 0.0)
+        bucket["total_time"] += float(duration or 0.0)
         bucket["total_elevation_gain"] += float(elevation or 0.0)
 
     buckets = []

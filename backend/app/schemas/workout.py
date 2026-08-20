@@ -15,6 +15,7 @@ class WorkoutBase(BaseModel):
     name: str
     sport_type: str
     start_time: datetime
+    utc_offset_minutes: int | None
     total_distance: float
     total_elevation_gain: float
     total_elevation_loss: float

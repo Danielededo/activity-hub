@@ -33,8 +33,9 @@ class TcxParser(BaseParser):
 
         sport_type = self._sport_type(activity)
         laps = self._nodes(activity, "Lap")
-        points = self._track_points(activity)
-        start_time = self._start_time(activity, laps, points)
+        trackpoints = self._descendants(activity, "Trackpoint")
+        points = self._track_points(trackpoints)
+        start_time, utc_offset_minutes = self._start(activity, laps, trackpoints)
 
         total_time = sum(t for t in (self._float(lap, "TotalTimeSeconds") for lap in laps) if t)
         total_distance = sum(d for d in (self._float(lap, "DistanceMeters") for lap in laps) if d)
@@ -56,6 +57,7 @@ class TcxParser(BaseParser):
             name=self._name(activity, sport_type, start_time),
             sport_type=sport_type,
             start_time=start_time,
+            utc_offset_minutes=utc_offset_minutes,
             track_points=points,
             raw_data={
                 "creator": creator,
@@ -84,19 +86,26 @@ class TcxParser(BaseParser):
             return notes[:255]
         return f"{sport_type.capitalize()} {start_time.date().isoformat()}"
 
-    def _start_time(self, activity, laps: list, points: list[ParsedTrackPoint]) -> datetime:
-        candidates = [self._parse_timestamp(self._text(activity, "Id"))]
-        if laps:
-            candidates.append(self._parse_timestamp(laps[0].get("StartTime")))
-        candidates.extend(point.timestamp for point in points[:1])
-        for candidate in candidates:
-            if candidate is not None:
-                return candidate
-        raise ParserError("TCX file carries no usable start time")
+    def _start(self, activity, laps: list, trackpoints: list) -> tuple[datetime, int | None]:
+        """Start instant plus whatever UTC offset the file stated.
 
-    def _track_points(self, activity) -> list[ParsedTrackPoint]:
+        Garmin writes the activity id as a timestamp; the lap start and the
+        first sample are the fallbacks.
+        """
+        candidates = [self._text(activity, "Id")]
+        if laps:
+            candidates.append(laps[0].get("StartTime"))
+        if trackpoints:
+            candidates.append(self._text(trackpoints[0], "Time"))
+
+        start_time, offset = self._first_timestamp(candidates)
+        if start_time is None:
+            raise ParserError("TCX file carries no usable start time")
+        return start_time, offset
+
+    def _track_points(self, trackpoints: list) -> list[ParsedTrackPoint]:
         points: list[ParsedTrackPoint] = []
-        for index, node in enumerate(self._descendants(activity, "Trackpoint")):
+        for index, node in enumerate(trackpoints):
             extensions = self._node(node, "Extensions")
             cadence = self._int(node, "Cadence")
             if cadence is None and extensions is not None:

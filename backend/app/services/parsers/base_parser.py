@@ -40,6 +40,10 @@ class ParsedWorkout:
     raw_data: dict[str, Any] = field(default_factory=dict)
 
     # Totals the file states itself. When absent, the analyzer derives them.
+    #: UTC offset the file stated, in minutes. None when the file only wrote
+    #: 'Z' or a naive timestamp, which says nothing about where the activity was.
+    utc_offset_minutes: int | None = None
+
     total_distance: float | None = None
     total_time: float | None = None
     avg_heart_rate: int | None = None
@@ -140,16 +144,38 @@ class BaseParser(ABC):
                 values.setdefault(etree.QName(node).localname.lower(), node.text.strip())
         return values
 
-    @staticmethod
-    def _parse_timestamp(text: str | None) -> datetime | None:
+    @classmethod
+    def _parse_timestamp(cls, text: str | None) -> datetime | None:
         """Parse an ISO-8601 timestamp, normalising to UTC."""
+        return cls._parse_timestamp_with_offset(text)[0]
+
+    @staticmethod
+    def _parse_timestamp_with_offset(text: str | None) -> tuple[datetime | None, int | None]:
+        """Parse a timestamp into UTC plus the offset the text actually stated.
+
+        'Z' and a naive timestamp both yield a None offset: they mark the
+        instant without saying anything about local time. An explicit
+        '+02:00' — or even '+00:00' — is a real statement, so it is kept.
+        """
         if not text:
-            return None
-        cleaned = text.strip().replace("Z", "+00:00")
+            return None, None
+        raw = text.strip()
+        marked_utc = raw.endswith(("Z", "z"))
         try:
-            parsed = datetime.fromisoformat(cleaned)
+            parsed = datetime.fromisoformat(raw[:-1] + "+00:00" if marked_utc else raw)
         except ValueError:
-            return None
+            return None, None
+
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=UTC)
-        return parsed.astimezone(UTC)
+            return parsed.replace(tzinfo=UTC), None
+        offset = None if marked_utc else int(parsed.utcoffset().total_seconds() // 60)
+        return parsed.astimezone(UTC), offset
+
+    @classmethod
+    def _first_timestamp(cls, candidates: list) -> tuple[datetime | None, int | None]:
+        """First parseable timestamp among `candidates`, with its stated offset."""
+        for candidate in candidates:
+            parsed, offset = cls._parse_timestamp_with_offset(candidate)
+            if parsed is not None:
+                return parsed, offset
+        return None, None

@@ -31,6 +31,9 @@ class Workout(Base, TimestampMixin):
     start_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )
+    # The UTC offset the file stated, in minutes. Null when it only wrote 'Z',
+    # which is the common case: the instant is known, the local hour is not.
+    utc_offset_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Metric units throughout: metres for distance/elevation, seconds for time.
     total_distance: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)

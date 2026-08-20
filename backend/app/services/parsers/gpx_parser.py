@@ -49,16 +49,19 @@ class GpxParser(BaseParser):
             raise ParserError("No <trk> element found in GPX file")
 
         track = tracks[0]
-        points = self._track_points(root)
+        trackpoints = self._descendants(root, "trkpt")
+        points = self._track_points(trackpoints)
         if not points:
             raise ParserError("GPX file contains no track points")
 
         creator = root.get("creator")
         timestamps = [point.timestamp for point in points if point.timestamp]
-        start_time = (
-            timestamps[0]
-            if timestamps
-            else self._parse_timestamp(self._text(root, "metadata/time"))
+        # Read the offset off the raw text: the parsed points are already UTC.
+        first_point_time = next(
+            (text for text in (self._text(node, "time") for node in trackpoints) if text), None
+        )
+        start_time, utc_offset_minutes = self._first_timestamp(
+            [first_point_time, self._text(root, "metadata/time")]
         )
         if start_time is None:
             raise ParserError("GPX file carries no usable start time")
@@ -73,6 +76,7 @@ class GpxParser(BaseParser):
             name=self._name(track, start_time),
             sport_type=self._sport_type(track),
             start_time=start_time,
+            utc_offset_minutes=utc_offset_minutes,
             track_points=points,
             raw_data={
                 "creator": creator,
@@ -105,9 +109,9 @@ class GpxParser(BaseParser):
             return name[:255]
         return f"Activity {start_time.date().isoformat()}"
 
-    def _track_points(self, root) -> list[ParsedTrackPoint]:
+    def _track_points(self, trackpoints: list) -> list[ParsedTrackPoint]:
         points: list[ParsedTrackPoint] = []
-        for index, node in enumerate(self._descendants(root, "trkpt")):
+        for index, node in enumerate(trackpoints):
             extensions = self._node(node, "extensions")
             values = self._leaf_values(extensions) if extensions is not None else {}
             points.append(

@@ -1,6 +1,7 @@
 """Application settings, loaded from the environment or a local .env file."""
 
 from functools import lru_cache
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -38,6 +39,20 @@ class Settings(BaseSettings):
         if isinstance(value, str) and not value.strip().startswith("["):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @field_validator("display_timezone")
+    @classmethod
+    def _known_timezone(cls, value: str) -> str:
+        """Reject an unknown zone at boot rather than at query time."""
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError) as exc:
+            raise ValueError(f"Unknown IANA timezone: {value!r}") from exc
+        return value
+
+    @property
+    def timezone(self) -> ZoneInfo:
+        return ZoneInfo(self.display_timezone)
 
     @property
     def max_request_bytes(self) -> int:

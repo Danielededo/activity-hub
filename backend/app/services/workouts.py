@@ -56,6 +56,7 @@ def store_workout(db: Session, user_id: int, filename: str | None, content: byte
         name=parsed.name,
         sport_type=parsed.sport_type,
         start_time=parsed.start_time,
+        utc_offset_minutes=parsed.utc_offset_minutes,
         file_format=parsed.file_format,
         raw_data=parsed.raw_data,
         total_distance=metrics.total_distance,
