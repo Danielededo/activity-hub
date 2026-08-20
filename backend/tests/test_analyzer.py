@@ -1,5 +1,6 @@
 """Metric derivation and aggregate reporting."""
 
+import hashlib
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -137,6 +138,8 @@ def make_workout(user_id: int, start_time: datetime, **kwargs) -> Workout:
         "source": "garmin",
         "name": "Test",
         "sport_type": "cycling",
+        # Unique per fixture row: the real hash comes from the uploaded bytes.
+        "file_hash": hashlib.sha256(f"{user_id}:{start_time}:{kwargs}".encode()).hexdigest(),
         "total_distance": 10_000.0,
         "total_time": 3600.0,
         "total_elevation_gain": 100.0,

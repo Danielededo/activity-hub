@@ -106,14 +106,28 @@ already stored, `413` over the size limit, `422` unreadable or unsupported file.
 4. The workout row is written with the summary columns, and the samples are
    inserted into `track_points` in a single multi-row statement.
 
+Timestamps are stored as UTC. TCX and GPX normally write `Z`, which fixes the
+instant but says nothing about the local hour, so any offset the file *does*
+state is kept in `utc_offset_minutes` and `DISPLAY_TIMEZONE` is the fallback.
+Weekly totals are bucketed by local week: a 00:30 Monday ride in Rome belongs
+to that Monday, not to the Sunday it falls on in UTC.
+
 `workouts.raw_data` holds file-level metadata only — creator, author, lap
 summaries, counts. The samples live in `track_points`, so nothing is stored
 twice.
 
 ### Duplicate detection
 
-`(user_id, start_time, source)` is unique. Re-uploading the same activity
-returns `409` rather than a second copy, whatever the file is named.
+Two questions, answered separately.
+
+`(user_id, file_hash)` is unique, so the same bytes cannot be stored twice
+whatever the file is named — exact, and enforced by the database.
+
+That misses the same ride exported from Garmin as TCX and from Strava as GPX:
+different bytes, different `source`, one session. Those are recognised by what
+they describe — same sport, starting within `DUPLICATE_WINDOW_SECONDS` — which
+no constraint can express, so the check lives in the service layer. A brick
+session still works: a ride and a run at the same time are different sports.
 
 ## Repository layout
 

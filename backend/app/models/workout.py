@@ -16,8 +16,11 @@ JsonColumn = JSON().with_variant(JSONB(), "postgresql")
 class Workout(Base, TimestampMixin):
     __tablename__ = "workouts"
     __table_args__ = (
-        # The same file uploaded twice is the same workout.
-        UniqueConstraint("user_id", "start_time", "source", name="uq_workout_user_start_source"),
+        # The hard guarantee: the same bytes cannot be stored twice for a user,
+        # whatever the file was named. Near-duplicates — one session exported
+        # from two services, so different bytes — are caught in the service
+        # layer by a start-time window, which no constraint can express.
+        UniqueConstraint("user_id", "file_hash", name="uq_workout_user_file_hash"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -46,6 +49,8 @@ class Workout(Base, TimestampMixin):
     avg_cadence: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     file_format: Mapped[str] = mapped_column(String(8), nullable=False)
+    #: SHA-256 of the uploaded file, hex encoded.
+    file_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     # File-level metadata only (creator, laps, counts). The samples live in track_points.
     raw_data: Mapped[dict[str, Any]] = mapped_column(JsonColumn, nullable=False, default=dict)
 

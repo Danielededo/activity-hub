@@ -91,7 +91,7 @@ def test_upload_rejects_a_duplicate_file(client, user, sample_tcx):
 
     second = upload(client, user["id"], sample_tcx, "ride-copy.tcx")
     assert second.status_code == 409
-    assert "already stored" in second.json()["detail"]
+    assert "identical file" in second.json()["detail"]
 
 
 def test_upload_rejects_an_unknown_user(client, sample_tcx):

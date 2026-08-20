@@ -4,9 +4,13 @@ Kept out of the router so the whole path — parse, summarise, deduplicate,
 persist — can be tested and reused without going through HTTP.
 """
 
+import hashlib
+from datetime import timedelta
+
 from sqlalchemy import func, insert, select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.models import TrackPoint, User, Workout
 from app.services.analyzer import compute_metrics
 from app.services.parsers import parse_file
@@ -23,9 +27,42 @@ class UserNotFoundError(WorkoutServiceError):
 
 
 class DuplicateWorkoutError(WorkoutServiceError):
-    def __init__(self, existing_id: int) -> None:
-        super().__init__(f"This workout is already stored as workout {existing_id}")
+    def __init__(self, existing_id: int, reason: str) -> None:
+        super().__init__(f"Already stored as workout {existing_id} ({reason})")
         self.existing_id = existing_id
+        self.reason = reason
+
+
+def find_duplicate(db: Session, user_id: int, parsed, file_hash: str) -> tuple[int, str] | None:
+    """Find an existing workout that is the same session as `parsed`.
+
+    Two questions, because they need different answers. Byte-identical files
+    are caught by their hash — exact, cheap, and enforced by the database.
+    The same ride exported from Garmin as TCX and from Strava as GPX has
+    different bytes and a different `source`, so it can only be recognised by
+    what it describes: same sport, starting at practically the same moment.
+    """
+    exact = db.execute(
+        select(Workout.id).where(Workout.user_id == user_id, Workout.file_hash == file_hash)
+    ).scalar_one_or_none()
+    if exact is not None:
+        return exact, "identical file"
+
+    window = timedelta(seconds=settings.duplicate_window_seconds)
+    near = db.execute(
+        select(Workout.id)
+        .where(
+            Workout.user_id == user_id,
+            Workout.sport_type == parsed.sport_type,
+            Workout.start_time >= parsed.start_time - window,
+            Workout.start_time <= parsed.start_time + window,
+        )
+        .order_by(Workout.id)
+        .limit(1)
+    ).scalar_one_or_none()
+    if near is not None:
+        return near, f"same sport starting within {settings.duplicate_window_seconds}s"
+    return None
 
 
 def store_workout(db: Session, user_id: int, filename: str | None, content: bytes) -> Workout:
@@ -39,15 +76,10 @@ def store_workout(db: Session, user_id: int, filename: str | None, content: byte
 
     parsed = parse_file(filename, content)
 
-    duplicate = db.execute(
-        select(Workout.id).where(
-            Workout.user_id == user_id,
-            Workout.start_time == parsed.start_time,
-            Workout.source == parsed.source,
-        )
-    ).scalar_one_or_none()
+    file_hash = hashlib.sha256(content).hexdigest()
+    duplicate = find_duplicate(db, user_id, parsed, file_hash)
     if duplicate is not None:
-        raise DuplicateWorkoutError(duplicate)
+        raise DuplicateWorkoutError(*duplicate)
 
     metrics = compute_metrics(parsed)
     workout = Workout(
@@ -58,6 +90,7 @@ def store_workout(db: Session, user_id: int, filename: str | None, content: byte
         start_time=parsed.start_time,
         utc_offset_minutes=parsed.utc_offset_minutes,
         file_format=parsed.file_format,
+        file_hash=file_hash,
         raw_data=parsed.raw_data,
         total_distance=metrics.total_distance,
         total_elevation_gain=metrics.total_elevation_gain,

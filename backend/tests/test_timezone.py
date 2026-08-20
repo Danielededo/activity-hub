@@ -1,5 +1,6 @@
 """Local-time handling: stated offsets, and local week bucketing."""
 
+import hashlib
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -104,6 +105,7 @@ def add_workout(db_session, user_id, start_time, offset):
             total_elevation_gain=100.0,
             total_elevation_loss=100.0,
             file_format="gpx",
+            file_hash=hashlib.sha256(f"{user_id}:{start_time}:{offset}".encode()).hexdigest(),
             raw_data={},
         )
     )
