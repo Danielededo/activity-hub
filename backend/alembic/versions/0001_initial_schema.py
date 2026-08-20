@@ -1,7 +1,13 @@
 """Initial schema: users, workouts, track_points.
 
-Column types are reused from the models so the two cannot drift apart, and so
-this revision applies to SQLite as well as PostgreSQL.
+Self-contained on purpose: a revision is a snapshot of the schema at a point in
+time, so it declares its own column types rather than importing them from the
+models. Importing would keep the two textually in sync, but it would also let a
+later model change silently alter what this revision means. `alembic check` in
+CI is what actually guards against drift.
+
+The variants keep this applicable to SQLite as well as PostgreSQL, so the
+test suite needs no database.
 
 Revision ID: 0001_initial_schema
 Revises:
@@ -11,10 +17,14 @@ Create Date: 2026-08-20
 from collections.abc import Sequence
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 from alembic import op
-from app.models.track_point import PrimaryKeyType
-from app.models.workout import JsonColumn
+
+#: JSONB on PostgreSQL, portable JSON elsewhere.
+JSON_TYPE = sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), "postgresql")
+#: SQLite has no autoincrementing BIGINT primary key.
+BIG_PK_TYPE = sa.BigInteger().with_variant(sa.Integer(), "sqlite")
 
 revision: str = "0001_initial_schema"
 down_revision: str | None = None
@@ -50,7 +60,7 @@ def upgrade() -> None:
         sa.Column("max_heart_rate", sa.Integer(), nullable=True),
         sa.Column("avg_cadence", sa.Integer(), nullable=True),
         sa.Column("file_format", sa.String(length=8), nullable=False),
-        sa.Column("raw_data", JsonColumn, nullable=False),
+        sa.Column("raw_data", JSON_TYPE, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
@@ -62,7 +72,7 @@ def upgrade() -> None:
 
     op.create_table(
         "track_points",
-        sa.Column("id", PrimaryKeyType, primary_key=True, autoincrement=True),
+        sa.Column("id", BIG_PK_TYPE, primary_key=True, autoincrement=True),
         sa.Column("workout_id", sa.Integer(), nullable=False),
         sa.Column("sequence", sa.Integer(), nullable=False),
         sa.Column("timestamp", sa.DateTime(timezone=True), nullable=True),
