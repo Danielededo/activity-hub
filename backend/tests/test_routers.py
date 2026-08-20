@@ -1,0 +1,221 @@
+"""End-to-end API behaviour against an in-memory database."""
+
+from app.models import TrackPoint
+
+
+def upload(client, user_id: int, content: bytes, filename: str):
+    return client.post(
+        f"/api/upload?user_id={user_id}",
+        files={"file": (filename, content, "application/octet-stream")},
+    )
+
+
+# -- health --------------------------------------------------------------
+
+
+def test_health_reports_ok(client):
+    response = client.get("/api/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "database": "ok"}
+
+
+def test_root_advertises_the_api(client):
+    assert client.get("/").json()["api"] == "/api"
+
+
+# -- users ---------------------------------------------------------------
+
+
+def test_create_and_read_user(client):
+    created = client.post("/api/users/", json={"username": "ada", "email": "ada@example.com"})
+    assert created.status_code == 201
+    body = created.json()
+    assert body["username"] == "ada"
+    assert body["id"] > 0
+
+    fetched = client.get(f"/api/users/{body['id']}")
+    assert fetched.status_code == 200
+    assert fetched.json()["email"] == "ada@example.com"
+
+
+def test_duplicate_username_conflicts(client, user):
+    response = client.post(
+        "/api/users/", json={"username": user["username"], "email": "other@example.com"}
+    )
+    assert response.status_code == 409
+
+
+def test_invalid_email_is_rejected(client):
+    response = client.post("/api/users/", json={"username": "bob", "email": "not-an-email"})
+    assert response.status_code == 422
+
+
+def test_unknown_user_is_404(client):
+    assert client.get("/api/users/9999").status_code == 404
+
+
+# -- upload --------------------------------------------------------------
+
+
+def test_upload_tcx(client, user, sample_tcx):
+    response = upload(client, user["id"], sample_tcx, "ride.tcx")
+
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["source"] == "garmin"
+    assert body["file_format"] == "tcx"
+    assert body["sport_type"] == "cycling"
+    assert body["total_distance"] == 12000.0
+    assert body["max_heart_rate"] == 171
+    assert body["track_point_count"] == 4
+    assert body["raw_data"]["creator"] == "Garmin Edge 530"
+
+
+def test_upload_persists_track_points(client, db_session, user, sample_gpx):
+    workout_id = upload(client, user["id"], sample_gpx, "run.gpx").json()["id"]
+
+    points = (
+        db_session.query(TrackPoint)
+        .filter(TrackPoint.workout_id == workout_id)
+        .order_by(TrackPoint.sequence)
+        .all()
+    )
+    assert len(points) == 4
+    assert points[0].heart_rate == 128
+    assert points[0].latitude is not None
+
+
+def test_upload_rejects_a_duplicate_file(client, user, sample_tcx):
+    assert upload(client, user["id"], sample_tcx, "ride.tcx").status_code == 201
+
+    second = upload(client, user["id"], sample_tcx, "ride-copy.tcx")
+    assert second.status_code == 409
+    assert "already stored" in second.json()["detail"]
+
+
+def test_upload_rejects_an_unknown_user(client, sample_tcx):
+    assert upload(client, 4242, sample_tcx, "ride.tcx").status_code == 404
+
+
+def test_upload_rejects_an_unsupported_extension(client, user):
+    response = upload(client, user["id"], b"random bytes", "workout.fit")
+
+    assert response.status_code == 422
+    assert "Unsupported file" in response.json()["detail"]
+
+
+def test_upload_rejects_malformed_xml(client, user):
+    response = upload(client, user["id"], b"<gpx><trk>", "broken.gpx")
+
+    assert response.status_code == 422
+    assert "Malformed XML" in response.json()["detail"]
+
+
+def test_upload_rejects_an_empty_file(client, user):
+    assert upload(client, user["id"], b"", "empty.gpx").status_code == 400
+
+
+def test_upload_rejects_an_oversized_file(client, user, monkeypatch, sample_tcx):
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "max_upload_bytes", 10)
+    assert upload(client, user["id"], sample_tcx, "ride.tcx").status_code == 413
+
+
+# -- workouts ------------------------------------------------------------
+
+
+def test_list_workouts_is_paginated(client, user, sample_tcx, sample_gpx):
+    upload(client, user["id"], sample_tcx, "ride.tcx")
+    upload(client, user["id"], sample_gpx, "run.gpx")
+
+    response = client.get(f"/api/workouts?user_id={user['id']}&limit=1&offset=0")
+    body = response.json()
+
+    assert response.status_code == 200
+    assert body["total"] == 2
+    assert len(body["items"]) == 1
+    # Newest first: the GPX run is a day later than the TCX ride.
+    assert body["items"][0]["file_format"] == "gpx"
+    assert client.get(f"/api/workouts?user_id={user['id']}&limit=1&offset=1").json()["items"][0][
+        "file_format"
+    ] == "tcx"
+
+
+def test_list_workouts_filters_by_sport(client, user, sample_tcx, sample_gpx):
+    upload(client, user["id"], sample_tcx, "ride.tcx")
+    upload(client, user["id"], sample_gpx, "run.gpx")
+
+    body = client.get(f"/api/workouts?user_id={user['id']}&sport_type=running").json()
+
+    assert body["total"] == 1
+    assert body["items"][0]["sport_type"] == "running"
+
+
+def test_list_workouts_requires_a_user_id(client):
+    assert client.get("/api/workouts").status_code == 422
+
+
+def test_list_workouts_is_empty_for_another_user(client, user, sample_tcx):
+    upload(client, user["id"], sample_tcx, "ride.tcx")
+    other = client.post("/api/users/", json={"username": "eve", "email": "eve@example.com"}).json()
+
+    assert client.get(f"/api/workouts?user_id={other['id']}").json()["total"] == 0
+
+
+def test_get_workout_detail(client, user, sample_tcx):
+    workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
+
+    body = client.get(f"/api/workouts/{workout_id}").json()
+
+    assert body["id"] == workout_id
+    assert body["track_point_count"] == 4
+    assert body["raw_data"]["lap_count"] == 1
+
+
+def test_get_unknown_workout_is_404(client):
+    assert client.get("/api/workouts/9999").status_code == 404
+
+
+def test_delete_workout_removes_its_track_points(client, db_session, user, sample_tcx):
+    workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
+
+    assert client.delete(f"/api/workouts/{workout_id}").status_code == 204
+    assert client.get(f"/api/workouts/{workout_id}").status_code == 404
+    assert db_session.query(TrackPoint).filter(TrackPoint.workout_id == workout_id).count() == 0
+
+
+def test_delete_unknown_workout_is_404(client):
+    assert client.delete("/api/workouts/9999").status_code == 404
+
+
+# -- analysis ------------------------------------------------------------
+
+
+def test_analysis_summary(client, user, sample_tcx, sample_gpx):
+    upload(client, user["id"], sample_tcx, "ride.tcx")
+    upload(client, user["id"], sample_gpx, "run.gpx")
+
+    body = client.get(f"/api/analysis/{user['id']}").json()
+
+    assert body["workout_count"] == 2
+    assert body["total_distance"] > 12000.0
+    assert body["max_heart_rate"] == 171
+    assert {row["sport_type"] for row in body["by_sport"]} == {"cycling", "running"}
+
+
+def test_analysis_summary_for_an_unknown_user_is_404(client):
+    assert client.get("/api/analysis/9999").status_code == 404
+
+
+def test_weekly_analysis_returns_one_bucket_per_week(client, user):
+    body = client.get(f"/api/analysis/{user['id']}/weekly?weeks=6").json()
+
+    assert body["weeks"] == 6
+    assert len(body["buckets"]) == 6
+    assert all(bucket["workout_count"] == 0 for bucket in body["buckets"])
+
+
+def test_weekly_analysis_rejects_an_out_of_range_window(client, user):
+    assert client.get(f"/api/analysis/{user['id']}/weekly?weeks=0").status_code == 422
