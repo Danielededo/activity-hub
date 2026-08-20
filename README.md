@@ -82,8 +82,8 @@ volume comes up ready.
 | POST | `/api/users/` | 409 on a duplicate username or email |
 | GET | `/api/users/{id}` | |
 | GET | `/api/workouts?user_id=X` | `limit`, `offset`, optional `sport_type`; newest first |
-| GET | `/api/workouts/{id}` | Includes `raw_data` and `track_point_count` |
-| DELETE | `/api/workouts/{id}` | Cascades to track points |
+| GET | `/api/workouts/{id}?user_id=X` | Includes `raw_data` and `track_point_count`; 404 if owned by someone else |
+| DELETE | `/api/workouts/{id}?user_id=X` | Cascades to track points; 404 if owned by someone else |
 | POST | `/api/upload?user_id=X` | Multipart `file`: one `.tcx` or `.gpx` |
 | GET | `/api/analysis/{user_id}` | Lifetime totals plus a per-sport breakdown |
 | GET | `/api/analysis/{user_id}/weekly?weeks=12` | One bucket per ISO week, quiet weeks zero-filled |

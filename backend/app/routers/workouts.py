@@ -12,8 +12,17 @@ from app.services.workouts import track_point_count
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
 
-def get_workout_or_404(workout_id: int, db: Session) -> Workout:
-    workout = db.execute(select(Workout).where(Workout.id == workout_id)).scalar_one_or_none()
+def get_owned_workout_or_404(workout_id: int, user_id: int, db: Session) -> Workout:
+    """Fetch a workout, scoped to its owner.
+
+    Deployments are single-user today, but the schema and every other endpoint
+    are multi-user: looking a workout up by id alone would let any caller read
+    or delete anyone's activity. A workout owned by someone else answers 404
+    rather than 403, so the response does not confirm that the id exists.
+    """
+    workout = db.execute(
+        select(Workout).where(Workout.id == workout_id, Workout.user_id == user_id)
+    ).scalar_one_or_none()
     if workout is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workout not found")
     return workout
@@ -48,17 +57,25 @@ def list_workouts(
 
 
 @router.get("/{workout_id}", response_model=WorkoutRead)
-def get_workout(workout_id: int, db: Session = Depends(get_db)) -> WorkoutRead:
-    workout = get_workout_or_404(workout_id, db)
+def get_workout(
+    workout_id: int,
+    user_id: int = Query(..., ge=1),
+    db: Session = Depends(get_db),
+) -> WorkoutRead:
+    workout = get_owned_workout_or_404(workout_id, user_id, db)
     return WorkoutRead.model_validate(workout).model_copy(
         update={"track_point_count": track_point_count(db, workout_id)}
     )
 
 
 @router.delete("/{workout_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_workout(workout_id: int, db: Session = Depends(get_db)) -> Response:
+def delete_workout(
+    workout_id: int,
+    user_id: int = Query(..., ge=1),
+    db: Session = Depends(get_db),
+) -> Response:
     """Deletes the workout and, by cascade, its track points."""
-    workout = get_workout_or_404(workout_id, db)
+    workout = get_owned_workout_or_404(workout_id, user_id, db)
     db.delete(workout)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

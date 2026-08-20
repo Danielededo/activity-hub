@@ -167,27 +167,56 @@ def test_list_workouts_is_empty_for_another_user(client, user, sample_tcx):
 def test_get_workout_detail(client, user, sample_tcx):
     workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
 
-    body = client.get(f"/api/workouts/{workout_id}").json()
+    body = client.get(f"/api/workouts/{workout_id}?user_id={user['id']}").json()
 
     assert body["id"] == workout_id
     assert body["track_point_count"] == 4
     assert body["raw_data"]["lap_count"] == 1
 
 
-def test_get_unknown_workout_is_404(client):
-    assert client.get("/api/workouts/9999").status_code == 404
+def test_get_unknown_workout_is_404(client, user):
+    assert client.get(f"/api/workouts/9999?user_id={user['id']}").status_code == 404
+
+
+def test_get_workout_requires_a_user_id(client, user, sample_tcx):
+    workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
+
+    assert client.get(f"/api/workouts/{workout_id}").status_code == 422
+
+
+def test_another_users_workout_is_not_readable(client, user, sample_tcx):
+    """Owned by someone else must answer 404, not 403: no existence leak."""
+    workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
+    other = client.post(
+        "/api/users/", json={"username": "mallory", "email": "mallory@example.com"}
+    ).json()
+
+    assert client.get(f"/api/workouts/{workout_id}?user_id={other['id']}").status_code == 404
+
+
+def test_another_users_workout_is_not_deletable(client, db_session, user, sample_tcx):
+    from app.models import Workout
+
+    workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
+    other = client.post(
+        "/api/users/", json={"username": "mallory", "email": "mallory@example.com"}
+    ).json()
+
+    assert client.delete(f"/api/workouts/{workout_id}?user_id={other['id']}").status_code == 404
+    # Still there.
+    assert db_session.get(Workout, workout_id) is not None
 
 
 def test_delete_workout_removes_its_track_points(client, db_session, user, sample_tcx):
     workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
 
-    assert client.delete(f"/api/workouts/{workout_id}").status_code == 204
-    assert client.get(f"/api/workouts/{workout_id}").status_code == 404
+    assert client.delete(f"/api/workouts/{workout_id}?user_id={user['id']}").status_code == 204
+    assert client.get(f"/api/workouts/{workout_id}?user_id={user['id']}").status_code == 404
     assert db_session.query(TrackPoint).filter(TrackPoint.workout_id == workout_id).count() == 0
 
 
-def test_delete_unknown_workout_is_404(client):
-    assert client.delete("/api/workouts/9999").status_code == 404
+def test_delete_unknown_workout_is_404(client, user):
+    assert client.delete(f"/api/workouts/9999?user_id={user['id']}").status_code == 404
 
 
 # -- analysis ------------------------------------------------------------
