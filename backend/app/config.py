@@ -26,6 +26,14 @@ class Settings(BaseSettings):
     #: offset. An IANA name, e.g. "Europe/Rome".
     display_timezone: str = "UTC"
 
+    # The deployment is single-user: whoever is self-hosting it. These name the
+    # row that scripts.ensure_user creates, so the dashboard never has to ask.
+    default_username: str = "athlete"
+    default_email: str = "athlete@localhost"
+
+    #: Hard ceiling on track points returned in one response.
+    max_track_points: int = 20_000
+
     #: Two activities from the same user starting within this window and sharing
     #: a sport are treated as the same session exported twice.
     duplicate_window_seconds: int = 300

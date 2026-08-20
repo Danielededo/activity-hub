@@ -31,10 +31,14 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env        # point DATABASE_URL at your PostgreSQL instance
-alembic upgrade head        # create the schema
+cp .env.example .env             # point DATABASE_URL at your PostgreSQL instance
+alembic upgrade head             # create the schema
+python -m scripts.ensure_user    # create the single user, once
 uvicorn app.main:app --reload
 ```
+
+The Docker image runs those two steps in its entrypoint, so a fresh volume
+comes up ready and the dashboard has someone to ask about.
 
 The API is then on http://localhost:8000, with interactive docs at `/docs`.
 
@@ -79,10 +83,12 @@ volume comes up ready.
 | Method | Path | Notes |
 | --- | --- | --- |
 | GET | `/api/health` | 503 when the database is unreachable |
+| GET | `/api/users/me` | The single user this deployment serves |
 | POST | `/api/users/` | 409 on a duplicate username or email |
 | GET | `/api/users/{id}` | |
 | GET | `/api/workouts?user_id=X` | `limit`, `offset`, optional `sport_type`; newest first |
 | GET | `/api/workouts/{id}?user_id=X` | Includes `raw_data` and `track_point_count`; 404 if owned by someone else |
+| GET | `/api/workouts/{id}/track-points?user_id=X` | Samples for a route map or HR trace, downsampled to `max_points` |
 | DELETE | `/api/workouts/{id}?user_id=X` | Cascades to track points; 404 if owned by someone else |
 | POST | `/api/upload?user_id=X` | Multipart `file`: one `.tcx` or `.gpx` |
 | GET | `/api/analysis/{user_id}` | Lifetime totals plus a per-sport breakdown |
@@ -149,6 +155,18 @@ backend/
 
 Repository-level files: `LICENSE`, `.gitignore`, `.editorconfig` (shared
 indentation rules across Python, JS and YAML) and `.github/workflows/ci.yml`.
+
+## One user, no authentication
+
+The deployment serves exactly one person: whoever is self-hosting it.
+`scripts.ensure_user` creates that row from `DEFAULT_USERNAME` and
+`DEFAULT_EMAIL`, and the dashboard reads `GET /api/users/me` rather than being
+configured with an id.
+
+`user_id` stays in the schema and on every endpoint anyway. It is not a
+security boundary — without authentication nothing here is — it scopes data,
+and the ownership checks stop accidental cross-reads rather than attacks.
+Keeping it costs nothing and leaves the door open to a second user.
 
 ## Demo data
 

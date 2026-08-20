@@ -18,11 +18,15 @@ RUN pip install --no-cache-dir -r requirements.txt \
 COPY alembic.ini .
 COPY alembic ./alembic
 COPY app ./app
+COPY scripts ./scripts
 
 RUN useradd --create-home --uid 1000 activity && chown -R activity:activity /app
 USER activity
 
 EXPOSE 8000
 
-# Apply migrations before serving, so a fresh volume comes up ready.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Migrate, then make sure the single user this deployment serves exists, so a
+# fresh volume comes up ready and the dashboard has someone to ask about.
+CMD ["sh", "-c", "alembic upgrade head \
+    && python -m scripts.ensure_user \
+    && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
