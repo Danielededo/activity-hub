@@ -58,6 +58,10 @@ docker-compose.override.yml
 helm/**/charts/
 *.tgz
 
+# --- Generated demo data --------------------------------------------------
+# demo/activities/ is committed; a full generated training year is not.
+demo/generated/
+
 # --- Databases and local artifacts ---------------------------------------
 *.db
 *.sqlite

@@ -150,6 +150,22 @@ backend/
 Repository-level files: `LICENSE`, `.gitignore`, `.editorconfig` (shared
 indentation rules across Python, JS and YAML) and `.github/workflows/ci.yml`.
 
+## Demo data
+
+`demo/activities/` holds five weeks of synthetic training plus files that
+exercise the awkward cases — no heart rate, no per-point timestamps, a stated
+UTC offset, a single point, a hike that TCX can only call `Other`. Synthetic
+rather than downloaded because a real GPX track starts at somebody's front
+door.
+
+```bash
+./demo/load.sh                                  # into a running API
+cd backend && python -m scripts.generate_demo_data --help
+```
+
+See [demo/README.md](demo/README.md) for regenerating, and for a full training
+year written somewhere untracked.
+
 ## Contributing
 
 `main` is the default branch and is never committed to directly. Each change
