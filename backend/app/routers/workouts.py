@@ -5,8 +5,9 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import TrackPoint, Workout
+from app.models import Workout
 from app.schemas import WorkoutList, WorkoutRead
+from app.services.workouts import track_point_count
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
@@ -16,15 +17,6 @@ def get_workout_or_404(workout_id: int, db: Session) -> Workout:
     if workout is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workout not found")
     return workout
-
-
-def track_point_count(workout_id: int, db: Session) -> int:
-    return (
-        db.execute(
-            select(func.count(TrackPoint.id)).where(TrackPoint.workout_id == workout_id)
-        ).scalar()
-        or 0
-    )
 
 
 @router.get("", response_model=WorkoutList)
@@ -59,7 +51,7 @@ def list_workouts(
 def get_workout(workout_id: int, db: Session = Depends(get_db)) -> WorkoutRead:
     workout = get_workout_or_404(workout_id, db)
     return WorkoutRead.model_validate(workout).model_copy(
-        update={"track_point_count": track_point_count(workout_id, db)}
+        update={"track_point_count": track_point_count(db, workout_id)}
     )
 
 
