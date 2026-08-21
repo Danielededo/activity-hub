@@ -2,128 +2,88 @@
 
 [![CI](https://github.com/Danielededo/activity-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/Danielededo/activity-hub/actions/workflows/ci.yml)
 
-Self-hosted fitness aggregator. Upload TCX/GPX files, store them in PostgreSQL,
-query your training through a REST API and (from phase 2) a React dashboard.
+Self-hosted training log. Feed it the TCX and GPX files your watch or Strava
+exports, and get your history back as numbers and charts that stay on your own
+machine.
 
-No authentication and no external integrations: single-user deployment, with the
-user identified by a `user_id` query parameter.
+One user, no accounts, no external services, no telemetry. Units are metric
+throughout.
 
-## Status
+## Quick start
 
-| Phase | Scope | State |
-| --- | --- | --- |
-| 1 | FastAPI backend, parsers, analyzer, migrations, tests | done |
-| 2 | React + Vite + Tailwind dashboard | done |
-| 3 | docker-compose | done |
-
-## Stack
-
-- **Backend** — FastAPI, SQLAlchemy 2.0, Alembic, PostgreSQL
-- **Parsers** — TCX (Garmin) and GPX (Strava, Komoot, and other exporters), via lxml
-- **Frontend** — React, Vite, Tailwind, Recharts (phase 2)
-
-Units are metric throughout: metres for distance and elevation, seconds for time.
-
-## Running the backend
+You need **Docker with Compose v2**. Nothing else — the images build themselves.
 
 ```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-
-cp .env.example .env             # point DATABASE_URL at your PostgreSQL instance
-alembic upgrade head             # create the schema
-uvicorn app.main:app --reload
+git clone https://github.com/Danielededo/activity-hub.git
+cd activity-hub
+cp .env.example .env          # then change POSTGRES_PASSWORD
+docker compose up --build     # first run takes a few minutes
 ```
 
-The dashboard asks who you are on first run, so there is nothing else to set
-up. For a headless deployment that never opens a browser, `python -m
-scripts.ensure_user` creates the profile from `DEFAULT_FIRST_NAME`.
+Open <http://localhost:8080>. The dashboard asks for your name once, and that is
+the whole of setup. Then add your `.tcx` and `.gpx` files in the upload box —
+select as many at a time as you like.
 
-The API is then on http://localhost:8000, with interactive docs at `/docs`.
-
-## Running the dashboard
+To try it without your own data, load the bundled demo set:
 
 ```bash
-cd frontend
-npm install
-npm run dev            # http://localhost:5173, proxying /api to :8000
+./demo/load.sh                # 22 synthetic activities over five weeks
 ```
 
-The dev server proxies `/api`, and the nginx image serves the API on the same
-origin, so the browser never makes a cross-origin request and CORS never comes
-into it. On first run the dashboard asks for your name; after that it goes
-straight to your training.
+## What you get
+
+- **Upload TCX and GPX** — Garmin, Strava, Komoot and anything else that writes
+  standard files. Re-uploading is safe: files already stored are skipped.
+- **Lifetime totals** — distance, moving time, elevation, heart rate, with
+  per-sport breakdowns.
+- **Weekly trend** over any window from 8 to 52 weeks.
+- **Every activity in a table** with pace or speed depending on the sport, in
+  the activity's own local time.
+- **Per-activity detail** — the route, the heart-rate trace and the elevation
+  profile.
+- **Duplicate detection** that catches the same session exported twice from two
+  different services, not just the same file twice.
+
+## Your data
+
+Everything lives in one PostgreSQL volume, `activity-hub_pgdata`. Nothing is
+sent anywhere.
+
+**`docker compose down -v` deletes it.** The `-v` removes volumes, which means
+your entire history. `docker compose down` without it is safe, and so is
+`docker compose stop`.
+
+Back it up before you need to:
 
 ```bash
-npm run lint
-npm test               # 43 tests, jsdom
-npm run build
-docker build -t activity-hub-web ./frontend   # nginx, API_URL at container start
+docker compose exec -T postgres \
+  sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' > activity-hub-backup.sql
 ```
 
-### What the dashboard shows
-
-Lifetime totals as stat tiles, weekly distance as a bar chart, distance per
-sport, an upload box that reports each file separately, and a table of every
-activity. Opening one draws its route, its heart rate and its elevation.
-
-Some choices worth knowing about:
-
-- **Weekly distance is bars, not a line.** The weeks are discrete buckets; a
-  line between them would imply a continuous quantity nobody measured, and a
-  quiet week is a real zero.
-- **Heart rate and elevation get a chart each.** Two measures of different
-  scale on two y-axes make the crossing point an artefact of the axis ranges,
-  and readers take it to mean something.
-- **The route has no basemap.** Tiles would mean asking a third party for the
-  map of wherever you exercise, which is the opposite of the point of
-  self-hosting. The line is the shape of the ride.
-- **Sport colours come from a validated palette** and are assigned in fixed
-  order. Two of the light-mode hues fall below 3:1 on white, so everything
-  painted with them carries a visible label — identity is never colour alone.
-- **Metric only, no unit toggle.** Runners get minutes per kilometre, cyclists
-  get km/h.
-- **Times are the activity's own local time**, from the UTC offset its file
-  stated, in 24-hour form.
-
-### Tests
+And to restore into a fresh stack:
 
 ```bash
-cd backend
-pytest                                   # 67 tests, no database required
-pytest --cov=app --cov-report=term-missing
-ruff check .
+docker compose exec -T postgres \
+  sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB"' < activity-hub-backup.sql
 ```
 
-The suite runs against an in-memory SQLite database, so there is nothing to
-provision. `JSONB` and `BIGSERIAL` columns fall back to portable types outside
-PostgreSQL.
+The uploaded files themselves are not kept — each one is parsed into a workout
+plus its samples, and the original is discarded. Keep your exports if you want
+them.
 
-### CI
-
-`.github/workflows/ci.yml` runs on every push to `main` and every pull request:
-
-| Job | What it proves |
-| --- | --- |
-| Lint and test | `ruff check` is clean and all tests pass |
-| Migrations on PostgreSQL | The schema applies to a real PostgreSQL 16, `alembic check` finds no drift from the models, and the downgrade path works |
-| Docker image | The image builds, and a container started against PostgreSQL migrates itself and reports healthy |
-
-The last two exercise what the SQLite test suite cannot: the actual `JSONB` and
-`BIGSERIAL` DDL, and the image's migrate-then-serve entrypoint.
-
-### Docker
+## Updating
 
 ```bash
-docker build -t activity-hub-api ./backend
-docker run -p 8000:8000 -e DATABASE_URL=... activity-hub-api
+git pull
+docker compose up -d --build
 ```
 
-The image runs `alembic upgrade head` before starting uvicorn, so a fresh
-volume comes up ready.
+Schema migrations run automatically when the API container starts, so there is
+no separate step. The volume is untouched.
 
 ## API
+
+Interactive docs at <http://localhost:8000/docs> when the stack is up.
 
 | Method | Path | Notes |
 | --- | --- | --- |
@@ -137,10 +97,33 @@ volume comes up ready.
 | DELETE | `/api/workouts/{id}?user_id=X` | Cascades to track points; 404 if owned by someone else |
 | POST | `/api/upload?user_id=X` | Multipart `file`: one `.tcx` or `.gpx` |
 | GET | `/api/analysis/{user_id}` | Lifetime totals plus a per-sport breakdown |
-| GET | `/api/analysis/{user_id}/weekly?weeks=12` | One bucket per ISO week, quiet weeks zero-filled |
+| GET | `/api/analysis/{user_id}/weekly?weeks=12` | One bucket per local week, quiet weeks zero-filled |
 
 Upload failures are explicit: `404` unknown user, `400` empty file, `409`
 already stored, `413` over the size limit, `422` unreadable or unsupported file.
+
+## One user, no authentication
+
+The deployment serves exactly one person: whoever is self-hosting it. On first
+run `GET /api/users/me` answers 404, the dashboard asks for a name, and that is
+the whole of setup — no id to configure, and no placeholder profile invented on
+your behalf.
+
+The profile is only a name. With one user and no authentication there is
+nothing to log in as and nothing to send mail to, so there is no username and
+no email; the surname is optional, because plenty of people go by one name.
+`POST /api/users/` refuses a second profile: `/users/me` resolves to the lowest
+id, so an extra row would simply be invisible.
+
+Activity files cannot supply the name. GPX 1.1 has a slot for it
+(`metadata/author/name`) and TCX has none — its `Author` is the application and
+its `Creator` is the device — and in practice the big exporters leave it empty
+anyway, which is the right call for personal data.
+
+`user_id` stays in the schema and on every endpoint. It is not a security
+boundary — without authentication nothing here is — it scopes data, and the
+ownership checks stop accidental cross-reads rather than attacks. Keeping it
+costs nothing and leaves the door open to a second person.
 
 ## How a file becomes a workout
 
@@ -180,6 +163,115 @@ they describe — same sport, starting within `DUPLICATE_WINDOW_SECONDS` — whi
 no constraint can express, so the check lives in the service layer. A brick
 session still works: a ride and a run at the same time are different sports.
 
+## What the dashboard shows, and why
+
+Lifetime totals as stat tiles, weekly distance as a bar chart, distance per
+sport, an upload box that reports each file separately, and a table of every
+activity. Opening one draws its route, its heart rate and its elevation.
+
+Choices worth knowing about:
+
+- **Weekly distance is bars, not a line.** The weeks are discrete buckets; a
+  line between them would imply a continuous quantity nobody measured, and a
+  quiet week is a real zero.
+- **Heart rate and elevation get a chart each.** Two measures of different
+  scale on two y-axes make the crossing point an artefact of the axis ranges,
+  and readers take it to mean something.
+- **The route has no basemap.** Tiles would mean asking a third party for the
+  map of wherever you exercise, which is the opposite of the point of
+  self-hosting. The line is the shape of the ride.
+- **Sport colours come from a validated palette** and are assigned in fixed
+  order. Two of the light-mode hues fall below 3:1 on white, so everything
+  painted with them carries a visible label — identity is never colour alone.
+- **Metric only, no unit toggle.** Runners get minutes per kilometre, cyclists
+  get km/h.
+- **Times are the activity's own local time**, from the UTC offset its file
+  stated, in 24-hour form.
+
+## Demo data
+
+`demo/activities/` holds five weeks of synthetic training plus files that
+exercise the awkward cases — no heart rate, no per-point timestamps, a stated
+UTC offset, a single point, a hike that TCX can only call `Other`. Synthetic
+rather than downloaded because a real GPX track starts at somebody's front
+door.
+
+```bash
+./demo/load.sh                # into a running stack
+cd backend && python -m scripts.generate_demo_data --help
+```
+
+See [demo/README.md](demo/README.md) for regenerating, and for a full training
+year written somewhere untracked.
+
+## Development
+
+Docker is enough to run it; these are for working on it. You need **Python
+3.11** and **Node 22**.
+
+```bash
+# API — http://localhost:8000, docs at /docs
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env             # point DATABASE_URL at a PostgreSQL instance
+alembic upgrade head
+uvicorn app.main:app --reload
+```
+
+```bash
+# Dashboard — http://localhost:5173, proxying /api to :8000
+cd frontend
+npm install
+npm run dev
+```
+
+The dev server proxies `/api`, and the nginx image serves the API on the same
+origin, so the browser never makes a cross-origin request and CORS never comes
+into it either way.
+
+For a headless setup that never opens a browser, `python -m scripts.ensure_user`
+creates the profile from `DEFAULT_FIRST_NAME` instead of the first-run screen.
+
+### Tests
+
+```bash
+cd backend && ruff check . && pytest          # 146 tests, no database needed
+cd frontend && npm run lint && npm test       # 43 tests, jsdom
+```
+
+The backend suite runs against in-memory SQLite, so there is nothing to
+provision: `JSONB` and `BIGSERIAL` fall back to portable types outside
+PostgreSQL.
+
+### CI
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request:
+
+| Job | What it proves |
+| --- | --- |
+| Lint and test | `ruff check` is clean and the backend suite passes |
+| Migrations on PostgreSQL | The schema applies to a real PostgreSQL 16, `alembic check` finds no drift from the models, and the downgrade path works |
+| Frontend lint, test and build | ESLint is clean, the jsdom suite passes, and the bundle builds |
+| Images and compose stack | Both images build, the stack comes up health-gated, and a profile plus an upload round-trips through the dashboard's own origin |
+
+The last two exercise what the unit suites cannot: the actual `JSONB` and
+`BIGSERIAL` DDL, the image's migrate-then-serve entrypoint, and the nginx proxy
+that makes same-origin requests possible.
+
+## Deployment
+
+`docker compose` is the whole deployment story, on purpose. This is a
+single-user application that fits on one machine — a NAS, a VPS, a server in a
+cupboard — and it builds its own images, so there is nothing to publish to a
+registry and no credentials to keep anywhere.
+
+A Helm chart lived here briefly. It was removed rather than kept "just in case":
+600 lines guessing at a cluster's storage class, ingress class and secret
+conventions is a liability if nobody runs it, and a chart written when those
+things are actually known would be a better chart. It is in the git history if
+that day comes.
+
 ## Repository layout
 
 ```
@@ -209,76 +301,12 @@ frontend/
 ├── nginx.conf             serves the build, proxies /api
 └── tests/                 formatters, palette, components
 
-docker-compose.yml        the whole stack
+demo/                      synthetic activities and a loader
+docker-compose.yml         the whole stack
 ```
 
 Repository-level files: `LICENSE`, `.gitignore`, `.editorconfig` (shared
 indentation rules across Python, JS and YAML) and `.github/workflows/ci.yml`.
-
-## One user, no authentication
-
-The deployment serves exactly one person: whoever is self-hosting it. On first
-run `GET /api/users/me` answers 404, the dashboard asks for a name, and that is
-the whole of setup — no id to configure, and no placeholder profile invented on
-your behalf.
-
-The profile is only a name. With one user and no authentication there is
-nothing to log in as and nothing to send mail to, so there is no username and
-no email; the surname is optional, because plenty of people go by one name.
-`POST /api/users/` refuses a second profile: /users/me resolves to the lowest
-id, so an extra row would simply be invisible.
-
-Activity files cannot supply the name. GPX 1.1 has a slot for it
-(`metadata/author/name`) and TCX has none — its `Author` is the application and
-its `Creator` is the device — and in practice the big exporters leave it empty
-anyway, which is the right call for personal data.
-
-`user_id` stays in the schema and on every endpoint. It is not a security
-boundary — without authentication nothing here is — it scopes data, and the
-ownership checks stop accidental cross-reads rather than attacks. Keeping it
-costs nothing and leaves the door open to a second person.
-
-## Running the whole thing
-
-```bash
-cp .env.example .env       # change POSTGRES_PASSWORD
-docker compose up --build
-open http://localhost:8080
-```
-
-PostgreSQL, the API and the dashboard. Only the dashboard is published; it
-proxies `/api` to the API on the compose network, so the browser makes
-same-origin requests and CORS never comes into it. The API is published too, on
-8000, because it is handy — not because the dashboard needs it.
-
-## Deployment
-
-`docker compose` is the whole deployment story, on purpose. This is a
-single-user application that fits on one machine — a NAS, a VPS, a server in a
-cupboard — and it builds its own images, so there is nothing to publish to a
-registry and no credentials to keep anywhere.
-
-A Helm chart lived here briefly. It was removed rather than kept "just in case":
-600 lines guessing at a cluster's storage class, ingress class and secret
-conventions is a liability if nobody runs it, and a chart written when those
-things are actually known would be a better chart. It is in the git history if
-that day comes.
-
-## Demo data
-
-`demo/activities/` holds five weeks of synthetic training plus files that
-exercise the awkward cases — no heart rate, no per-point timestamps, a stated
-UTC offset, a single point, a hike that TCX can only call `Other`. Synthetic
-rather than downloaded because a real GPX track starts at somebody's front
-door.
-
-```bash
-./demo/load.sh                                  # into a running API
-cd backend && python -m scripts.generate_demo_data --help
-```
-
-See [demo/README.md](demo/README.md) for regenerating, and for a full training
-year written somewhere untracked.
 
 ## Contributing
 
