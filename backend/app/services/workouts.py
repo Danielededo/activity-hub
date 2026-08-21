@@ -5,15 +5,18 @@ persist — can be tested and reused without going through HTTP.
 """
 
 import hashlib
+from dataclasses import dataclass, field
 from datetime import timedelta
 
 from sqlalchemy import func, insert, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models import TrackPoint, User, Workout
 from app.services.analyzer import compute_metrics
-from app.services.parsers import parse_file
+from app.services.archives import read_archive
+from app.services.parsers import ParserError, parse_file
 
 
 class WorkoutServiceError(Exception):
@@ -135,3 +138,83 @@ def track_point_count(db: Session, workout_id: int) -> int:
         ).scalar()
         or 0
     )
+
+
+# -- archives ------------------------------------------------------------
+
+#: What happened to one file inside an archive.
+STORED = "stored"
+DUPLICATE = "duplicate"
+SKIPPED = "skipped"
+FAILED = "failed"
+
+
+@dataclass(slots=True)
+class MemberOutcome:
+    filename: str
+    outcome: str
+    workout_id: int | None = None
+    detail: str | None = None
+
+
+@dataclass(slots=True)
+class ArchiveOutcome:
+    stored: int = 0
+    duplicates: int = 0
+    skipped: int = 0
+    failed: int = 0
+    members: list[MemberOutcome] = field(default_factory=list)
+
+    def record(self, member: MemberOutcome) -> None:
+        self.members.append(member)
+        counter = {
+            STORED: "stored",
+            DUPLICATE: "duplicates",
+            SKIPPED: "skipped",
+            FAILED: "failed",
+        }[member.outcome]
+        setattr(self, counter, getattr(self, counter) + 1)
+
+
+def store_archive(db: Session, user_id: int, content: bytes) -> ArchiveOutcome:
+    """Store every activity file in an archive, reporting each one.
+
+    Members are processed one at a time on purpose. The near-duplicate check
+    reads before it writes, so two files describing the same session could both
+    pass it if they were handled concurrently — the unique constraint would not
+    catch them either, since their bytes differ. Sequential is load-bearing
+    here, not merely simple.
+
+    A member that fails is recorded and skipped over: an export with one corrupt
+    file should still import the other three hundred.
+    """
+    if db.execute(select(User.id).where(User.id == user_id)).scalar_one_or_none() is None:
+        raise UserNotFoundError(user_id)
+
+    outcome = ArchiveOutcome()
+    for member in read_archive(
+        content,
+        max_members=settings.max_archive_members,
+        max_extracted_bytes=settings.max_archive_extracted_bytes,
+        max_member_bytes=settings.max_upload_bytes,
+    ):
+        if not member.usable:
+            outcome.record(MemberOutcome(member.name, SKIPPED, detail=member.skipped))
+            continue
+
+        try:
+            workout = store_workout(db, user_id, member.name, member.content)
+        except DuplicateWorkoutError as exc:
+            outcome.record(
+                MemberOutcome(member.name, DUPLICATE, exc.existing_id, exc.reason)
+            )
+        except ParserError as exc:
+            outcome.record(MemberOutcome(member.name, FAILED, detail=str(exc)))
+        except IntegrityError as exc:
+            # Leave the session usable for the remaining members.
+            db.rollback()
+            outcome.record(MemberOutcome(member.name, FAILED, detail=str(exc.orig)))
+        else:
+            outcome.record(MemberOutcome(member.name, STORED, workout.id, workout.name))
+
+    return outcome

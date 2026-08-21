@@ -1,6 +1,8 @@
 from app.schemas.user import UserCreate, UserRead
 from app.schemas.workout import (
     AnalysisSummary,
+    ArchiveMemberRead,
+    ArchiveUploadRead,
     SportBreakdown,
     TrackPointRead,
     TrackPointSeries,
@@ -13,6 +15,8 @@ from app.schemas.workout import (
 
 __all__ = [
     "AnalysisSummary",
+    "ArchiveMemberRead",
+    "ArchiveUploadRead",
     "SportBreakdown",
     "TrackPointRead",
     "TrackPointSeries",

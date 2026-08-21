@@ -39,6 +39,17 @@ class Settings(BaseSettings):
     #: Hard ceiling on track points returned in one response.
     max_track_points: int = 20_000
 
+    # A full Garmin or Strava export is a zip of hundreds of files, so it needs
+    # a far larger cap than a single activity. XML compresses roughly ten to
+    # one, which is also why an archive needs its own guards rather than
+    # trusting this number: 200 MiB of zip can claim to be gigabytes of XML.
+    max_archive_bytes: int = 200 * 1024 * 1024
+    max_archive_members: int = 5_000
+    #: Total *declared* uncompressed size across an archive's members.
+    max_archive_extracted_bytes: int = 2 * 1024 * 1024 * 1024
+    #: Members reported individually in the response; the counts are always exact.
+    max_reported_members: int = 200
+
     #: Two activities from the same user starting within this window and sharing
     #: a sport are treated as the same session exported twice.
     duplicate_window_seconds: int = 300
@@ -75,8 +86,13 @@ class Settings(BaseSettings):
 
     @property
     def max_request_bytes(self) -> int:
-        """Cap for a whole request body: the file plus multipart framing."""
-        return self.max_upload_bytes + MULTIPART_OVERHEAD_BYTES
+        """Cap for a whole request body: the largest upload plus framing.
+
+        The guard in main.py cannot tell which route a body is heading for, so
+        it allows the biggest thing any route accepts. The per-route limits are
+        the narrower ones.
+        """
+        return max(self.max_upload_bytes, self.max_archive_bytes) + MULTIPART_OVERHEAD_BYTES
 
 
 @lru_cache

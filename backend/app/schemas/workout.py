@@ -70,6 +70,31 @@ class TrackPointSeries(BaseModel):
     items: list[TrackPointRead]
 
 
+class ArchiveMemberRead(BaseModel):
+    """What happened to one file inside an uploaded archive."""
+
+    filename: str
+    #: stored | duplicate | skipped | failed
+    outcome: str
+    workout_id: int | None = None
+    detail: str | None = None
+
+
+class ArchiveUploadRead(BaseModel):
+    """The result of unpacking an archive.
+
+    The counts are always exact. `members` is capped, because a full export can
+    hold thousands of files and nobody reads a thousand-line JSON list.
+    """
+
+    stored: int
+    duplicates: int
+    skipped: int
+    failed: int
+    members: list[ArchiveMemberRead]
+    truncated: bool = False
+
+
 class SportBreakdown(BaseModel):
     sport_type: str
     workout_count: int
