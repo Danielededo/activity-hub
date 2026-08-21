@@ -39,6 +39,12 @@ class Settings(BaseSettings):
     #: Hard ceiling on track points returned in one response.
     max_track_points: int = 20_000
 
+    #: Maximum heart rate for zone boundaries. Left unset, the highest beat any
+    #: activity recorded is used instead — which is a floor, not a maximum: a
+    #: figure nobody has ever pushed to reads low and makes every zone read
+    #: high. Set it if you know yours from a test.
+    max_heart_rate: int | None = None
+
     # A full Garmin or Strava export is a zip of hundreds of files, so it needs
     # a far larger cap than a single activity. XML compresses roughly ten to
     # one, which is also why an archive needs its own guards rather than

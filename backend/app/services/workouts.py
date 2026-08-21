@@ -18,6 +18,7 @@ from app.services.analyzer import compute_metrics
 from app.services.archives import read_archive
 from app.services.parsers import ParserError, parse_file
 from app.services.records import fastest_windows
+from app.services.zones import heart_rate_seconds
 
 
 class WorkoutServiceError(Exception):
@@ -96,6 +97,12 @@ def store_workout(db: Session, user_id: int, filename: str | None, content: byte
         file_format=parsed.file_format,
         file_hash=file_hash,
         raw_data=parsed.raw_data,
+        # Computed here for the same reason the windows are: the samples are
+        # already in memory. Empty rather than null when there is no heart rate,
+        # so the backfill knows this one has been looked at.
+        hr_seconds={
+            str(bpm): seconds for bpm, seconds in heart_rate_seconds(parsed.track_points).items()
+        },
         total_distance=metrics.total_distance,
         total_elevation_gain=metrics.total_elevation_gain,
         total_elevation_loss=metrics.total_elevation_loss,
@@ -219,9 +226,7 @@ def store_archive(db: Session, user_id: int, content: bytes) -> ArchiveOutcome:
         try:
             workout = store_workout(db, user_id, member.name, member.content)
         except DuplicateWorkoutError as exc:
-            outcome.record(
-                MemberOutcome(member.name, DUPLICATE, exc.existing_id, exc.reason)
-            )
+            outcome.record(MemberOutcome(member.name, DUPLICATE, exc.existing_id, exc.reason))
         except ParserError as exc:
             outcome.record(MemberOutcome(member.name, FAILED, detail=str(exc)))
         except IntegrityError as exc:

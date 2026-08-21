@@ -3,19 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../src/App'
 import * as api from '../src/api/client'
 
-vi.mock('../src/api/client', () => ({
-  errorMessage: (error, fallback) => error?.message ?? fallback ?? 'error',
-  fetchProfile: vi.fn(),
-  createProfile: vi.fn(),
-  fetchAnalysis: vi.fn(),
-  fetchRecords: vi.fn(),
-  fetchWeekly: vi.fn(),
-  fetchWorkout: vi.fn(),
-  fetchWorkouts: vi.fn(),
-  fetchTrackPoints: vi.fn(),
-  deleteWorkout: vi.fn(),
-  uploadWorkout: vi.fn(),
-}))
+vi.mock('../src/api/client', async (importOriginal) =>
+  (await import('./mockClient')).mockClient(importOriginal),
+)
 
 const PROFILE = { id: 1, first_name: 'Daniele', last_name: 'De Dominicis', full_name: 'Daniele De Dominicis' }
 

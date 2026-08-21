@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { errorMessage, fetchTrackPoints } from '../api/client'
+import { errorMessage, fetchTrackPoints, fetchWorkoutZones } from '../api/client'
 import RouteMap from './RouteMap'
 import TraceChart from './TraceChart'
+import ZoneBar from './ZoneBar'
 import {
   cadenceUnit,
   formatCadence,
@@ -32,6 +33,7 @@ function withElapsed(items) {
 
 export default function WorkoutDetail({ workout, userId, onClose }) {
   const [series, setSeries] = useState(null)
+  const [zones, setZones] = useState(null)
   const [error, setError] = useState(null)
 
   // No state reset here: Dashboard gives this component a key per workout, so
@@ -45,6 +47,24 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
       })
       .catch((caught) => {
         if (!cancelled) setError(errorMessage(caught, 'Could not load the track'))
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [workout.id, userId])
+
+  // Its own request: the zones hang off a maximum heart rate the server knows
+  // and this component does not, and a track without a strap has none at all.
+  useEffect(() => {
+    let cancelled = false
+    fetchWorkoutZones(workout.id, userId)
+      .then((data) => {
+        if (!cancelled) setZones(data)
+      })
+      .catch(() => {
+        // A missing zone breakdown is not worth an error banner over the
+        // activity somebody asked to see; the traces are still there.
+        if (!cancelled) setZones(null)
       })
     return () => {
       cancelled = true
@@ -97,6 +117,8 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
           </div>
         ))}
       </dl>
+
+      {zones && <div className="mt-4"><ZoneBar zones={zones.zones} load={zones.load} /></div>}
 
       {error && (
         <p role="alert" className="mt-4 text-sm text-red-700 dark:text-red-400">

@@ -35,6 +35,20 @@ export function formatElapsed(seconds) {
   return seconds <= 0 ? '0s' : formatDuration(seconds)
 }
 
+/**
+ * A duration short enough for an axis tick.
+ *
+ * formatDuration spells out seconds — "55m 00s" — which is right in a table and
+ * too long beside a y axis, where a label wider than the axis is silently
+ * clipped and reads as a different number.
+ */
+export function formatShortDuration(seconds) {
+  if (seconds == null || seconds <= 0) return '0'
+  const minutes = Math.round(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  return hours ? `${hours}h ${String(minutes % 60).padStart(2, '0')}m` : `${minutes}m`
+}
+
 export function formatElevation(metres) {
   if (metres == null) return '—'
   return `${Math.round(metres)} m`

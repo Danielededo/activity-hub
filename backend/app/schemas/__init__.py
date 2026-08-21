@@ -15,7 +15,10 @@ from app.schemas.workout import (
     WorkoutList,
     WorkoutRead,
     WorkoutSummary,
+    WorkoutZones,
     YearlyTotals,
+    ZoneBandRead,
+    ZoneSummary,
 )
 
 __all__ = [
@@ -36,5 +39,8 @@ __all__ = [
     "WorkoutList",
     "WorkoutRead",
     "WorkoutSummary",
+    "WorkoutZones",
     "YearlyTotals",
+    "ZoneBandRead",
+    "ZoneSummary",
 ]

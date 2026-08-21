@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import RouteMap from '../src/components/RouteMap'
-import { CHART_INK, SINGLE_SERIES, SPEED_RAMP } from '../src/theme'
+import { CHART_INK, SINGLE_SERIES, ORDINAL_RAMP } from '../src/theme'
 
 const EPOCH = Date.UTC(2026, 5, 22, 6, 30)
 
@@ -114,13 +114,13 @@ describe('RouteMap speed colouring', () => {
     const used = new Set(strokes())
 
     expect(used.size).toBeGreaterThan(1)
-    expect([...used].every((stroke) => SPEED_RAMP.light.includes(stroke))).toBe(true)
+    expect([...used].every((stroke) => ORDINAL_RAMP.light.includes(stroke))).toBe(true)
   })
 
   it('never paints the track a colour outside the documented set', () => {
     // Either a validated step of the ramp, or the grey that means "not
     // measured". Anything else would be a hue chosen by eye.
-    const allowed = [...SPEED_RAMP.light, CHART_INK.light.axis]
+    const allowed = [...ORDINAL_RAMP.light, CHART_INK.light.axis]
     render(<RouteMap samples={eastward(WITH_A_GAP)} sportType="running" />)
 
     for (const stroke of strokes()) {
@@ -152,7 +152,7 @@ describe('RouteMap speed colouring', () => {
     render(<RouteMap samples={eastward(WITH_A_GAP)} sportType="cycling" />)
 
     expect(strokes()).toContain(CHART_INK.light.axis)
-    expect(SPEED_RAMP.light).not.toContain(CHART_INK.light.axis)
+    expect(ORDINAL_RAMP.light).not.toContain(CHART_INK.light.axis)
   })
 
   it('explains the grey in the legend', () => {
@@ -176,7 +176,7 @@ describe('RouteMap speed colouring', () => {
 
     expect(polylines().length).toBeGreaterThan(4)
     for (const stroke of strokes()) {
-      expect(SPEED_RAMP.light).toContain(stroke)
+      expect(ORDINAL_RAMP.light).toContain(stroke)
     }
   })
 })

@@ -12,6 +12,14 @@ from app.database import Base, TimestampMixin
 # JSONB on PostgreSQL, plain JSON elsewhere so the test suite can run on SQLite.
 JsonColumn = JSON().with_variant(JSONB(), "postgresql")
 
+# The same, for a column where NULL has to mean something.
+#
+# By default SQLAlchemy stores Python None in a JSON column as the JSON *value*
+# `null`, which `IS NULL` does not match. Anything relying on the difference
+# between "no value" and "an empty value" — here, "never computed" against
+# "computed, and there was nothing to record" — silently stops working.
+NullableJsonColumn = JSON(none_as_null=True).with_variant(JSONB(none_as_null=True), "postgresql")
+
 
 class Workout(Base, TimestampMixin):
     __tablename__ = "workouts"
@@ -53,6 +61,16 @@ class Workout(Base, TimestampMixin):
     file_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     # File-level metadata only (creator, laps, counts). The samples live in track_points.
     raw_data: Mapped[dict[str, Any]] = mapped_column(JsonColumn, nullable=False, default=dict)
+
+    # Seconds spent at each whole beat per minute, keyed by bpm. Zones are
+    # derived from this at query time rather than stored, because they depend on
+    # a maximum heart rate that moves: one harder session and every previous
+    # activity's zones change.
+    #
+    # Null and empty mean different things, and the difference is what lets the
+    # backfill skip what it has already looked at: null is "never computed",
+    # empty is "computed, and this file carried no usable heart rate".
+    hr_seconds: Mapped[dict[str, float] | None] = mapped_column(NullableJsonColumn, nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="workouts")  # noqa: F821
     track_points: Mapped[list["TrackPoint"]] = relationship(  # noqa: F821

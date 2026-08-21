@@ -39,6 +39,8 @@ To try it without your own data, load the bundled demo set:
 - **Lifetime totals** — distance, moving time, elevation, heart rate, with
   per-sport breakdowns.
 - **Weekly trend** over any window from 8 to 52 weeks.
+- **Heart-rate zones and training load** — how much time goes into each of five
+  zones, per activity and per week, with Edwards' TRIMP as the load figure.
 - **Personal bests** — the fastest 1 km, 5 km, 10 km, half marathon and
   marathon you have ever covered, per sport, each naming the activity that set
   it. Plus the furthest, longest and biggest-climbing activity of each sport,
@@ -102,6 +104,17 @@ It reads one activity at a time, is safe to interrupt and safe to re-run — it
 only looks at activities with no bests yet. `--recompute` redoes every
 activity, which is only needed if the window calculation itself changes.
 
+The heart-rate histogram behind the zones is the same story:
+
+```bash
+docker compose exec backend python -m scripts.backfill_hr_zones
+```
+
+This one is strictly better behaved. It records an empty histogram for an
+activity that carried no heart rate, so "never looked at" and "looked at,
+nothing there" are different states and a strapless activity is visited once
+rather than rescanned on every run.
+
 ## API
 
 Interactive docs at <http://localhost:8000/docs> when the stack is up.
@@ -121,6 +134,8 @@ Interactive docs at <http://localhost:8000/docs> when the stack is up.
 | GET | `/api/analysis/{user_id}` | Lifetime totals plus a per-sport breakdown |
 | GET | `/api/analysis/{user_id}/weekly?weeks=12` | One bucket per local week, quiet weeks zero-filled |
 | GET | `/api/analysis/{user_id}/records` | Per-sport records and distance bests, plus totals by local year |
+| GET | `/api/analysis/{user_id}/zones?weeks=12` | Time in each heart-rate zone, lifetime and by week, with load |
+| GET | `/api/workouts/{id}/zones?user_id=X` | One activity's time in zone and the load it earned |
 
 Upload failures are explicit: `404` unknown user, `400` empty file, `409`
 already stored, `413` over the size limit, `422` unreadable or unsupported file.
@@ -271,6 +286,23 @@ Choices worth knowing about:
 - **Deleting asks twice.** There is no undo and the track points go with it, so
   the destructive click is the second one — and Cancel is where the Delete
   button just was, so a double-click cancels.
+- **Zones are derived on request, not stored.** What is stored is the histogram
+  — how many seconds at each beat per minute — because zones hang off a maximum
+  heart rate that *moves*: one harder session and every previous activity's
+  zones shift. Stored zones would describe the athlete you used to be.
+- **The maximum says where it came from.** Configured, or the highest beat any
+  activity recorded. Observed is a floor rather than a maximum: a peak nobody
+  has pushed to reads low and lifts every zone, so the panel prints which one it
+  used instead of asking you to trust it.
+- **Time below zone one is reported, never folded in.** Warming up and standing
+  at a junction are real time and not easy training; adding them to Z1 would
+  inflate exactly the zone people read as "I did my easy work".
+- **A gap longer than two minutes is not time at that heart rate.** It is a
+  pause or a lost signal, so it is dropped rather than credited — which is also
+  why a file sampled less often than that contributes no time in zone at all.
+- **Load is Edwards' TRIMP**: minutes in a zone weighted by the zone, one
+  through five. Banister's needs a resting heart rate and a sex-specific
+  exponential that this app does not ask for; Edwards' needs only the zones.
 - **A personal best is the fastest stretch, not the average.** The 5 km best is
   the quickest any five kilometres were covered inside any activity, found by
   sliding a window over the samples — so a hard middle kilometre of an easy run
@@ -389,9 +421,10 @@ backend/
 │   └── services/
 │       ├── analyzer.py    metric derivation and aggregate reporting
 │       ├── records.py     the window scan, and records over it
+│       ├── zones.py       the heart-rate histogram, and zones over it
 │       └── parsers/       base, TCX, GPX, factory
 ├── alembic/               migrations
-├── scripts/               demo data generator, profile bootstrap, bests backfill
+├── scripts/               demo data generator, profile bootstrap, two backfills
 └── tests/                 parsers, analyzer, API
 
 frontend/

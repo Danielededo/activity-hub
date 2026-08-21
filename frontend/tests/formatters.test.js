@@ -10,6 +10,7 @@ import {
   formatLocalTime,
   formatPaceOrSpeed,
   formatRate,
+  formatShortDuration,
   sportLabel,
 } from '../src/utils/formatters'
 
@@ -69,6 +70,21 @@ describe('local time', () => {
     // Mixing "06:45 PM" and "08:45" in one column reads as two kinds of number.
     expect(formatLocalTime('2026-05-03T22:30:00Z', 120)).toMatch(/^\d{2}:\d{2}$/)
     expect(formatLocalTime('2026-05-03T22:30:00Z', null)).toMatch(/^\d{2}:\d{2}$/)
+  })
+})
+
+describe('formatShortDuration', () => {
+  it('drops the seconds an axis has no room for', () => {
+    // formatDuration gives "55m 00s"; beside a y axis that is wide enough to be
+    // clipped, and a clipped label reads as a different number.
+    expect(formatShortDuration(3_300)).toBe('55m')
+    expect(formatShortDuration(6_600)).toBe('1h 50m')
+    expect(formatShortDuration(13_200)).toBe('3h 40m')
+  })
+
+  it('writes a bare zero rather than a dash', () => {
+    expect(formatShortDuration(0)).toBe('0')
+    expect(formatShortDuration(null)).toBe('0')
   })
 })
 

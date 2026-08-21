@@ -7,8 +7,10 @@ import {
   fetchWeekly,
   fetchWorkout,
   fetchWorkouts,
+  fetchZones,
 } from '../api/client'
 import FilterBar, { EMPTY_FILTERS, hasFilters } from './FilterBar'
+import HeartRateZones from './HeartRateZones'
 import Records from './Records'
 import SportBreakdown from './SportBreakdown'
 import StatsCards from './StatsCards'
@@ -28,6 +30,7 @@ export default function Dashboard({ profile }) {
   const [summary, setSummary] = useState(null)
   const [weekly, setWeekly] = useState(null)
   const [records, setRecords] = useState(null)
+  const [zones, setZones] = useState(null)
   const [weeks, setWeeks] = useState(12)
   const [page, setPage] = useState({ items: [], total: 0, offset: 0 })
   const [offset, setOffset] = useState(0)
@@ -41,7 +44,13 @@ export default function Dashboard({ profile }) {
   // records do not depend on the filters, so narrowing the list must not
   // re-request them.
   const loadTotals = useCallback(
-    () => Promise.all([fetchAnalysis(userId), fetchWeekly(userId, weeks), fetchRecords(userId)]),
+    () =>
+      Promise.all([
+        fetchAnalysis(userId),
+        fetchWeekly(userId, weeks),
+        fetchRecords(userId),
+        fetchZones(userId, weeks),
+      ]),
     [userId, weeks],
   )
 
@@ -50,10 +59,11 @@ export default function Dashboard({ profile }) {
     [userId, offset, filters],
   )
 
-  const applyTotals = useCallback(([analysis, trend, bests]) => {
+  const applyTotals = useCallback(([analysis, trend, bests, inZone]) => {
     setSummary(analysis)
     setWeekly(trend)
     setRecords(bests)
+    setZones(inZone)
     setError(null)
   }, [])
 
@@ -157,6 +167,8 @@ export default function Dashboard({ profile }) {
           </div>
           <YearlyTotals years={records?.yearly} />
         </div>
+
+        <HeartRateZones summary={zones} weeks={weeks} onWeeksChange={setWeeks} />
 
         <UploadForm userId={userId} onUploaded={reload} />
 
