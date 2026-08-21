@@ -41,6 +41,8 @@ To try it without your own data, load the bundled demo set:
 - **Weekly trend** over any window from 8 to 52 weeks.
 - **Every activity in a table** with pace or speed depending on the sport, in
   the activity's own local time.
+- **Filter and search** by sport, date range and name, with paging over the
+  result.
 - **Per-activity detail** — the route, the heart-rate trace and the elevation
   profile.
 - **Duplicate detection** that catches the same session exported twice from two
@@ -93,7 +95,7 @@ Interactive docs at <http://localhost:8000/docs> when the stack is up.
 | GET | `/api/users/me` | The profile; 404 before one exists |
 | POST | `/api/users/` | Creates the profile; 409 if one already exists |
 | GET | `/api/users/{id}` | |
-| GET | `/api/workouts?user_id=X` | `limit`, `offset`, optional `sport_type`; newest first |
+| GET | `/api/workouts?user_id=X` | `limit`, `offset`, and optional `sport_type`, `date_from`, `date_to`, `q`; newest first |
 | GET | `/api/workouts/{id}?user_id=X` | Includes `raw_data` and `track_point_count`; 404 if owned by someone else |
 | GET | `/api/workouts/{id}/track-points?user_id=X` | Samples for a route map or HR trace, downsampled to `max_points` |
 | DELETE | `/api/workouts/{id}?user_id=X` | Cascades to track points; 404 if owned by someone else |
@@ -213,6 +215,15 @@ Choices worth knowing about:
 - **Upload results appear as each file lands**, with a running count. A few
   hundred files used to mean minutes of silence, which is indistinguishable
   from a hang.
+- **Filter dates are local dates.** `date_from` and `date_to` are resolved in
+  `DISPLAY_TIMEZONE`, so asking for July returns July where you were, not July
+  in Greenwich. `date_to` is inclusive.
+- **The sport filter lists only sports you have recorded**, with counts, and
+  the counts stay unfiltered — narrowing the list should not make the options
+  disappear from under you.
+- **Deleting asks twice.** There is no undo and the track points go with it, so
+  the destructive click is the second one — and Cancel is where the Delete
+  button just was, so a double-click cancels.
 
 ## Demo data
 
