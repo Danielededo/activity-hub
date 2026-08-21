@@ -101,6 +101,22 @@ export function formatRate(sportType, metresPerSecond) {
   return formatPaceOrSpeed(sportType, metresPerSecond, 1)
 }
 
+/**
+ * An instantaneous speed, in km/h whatever the sport.
+ *
+ * Deliberately not pace, even for the sports that read in minutes per
+ * kilometre. A whole activity always moved, so its pace is a number; a single
+ * sample often did not, and the pace of a standstill is unbounded — the zero
+ * tick of a pace axis rendered as a dash and the ones above it ran 11:54, 5:57,
+ * 3:58, faster as they climbed. Speed is linear, starts at zero and rises the
+ * way an axis is read. Pace stays where it is well defined: the summary of the
+ * activity as a whole.
+ */
+export function formatSpeed(metresPerSecond) {
+  if (metresPerSecond == null) return '—'
+  return `${(metresPerSecond * 3.6).toFixed(1)} km/h`
+}
+
 export function formatDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString(undefined, {

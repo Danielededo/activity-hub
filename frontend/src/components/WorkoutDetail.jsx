@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { errorMessage, exportUrl, fetchTrackPoints, fetchWorkoutZones } from '../api/client'
+import CompareActivities from './CompareActivities'
 import RouteMap from './RouteMap'
 import TraceChart from './TraceChart'
 import ZoneBar from './ZoneBar'
@@ -183,6 +184,10 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
           </div>
         </div>
       )}
+
+      {/* Last, because it is a question you ask after reading this activity —
+          not part of reading it. */}
+      <CompareActivities workout={workout} userId={userId} />
     </section>
   )
 }

@@ -11,6 +11,7 @@ import {
   formatPaceOrSpeed,
   formatRate,
   formatShortDuration,
+  formatSpeed,
   sportLabel,
 } from '../src/utils/formatters'
 
@@ -98,6 +99,19 @@ describe('formatRate', () => {
   it('has nothing to say about a rate of nothing', () => {
     expect(formatRate('cycling', 0)).toBe('—')
     expect(formatRate('cycling', null)).toBe('—')
+  })
+})
+
+describe('formatSpeed', () => {
+  it('counts every sport in km/h, because an axis is one scale', () => {
+    expect(formatSpeed(5)).toBe('18.0 km/h')
+  })
+
+  it('writes a standing start as zero, not as a dash', () => {
+    // The zero tick of the comparison axis rendered as an em dash: a rate of
+    // nothing has no pace, but it has a speed, and it is where the axis starts.
+    expect(formatSpeed(0)).toBe('0.0 km/h')
+    expect(formatSpeed(null)).toBe('—')
   })
 })
 
