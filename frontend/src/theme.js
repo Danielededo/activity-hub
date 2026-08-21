@@ -30,8 +30,46 @@ export const SPORT_ORDER = ['cycling', 'running', 'hiking', 'other']
 export const SINGLE_SERIES = { light: '#2a78d6', dark: '#3987e5' }
 
 export const CHART_INK = {
-  light: { grid: '#e2e8f0', axis: '#64748b', tooltipBg: '#ffffff', tooltipInk: '#0f172a' },
-  dark: { grid: '#3a3a38', axis: '#a3a3a0', tooltipBg: '#1f1f1e', tooltipInk: '#f5f5f4' },
+  light: {
+    grid: '#e2e8f0',
+    axis: '#64748b',
+    tooltipBg: '#ffffff',
+    tooltipInk: '#0f172a',
+    // The panel behind a chart, for the ring that keeps a marker legible where
+    // it crosses a line.
+    surface: '#ffffff',
+    // Landmarks are not data: start and finish wear text ink, never a step of
+    // the speed ramp, or they would read as a speed.
+    marker: '#0f172a',
+  },
+  dark: {
+    grid: '#3a3a38',
+    axis: '#a3a3a0',
+    tooltipBg: '#1f1f1e',
+    tooltipInk: '#f5f5f4',
+    surface: '#1f1f1e',
+    marker: '#f5f5f4',
+  },
+}
+
+/**
+ * Five ordinal steps of one hue, slow to fast, for colouring a route by speed.
+ *
+ * Ordinal rather than the full sequential range: every step has to stay visible
+ * against the panel, because a pale segment here means "slow", not "absent" — a
+ * step that receded into the surface would break the line into gaps. Both modes
+ * clear the 2:1 floor for the step nearest their own surface (2.11:1 on white,
+ * 2.04:1 on the dark panel), are monotone in lightness with gaps of at least
+ * 0.06, and hold to a 3° hue spread. Validated, not chosen by eye; re-run the
+ * check before touching a value.
+ *
+ * Dark is not the light ramp flipped: it is stepped from the same hue against
+ * the dark surface, which is why its ends are 600 and 200 rather than 650 and
+ * 250.
+ */
+export const SPEED_RAMP = {
+  light: ['#86b6ef', '#5598e7', '#2a78d6', '#1c5cab', '#104281'],
+  dark: ['#184f95', '#256abf', '#3987e5', '#6da7ec', '#9ec5f4'],
 }
 
 export function sportColor(sport, dark = false) {

@@ -47,9 +47,9 @@ To try it without your own data, load the bundled demo set:
   the activity's own local time.
 - **Filter and search** by sport, date range and name, with paging over the
   result.
-- **Per-activity detail** — the route, and traces for heart rate, cadence and
-  elevation.
-
+- **Per-activity detail** — the route coloured by speed, with traces for heart
+  rate, cadence and elevation. Hovering the route reports how far in, how long
+  in, and how fast at that point.
 - **Duplicate detection** that catches the same session exported twice from two
   different services, not just the same file twice.
 
@@ -233,7 +233,25 @@ Choices worth knowing about:
   there was no sensor.
 - **The route has no basemap.** Tiles would mean asking a third party for the
   map of wherever you exercise, which is the opposite of the point of
-  self-hosting. The line is the shape of the ride.
+  self-hosting. What a bare line can still say is the shape of the ride and
+  where on it you were moving, so it says both.
+- **The route is coloured by speed**, in five steps of one hue, from the
+  activity's own slowest stretch to its fastest. Quantiles of that activity
+  rather than absolute bands: the question is where you were quick *on this
+  ride*, and fixed thresholds would paint a whole hike in one step. The legend
+  names both ends in the sport's unit, so the colours still read in absolute
+  terms.
+- **If the two ends of the ramp would print the same figure, there is no ramp.**
+  Five shades of a number that does not change is decoration, so a steady ride
+  goes back to a plain line.
+- **A stretch whose speed is unknown is grey, not blue.** The app's
+  single-series blue happens to be the middle step of the ramp, so painting an
+  unmeasured stretch with it would read as "average pace" rather than "not
+  measured". Anything faster than 120 km/h counts as a lost fix, not a speed.
+- **Start and finish are told apart by shape**, a disc and a square in text ink.
+  Green against red is the obvious choice and fails outright for a red-green
+  reader: those two sit 4.1 ΔE apart under simulated deuteranopia, where 8 is
+  the target.
 - **Sport colours come from a validated palette** and are assigned in fixed
   order. Two of the light-mode hues fall below 3:1 on white, so everything
   painted with them carries a visible label — identity is never colour alone.

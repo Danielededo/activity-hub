@@ -76,6 +76,17 @@ export function formatPaceOrSpeed(sportType, metres, seconds) {
   return `${(metres / seconds * 3.6).toFixed(1)} km/h`
 }
 
+/**
+ * A rate in metres per second, as the pace or speed the sport reads in.
+ *
+ * Delegates rather than repeating the arithmetic: a rate is a distance over one
+ * second, so the same helper that formats a whole activity formats an instant.
+ */
+export function formatRate(sportType, metresPerSecond) {
+  if (!metresPerSecond) return '—'
+  return formatPaceOrSpeed(sportType, metresPerSecond, 1)
+}
+
 export function formatDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString(undefined, {

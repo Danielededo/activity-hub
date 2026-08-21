@@ -5,10 +5,10 @@
       <Id>2026-06-22T08:45:00+02:00</Id>
       <Lap StartTime="2026-06-22T08:45:00+02:00">
         <TotalTimeSeconds>4620.0</TotalTimeSeconds>
-        <DistanceMeters>11832.3</DistanceMeters>
+        <DistanceMeters>9658.4</DistanceMeters>
         <Calories>874</Calories>
-        <AverageHeartRateBpm><Value>150</Value></AverageHeartRateBpm>
-        <MaximumHeartRateBpm><Value>178</Value></MaximumHeartRateBpm>
+        <AverageHeartRateBpm><Value>154</Value></AverageHeartRateBpm>
+        <MaximumHeartRateBpm><Value>170</Value></MaximumHeartRateBpm>
         <Intensity>Active</Intensity>
         <Notes>Interval session</Notes>
         <Track>
@@ -26,848 +26,848 @@
           <Trackpoint>
             <Time>2026-06-22T08:46:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.071323</LatitudeDegrees>
-              <LongitudeDegrees>7.693753</LongitudeDegrees>
+              <LatitudeDegrees>45.071334</LatitudeDegrees>
+              <LongitudeDegrees>7.693721</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>258.6</AltitudeMeters>
-            <DistanceMeters>153.7</DistanceMeters>
-            <HeartRateBpm><Value>142</Value></HeartRateBpm>
+            <AltitudeMeters>258.3</AltitudeMeters>
+            <DistanceMeters>150.8</DistanceMeters>
+            <HeartRateBpm><Value>141</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:47:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.070733</LatitudeDegrees>
-              <LongitudeDegrees>7.695522</LongitudeDegrees>
+              <LatitudeDegrees>45.071028</LatitudeDegrees>
+              <LongitudeDegrees>7.694638</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>277.2</AltitudeMeters>
-            <DistanceMeters>307.3</DistanceMeters>
-            <HeartRateBpm><Value>168</Value></HeartRateBpm>
+            <AltitudeMeters>267.9</AltitudeMeters>
+            <DistanceMeters>230.5</DistanceMeters>
+            <HeartRateBpm><Value>155</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:48:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.069838</LatitudeDegrees>
-              <LongitudeDegrees>7.697013</LongitudeDegrees>
+              <LatitudeDegrees>45.070603</LatitudeDegrees>
+              <LongitudeDegrees>7.695347</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>295.7</AltitudeMeters>
-            <DistanceMeters>461.0</DistanceMeters>
-            <HeartRateBpm><Value>170</Value></HeartRateBpm>
+            <AltitudeMeters>276.8</AltitudeMeters>
+            <DistanceMeters>303.6</DistanceMeters>
+            <HeartRateBpm><Value>156</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>90</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:49:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.068738</LatitudeDegrees>
-              <LongitudeDegrees>7.698199</LongitudeDegrees>
+              <LatitudeDegrees>45.069915</LatitudeDegrees>
+              <LongitudeDegrees>7.696089</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>314.2</AltitudeMeters>
-            <DistanceMeters>614.7</DistanceMeters>
-            <HeartRateBpm><Value>176</Value></HeartRateBpm>
+            <AltitudeMeters>288.4</AltitudeMeters>
+            <DistanceMeters>399.7</DistanceMeters>
+            <HeartRateBpm><Value>167</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:50:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.067629</LatitudeDegrees>
-              <LongitudeDegrees>7.699366</LongitudeDegrees>
+              <LatitudeDegrees>45.069343</LatitudeDegrees>
+              <LongitudeDegrees>7.696691</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>332.5</AltitudeMeters>
-            <DistanceMeters>768.3</DistanceMeters>
-            <HeartRateBpm><Value>171</Value></HeartRateBpm>
+            <AltitudeMeters>297.9</AltitudeMeters>
+            <DistanceMeters>479.0</DistanceMeters>
+            <HeartRateBpm><Value>158</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:51:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.066524</LatitudeDegrees>
-              <LongitudeDegrees>7.700541</LongitudeDegrees>
+              <LatitudeDegrees>45.068809</LatitudeDegrees>
+              <LongitudeDegrees>7.697258</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>350.6</AltitudeMeters>
-            <DistanceMeters>922.0</DistanceMeters>
-            <HeartRateBpm><Value>175</Value></HeartRateBpm>
+            <AltitudeMeters>306.8</AltitudeMeters>
+            <DistanceMeters>553.1</DistanceMeters>
+            <HeartRateBpm><Value>161</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:52:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.065737</LatitudeDegrees>
-              <LongitudeDegrees>7.702149</LongitudeDegrees>
+              <LatitudeDegrees>45.068329</LatitudeDegrees>
+              <LongitudeDegrees>7.698239</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>368.6</AltitudeMeters>
-            <DistanceMeters>1075.7</DistanceMeters>
-            <HeartRateBpm><Value>174</Value></HeartRateBpm>
+            <AltitudeMeters>318.0</AltitudeMeters>
+            <DistanceMeters>646.9</DistanceMeters>
+            <HeartRateBpm><Value>164</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:53:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.064885</LatitudeDegrees>
-              <LongitudeDegrees>7.70369</LongitudeDegrees>
+              <LatitudeDegrees>45.067907</LatitudeDegrees>
+              <LongitudeDegrees>7.699003</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>386.4</AltitudeMeters>
-            <DistanceMeters>1229.3</DistanceMeters>
-            <HeartRateBpm><Value>171</Value></HeartRateBpm>
+            <AltitudeMeters>327.1</AltitudeMeters>
+            <DistanceMeters>723.1</DistanceMeters>
+            <HeartRateBpm><Value>158</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:54:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.064012</LatitudeDegrees>
-              <LongitudeDegrees>7.705206</LongitudeDegrees>
+              <LatitudeDegrees>45.067374</LatitudeDegrees>
+              <LongitudeDegrees>7.699928</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>403.9</AltitudeMeters>
-            <DistanceMeters>1383.0</DistanceMeters>
-            <HeartRateBpm><Value>172</Value></HeartRateBpm>
+            <AltitudeMeters>338.2</AltitudeMeters>
+            <DistanceMeters>816.8</DistanceMeters>
+            <HeartRateBpm><Value>163</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:55:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.062814</LatitudeDegrees>
-              <LongitudeDegrees>7.706182</LongitudeDegrees>
+              <LatitudeDegrees>45.066827</LatitudeDegrees>
+              <LongitudeDegrees>7.700374</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>421.1</AltitudeMeters>
-            <DistanceMeters>1536.7</DistanceMeters>
-            <HeartRateBpm><Value>171</Value></HeartRateBpm>
+            <AltitudeMeters>346.5</AltitudeMeters>
+            <DistanceMeters>887.0</DistanceMeters>
+            <HeartRateBpm><Value>159</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:56:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.06163</LatitudeDegrees>
-              <LongitudeDegrees>7.70719</LongitudeDegrees>
+              <LatitudeDegrees>45.066068</LatitudeDegrees>
+              <LongitudeDegrees>7.70102</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>438.1</AltitudeMeters>
-            <DistanceMeters>1690.3</DistanceMeters>
-            <HeartRateBpm><Value>178</Value></HeartRateBpm>
+            <AltitudeMeters>358.1</AltitudeMeters>
+            <DistanceMeters>985.5</DistanceMeters>
+            <HeartRateBpm><Value>170</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:57:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.060421</LatitudeDegrees>
-              <LongitudeDegrees>7.70814</LongitudeDegrees>
+              <LatitudeDegrees>45.065501</LatitudeDegrees>
+              <LongitudeDegrees>7.701466</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>454.7</AltitudeMeters>
-            <DistanceMeters>1844.0</DistanceMeters>
-            <HeartRateBpm><Value>173</Value></HeartRateBpm>
+            <AltitudeMeters>366.5</AltitudeMeters>
+            <DistanceMeters>1057.6</DistanceMeters>
+            <HeartRateBpm><Value>161</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:58:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.05921</LatitudeDegrees>
-              <LongitudeDegrees>7.709081</LongitudeDegrees>
+              <LatitudeDegrees>45.064737</LatitudeDegrees>
+              <LongitudeDegrees>7.70206</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>471.0</AltitudeMeters>
-            <DistanceMeters>1997.7</DistanceMeters>
-            <HeartRateBpm><Value>167</Value></HeartRateBpm>
+            <AltitudeMeters>377.8</AltitudeMeters>
+            <DistanceMeters>1154.6</DistanceMeters>
+            <HeartRateBpm><Value>160</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T08:59:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.058042</LatitudeDegrees>
-              <LongitudeDegrees>7.710127</LongitudeDegrees>
+              <LatitudeDegrees>45.06421</LatitudeDegrees>
+              <LongitudeDegrees>7.702531</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>486.8</AltitudeMeters>
-            <DistanceMeters>2151.3</DistanceMeters>
-            <HeartRateBpm><Value>171</Value></HeartRateBpm>
+            <AltitudeMeters>385.7</AltitudeMeters>
+            <DistanceMeters>1223.8</DistanceMeters>
+            <HeartRateBpm><Value>160</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:00:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.05701</LatitudeDegrees>
-              <LongitudeDegrees>7.711429</LongitudeDegrees>
+              <LatitudeDegrees>45.063634</LatitudeDegrees>
+              <LongitudeDegrees>7.703258</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>502.3</AltitudeMeters>
-            <DistanceMeters>2305.0</DistanceMeters>
-            <HeartRateBpm><Value>172</Value></HeartRateBpm>
+            <AltitudeMeters>395.6</AltitudeMeters>
+            <DistanceMeters>1309.7</DistanceMeters>
+            <HeartRateBpm><Value>164</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:01:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.056116</LatitudeDegrees>
-              <LongitudeDegrees>7.71292</LongitudeDegrees>
+              <LatitudeDegrees>45.063112</LatitudeDegrees>
+              <LongitudeDegrees>7.704128</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>517.3</AltitudeMeters>
-            <DistanceMeters>2458.7</DistanceMeters>
-            <HeartRateBpm><Value>173</Value></HeartRateBpm>
+            <AltitudeMeters>405.7</AltitudeMeters>
+            <DistanceMeters>1399.3</DistanceMeters>
+            <HeartRateBpm><Value>166</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:02:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.055116</LatitudeDegrees>
-              <LongitudeDegrees>7.714271</LongitudeDegrees>
+              <LatitudeDegrees>45.062585</LatitudeDegrees>
+              <LongitudeDegrees>7.70484</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>531.9</AltitudeMeters>
-            <DistanceMeters>2612.3</DistanceMeters>
-            <HeartRateBpm><Value>168</Value></HeartRateBpm>
+            <AltitudeMeters>414.8</AltitudeMeters>
+            <DistanceMeters>1480.3</DistanceMeters>
+            <HeartRateBpm><Value>160</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:03:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.054042</LatitudeDegrees>
-              <LongitudeDegrees>7.715501</LongitudeDegrees>
+              <LatitudeDegrees>45.061927</LatitudeDegrees>
+              <LongitudeDegrees>7.705594</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>545.9</AltitudeMeters>
-            <DistanceMeters>2766.0</DistanceMeters>
-            <HeartRateBpm><Value>166</Value></HeartRateBpm>
+            <AltitudeMeters>425.3</AltitudeMeters>
+            <DistanceMeters>1574.4</DistanceMeters>
+            <HeartRateBpm><Value>160</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:04:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.052894</LatitudeDegrees>
-              <LongitudeDegrees>7.716591</LongitudeDegrees>
+              <LatitudeDegrees>45.061295</LatitudeDegrees>
+              <LongitudeDegrees>7.706195</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>559.5</AltitudeMeters>
-            <DistanceMeters>2919.7</DistanceMeters>
-            <HeartRateBpm><Value>169</Value></HeartRateBpm>
+            <AltitudeMeters>434.7</AltitudeMeters>
+            <DistanceMeters>1659.1</DistanceMeters>
+            <HeartRateBpm><Value>163</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:05:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.051654</LatitudeDegrees>
-              <LongitudeDegrees>7.717454</LongitudeDegrees>
+              <LatitudeDegrees>45.060594</LatitudeDegrees>
+              <LongitudeDegrees>7.706682</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>572.5</AltitudeMeters>
-            <DistanceMeters>3073.3</DistanceMeters>
-            <HeartRateBpm><Value>171</Value></HeartRateBpm>
+            <AltitudeMeters>444.1</AltitudeMeters>
+            <DistanceMeters>1745.9</DistanceMeters>
+            <HeartRateBpm><Value>166</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:06:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.050482</LatitudeDegrees>
-              <LongitudeDegrees>7.71849</LongitudeDegrees>
+              <LatitudeDegrees>45.059931</LatitudeDegrees>
+              <LongitudeDegrees>7.707268</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>585.0</AltitudeMeters>
-            <DistanceMeters>3227.0</DistanceMeters>
-            <HeartRateBpm><Value>170</Value></HeartRateBpm>
+            <AltitudeMeters>453.5</AltitudeMeters>
+            <DistanceMeters>1832.8</DistanceMeters>
+            <HeartRateBpm><Value>165</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>90</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:07:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.04922</LatitudeDegrees>
-              <LongitudeDegrees>7.719286</LongitudeDegrees>
+              <LatitudeDegrees>45.059269</LatitudeDegrees>
+              <LongitudeDegrees>7.707686</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>596.9</AltitudeMeters>
-            <DistanceMeters>3380.7</DistanceMeters>
-            <HeartRateBpm><Value>167</Value></HeartRateBpm>
+            <AltitudeMeters>462.1</AltitudeMeters>
+            <DistanceMeters>1913.5</DistanceMeters>
+            <HeartRateBpm><Value>162</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:08:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.047934</LatitudeDegrees>
-              <LongitudeDegrees>7.720004</LongitudeDegrees>
+              <LatitudeDegrees>45.058449</LatitudeDegrees>
+              <LongitudeDegrees>7.708144</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>608.2</AltitudeMeters>
-            <DistanceMeters>3534.3</DistanceMeters>
-            <HeartRateBpm><Value>171</Value></HeartRateBpm>
+            <AltitudeMeters>472.4</AltitudeMeters>
+            <DistanceMeters>2011.4</DistanceMeters>
+            <HeartRateBpm><Value>169</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:09:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.046674</LatitudeDegrees>
-              <LongitudeDegrees>7.720806</LongitudeDegrees>
+              <LatitudeDegrees>45.0578</LatitudeDegrees>
+              <LongitudeDegrees>7.708557</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>618.9</AltitudeMeters>
-            <DistanceMeters>3688.0</DistanceMeters>
-            <HeartRateBpm><Value>165</Value></HeartRateBpm>
+            <AltitudeMeters>480.6</AltitudeMeters>
+            <DistanceMeters>2090.6</DistanceMeters>
+            <HeartRateBpm><Value>161</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:10:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.045388</LatitudeDegrees>
-              <LongitudeDegrees>7.721522</LongitudeDegrees>
+              <LatitudeDegrees>45.057003</LatitudeDegrees>
+              <LongitudeDegrees>7.709001</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>629.0</AltitudeMeters>
-            <DistanceMeters>3841.7</DistanceMeters>
-            <HeartRateBpm><Value>168</Value></HeartRateBpm>
+            <AltitudeMeters>490.3</AltitudeMeters>
+            <DistanceMeters>2185.8</DistanceMeters>
+            <HeartRateBpm><Value>167</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:11:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.044021</LatitudeDegrees>
-              <LongitudeDegrees>7.721807</LongitudeDegrees>
+              <LatitudeDegrees>45.056246</LatitudeDegrees>
+              <LongitudeDegrees>7.709159</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>638.4</AltitudeMeters>
-            <DistanceMeters>3995.3</DistanceMeters>
-            <HeartRateBpm><Value>165</Value></HeartRateBpm>
+            <AltitudeMeters>498.9</AltitudeMeters>
+            <DistanceMeters>2270.9</DistanceMeters>
+            <HeartRateBpm><Value>163</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:12:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.042639</LatitudeDegrees>
-              <LongitudeDegrees>7.72177</LongitudeDegrees>
+              <LatitudeDegrees>45.05543</LatitudeDegrees>
+              <LongitudeDegrees>7.709137</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>647.2</AltitudeMeters>
-            <DistanceMeters>4149.0</DistanceMeters>
+            <AltitudeMeters>507.9</AltitudeMeters>
+            <DistanceMeters>2361.7</DistanceMeters>
             <HeartRateBpm><Value>164</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>83</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:13:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.041259</LatitudeDegrees>
-              <LongitudeDegrees>7.721871</LongitudeDegrees>
+              <LatitudeDegrees>45.054591</LatitudeDegrees>
+              <LongitudeDegrees>7.709199</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>655.3</AltitudeMeters>
-            <DistanceMeters>4302.7</DistanceMeters>
-            <HeartRateBpm><Value>162</Value></HeartRateBpm>
+            <AltitudeMeters>517.0</AltitudeMeters>
+            <DistanceMeters>2455.1</DistanceMeters>
+            <HeartRateBpm><Value>163</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:14:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.03995</LatitudeDegrees>
-              <LongitudeDegrees>7.722502</LongitudeDegrees>
+              <LatitudeDegrees>45.053931</LatitudeDegrees>
+              <LongitudeDegrees>7.709517</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>662.7</AltitudeMeters>
-            <DistanceMeters>4456.3</DistanceMeters>
+            <AltitudeMeters>524.4</AltitudeMeters>
+            <DistanceMeters>2532.6</DistanceMeters>
             <HeartRateBpm><Value>161</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:15:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.038759</LatitudeDegrees>
-              <LongitudeDegrees>7.723494</LongitudeDegrees>
+              <LatitudeDegrees>45.053132</LatitudeDegrees>
+              <LongitudeDegrees>7.710182</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>669.4</AltitudeMeters>
-            <DistanceMeters>4610.0</DistanceMeters>
-            <HeartRateBpm><Value>158</Value></HeartRateBpm>
+            <AltitudeMeters>534.0</AltitudeMeters>
+            <DistanceMeters>2635.7</DistanceMeters>
+            <HeartRateBpm><Value>163</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:16:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.037557</LatitudeDegrees>
-              <LongitudeDegrees>7.724456</LongitudeDegrees>
+              <LatitudeDegrees>45.052415</LatitudeDegrees>
+              <LongitudeDegrees>7.710756</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>675.3</AltitudeMeters>
-            <DistanceMeters>4763.7</DistanceMeters>
-            <HeartRateBpm><Value>157</Value></HeartRateBpm>
+            <AltitudeMeters>542.4</AltitudeMeters>
+            <DistanceMeters>2727.3</DistanceMeters>
+            <HeartRateBpm><Value>160</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>82</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:17:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.036324</LatitudeDegrees>
-              <LongitudeDegrees>7.725342</LongitudeDegrees>
+              <LatitudeDegrees>45.051666</LatitudeDegrees>
+              <LongitudeDegrees>7.711294</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>680.6</AltitudeMeters>
-            <DistanceMeters>4917.3</DistanceMeters>
-            <HeartRateBpm><Value>158</Value></HeartRateBpm>
+            <AltitudeMeters>550.8</AltitudeMeters>
+            <DistanceMeters>2820.7</DistanceMeters>
+            <HeartRateBpm><Value>163</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:18:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.035065</LatitudeDegrees>
-              <LongitudeDegrees>7.726148</LongitudeDegrees>
+              <LatitudeDegrees>45.050912</LatitudeDegrees>
+              <LongitudeDegrees>7.711777</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>685.1</AltitudeMeters>
-            <DistanceMeters>5071.0</DistanceMeters>
-            <HeartRateBpm><Value>159</Value></HeartRateBpm>
+            <AltitudeMeters>558.9</AltitudeMeters>
+            <DistanceMeters>2912.7</DistanceMeters>
+            <HeartRateBpm><Value>164</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:19:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.033835</LatitudeDegrees>
-              <LongitudeDegrees>7.727038</LongitudeDegrees>
+              <LatitudeDegrees>45.050183</LatitudeDegrees>
+              <LongitudeDegrees>7.712305</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>688.9</AltitudeMeters>
-            <DistanceMeters>5224.7</DistanceMeters>
-            <HeartRateBpm><Value>160</Value></HeartRateBpm>
+            <AltitudeMeters>566.7</AltitudeMeters>
+            <DistanceMeters>3003.7</DistanceMeters>
+            <HeartRateBpm><Value>165</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:20:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.032713</LatitudeDegrees>
-              <LongitudeDegrees>7.728181</LongitudeDegrees>
+              <LatitudeDegrees>45.049349</LatitudeDegrees>
+              <LongitudeDegrees>7.713155</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>691.9</AltitudeMeters>
-            <DistanceMeters>5378.3</DistanceMeters>
-            <HeartRateBpm><Value>158</Value></HeartRateBpm>
+            <AltitudeMeters>576.2</AltitudeMeters>
+            <DistanceMeters>3118.1</DistanceMeters>
+            <HeartRateBpm><Value>167</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>91</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:21:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.031707</LatitudeDegrees>
-              <LongitudeDegrees>7.729521</LongitudeDegrees>
+              <LatitudeDegrees>45.048851</LatitudeDegrees>
+              <LongitudeDegrees>7.713818</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>694.2</AltitudeMeters>
-            <DistanceMeters>5532.0</DistanceMeters>
-            <HeartRateBpm><Value>155</Value></HeartRateBpm>
+            <AltitudeMeters>582.4</AltitudeMeters>
+            <DistanceMeters>3194.0</DistanceMeters>
+            <HeartRateBpm><Value>161</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:22:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.030752</LatitudeDegrees>
-              <LongitudeDegrees>7.730935</LongitudeDegrees>
+              <LatitudeDegrees>45.048069</LatitudeDegrees>
+              <LongitudeDegrees>7.714976</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>695.7</AltitudeMeters>
-            <DistanceMeters>5685.7</DistanceMeters>
-            <HeartRateBpm><Value>155</Value></HeartRateBpm>
+            <AltitudeMeters>592.3</AltitudeMeters>
+            <DistanceMeters>3319.9</DistanceMeters>
+            <HeartRateBpm><Value>167</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:23:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029909</LatitudeDegrees>
-              <LongitudeDegrees>7.732484</LongitudeDegrees>
+              <LatitudeDegrees>45.04761</LatitudeDegrees>
+              <LongitudeDegrees>7.715819</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>696.4</AltitudeMeters>
-            <DistanceMeters>5839.3</DistanceMeters>
-            <HeartRateBpm><Value>150</Value></HeartRateBpm>
+            <AltitudeMeters>598.7</AltitudeMeters>
+            <DistanceMeters>3403.5</DistanceMeters>
+            <HeartRateBpm><Value>158</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>90</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:24:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029067</LatitudeDegrees>
-              <LongitudeDegrees>7.734035</LongitudeDegrees>
+              <LatitudeDegrees>45.047028</LatitudeDegrees>
+              <LongitudeDegrees>7.716893</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>696.4</AltitudeMeters>
-            <DistanceMeters>5993.0</DistanceMeters>
-            <HeartRateBpm><Value>151</Value></HeartRateBpm>
+            <AltitudeMeters>606.5</AltitudeMeters>
+            <DistanceMeters>3509.9</DistanceMeters>
+            <HeartRateBpm><Value>162</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:25:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.02839</LatitudeDegrees>
-              <LongitudeDegrees>7.73574</LongitudeDegrees>
+              <LatitudeDegrees>45.046613</LatitudeDegrees>
+              <LongitudeDegrees>7.717939</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>695.7</AltitudeMeters>
-            <DistanceMeters>6146.7</DistanceMeters>
-            <HeartRateBpm><Value>151</Value></HeartRateBpm>
+            <AltitudeMeters>613.2</AltitudeMeters>
+            <DistanceMeters>3604.1</DistanceMeters>
+            <HeartRateBpm><Value>162</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:26:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.027794</LatitudeDegrees>
-              <LongitudeDegrees>7.737504</LongitudeDegrees>
+              <LatitudeDegrees>45.046183</LatitudeDegrees>
+              <LongitudeDegrees>7.719211</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>694.2</AltitudeMeters>
-            <DistanceMeters>6300.3</DistanceMeters>
-            <HeartRateBpm><Value>150</Value></HeartRateBpm>
+            <AltitudeMeters>620.8</AltitudeMeters>
+            <DistanceMeters>3714.9</DistanceMeters>
+            <HeartRateBpm><Value>163</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:27:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.027434</LatitudeDegrees>
-              <LongitudeDegrees>7.739391</LongitudeDegrees>
+              <LatitudeDegrees>45.04595</LatitudeDegrees>
+              <LongitudeDegrees>7.72043</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>691.9</AltitudeMeters>
-            <DistanceMeters>6454.0</DistanceMeters>
-            <HeartRateBpm><Value>151</Value></HeartRateBpm>
+            <AltitudeMeters>627.3</AltitudeMeters>
+            <DistanceMeters>3814.1</DistanceMeters>
+            <HeartRateBpm><Value>163</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:28:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.027031</LatitudeDegrees>
-              <LongitudeDegrees>7.741262</LongitudeDegrees>
+              <LatitudeDegrees>45.04565</LatitudeDegrees>
+              <LongitudeDegrees>7.721825</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>688.9</AltitudeMeters>
-            <DistanceMeters>6607.7</DistanceMeters>
-            <HeartRateBpm><Value>146</Value></HeartRateBpm>
+            <AltitudeMeters>634.4</AltitudeMeters>
+            <DistanceMeters>3928.7</DistanceMeters>
+            <HeartRateBpm><Value>161</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:29:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.026548</LatitudeDegrees>
-              <LongitudeDegrees>7.743094</LongitudeDegrees>
+              <LatitudeDegrees>45.045354</LatitudeDegrees>
+              <LongitudeDegrees>7.722949</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>685.1</AltitudeMeters>
-            <DistanceMeters>6761.3</DistanceMeters>
-            <HeartRateBpm><Value>146</Value></HeartRateBpm>
+            <AltitudeMeters>640.1</AltitudeMeters>
+            <DistanceMeters>4022.9</DistanceMeters>
+            <HeartRateBpm><Value>159</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>90</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:30:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.026099</LatitudeDegrees>
-              <LongitudeDegrees>7.744943</LongitudeDegrees>
+              <LatitudeDegrees>45.045015</LatitudeDegrees>
+              <LongitudeDegrees>7.724348</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>680.6</AltitudeMeters>
-            <DistanceMeters>6915.0</DistanceMeters>
-            <HeartRateBpm><Value>153</Value></HeartRateBpm>
+            <AltitudeMeters>646.7</AltitudeMeters>
+            <DistanceMeters>4139.1</DistanceMeters>
+            <HeartRateBpm><Value>169</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:31:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.025651</LatitudeDegrees>
-              <LongitudeDegrees>7.746793</LongitudeDegrees>
+              <LatitudeDegrees>45.044689</LatitudeDegrees>
+              <LongitudeDegrees>7.72569</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>675.3</AltitudeMeters>
-            <DistanceMeters>7068.7</DistanceMeters>
-            <HeartRateBpm><Value>145</Value></HeartRateBpm>
+            <AltitudeMeters>652.6</AltitudeMeters>
+            <DistanceMeters>4250.5</DistanceMeters>
+            <HeartRateBpm><Value>161</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>92</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:32:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.025262</LatitudeDegrees>
-              <LongitudeDegrees>7.748669</LongitudeDegrees>
+              <LatitudeDegrees>45.04443</LatitudeDegrees>
+              <LongitudeDegrees>7.726937</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>669.4</AltitudeMeters>
-            <DistanceMeters>7222.3</DistanceMeters>
-            <HeartRateBpm><Value>139</Value></HeartRateBpm>
+            <AltitudeMeters>657.8</AltitudeMeters>
+            <DistanceMeters>4352.7</DistanceMeters>
+            <HeartRateBpm><Value>155</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:33:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.025128</LatitudeDegrees>
-              <LongitudeDegrees>7.750615</LongitudeDegrees>
+              <LatitudeDegrees>45.044341</LatitudeDegrees>
+              <LongitudeDegrees>7.728245</LongitudeDegrees>
             </Position>
             <AltitudeMeters>662.7</AltitudeMeters>
-            <DistanceMeters>7376.0</DistanceMeters>
-            <HeartRateBpm><Value>141</Value></HeartRateBpm>
+            <DistanceMeters>4455.9</DistanceMeters>
+            <HeartRateBpm><Value>158</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:34:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.024828</LatitudeDegrees>
-              <LongitudeDegrees>7.752524</LongitudeDegrees>
+              <LatitudeDegrees>45.044125</LatitudeDegrees>
+              <LongitudeDegrees>7.729616</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>655.3</AltitudeMeters>
-            <DistanceMeters>7529.7</DistanceMeters>
-            <HeartRateBpm><Value>136</Value></HeartRateBpm>
+            <AltitudeMeters>667.5</AltitudeMeters>
+            <DistanceMeters>4566.3</DistanceMeters>
+            <HeartRateBpm><Value>154</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>90</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:35:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.024487</LatitudeDegrees>
-              <LongitudeDegrees>7.754418</LongitudeDegrees>
+              <LatitudeDegrees>45.043849</LatitudeDegrees>
+              <LongitudeDegrees>7.731153</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>647.2</AltitudeMeters>
-            <DistanceMeters>7683.3</DistanceMeters>
-            <HeartRateBpm><Value>139</Value></HeartRateBpm>
+            <AltitudeMeters>672.6</AltitudeMeters>
+            <DistanceMeters>4690.9</DistanceMeters>
+            <HeartRateBpm><Value>158</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>90</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:36:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.024411</LatitudeDegrees>
-              <LongitudeDegrees>7.756371</LongitudeDegrees>
+              <LatitudeDegrees>45.043794</LatitudeDegrees>
+              <LongitudeDegrees>7.732559</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>638.4</AltitudeMeters>
-            <DistanceMeters>7837.0</DistanceMeters>
-            <HeartRateBpm><Value>136</Value></HeartRateBpm>
+            <AltitudeMeters>676.7</AltitudeMeters>
+            <DistanceMeters>4801.5</DistanceMeters>
+            <HeartRateBpm><Value>154</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:37:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.024529</LatitudeDegrees>
-              <LongitudeDegrees>7.758319</LongitudeDegrees>
+              <LatitudeDegrees>45.043893</LatitudeDegrees>
+              <LongitudeDegrees>7.734202</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>629.0</AltitudeMeters>
-            <DistanceMeters>7990.7</DistanceMeters>
-            <HeartRateBpm><Value>140</Value></HeartRateBpm>
+            <AltitudeMeters>681.0</AltitudeMeters>
+            <DistanceMeters>4931.1</DistanceMeters>
+            <HeartRateBpm><Value>160</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:38:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.024892</LatitudeDegrees>
-              <LongitudeDegrees>7.760205</LongitudeDegrees>
+              <LatitudeDegrees>45.044185</LatitudeDegrees>
+              <LongitudeDegrees>7.735721</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>618.9</AltitudeMeters>
-            <DistanceMeters>8144.3</DistanceMeters>
-            <HeartRateBpm><Value>136</Value></HeartRateBpm>
+            <AltitudeMeters>684.6</AltitudeMeters>
+            <DistanceMeters>5054.7</DistanceMeters>
+            <HeartRateBpm><Value>156</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:39:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.02532</LatitudeDegrees>
-              <LongitudeDegrees>7.762064</LongitudeDegrees>
+              <LatitudeDegrees>45.044557</LatitudeDegrees>
+              <LongitudeDegrees>7.737336</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>608.2</AltitudeMeters>
-            <DistanceMeters>8298.0</DistanceMeters>
-            <HeartRateBpm><Value>137</Value></HeartRateBpm>
+            <AltitudeMeters>688.0</AltitudeMeters>
+            <DistanceMeters>5188.2</DistanceMeters>
+            <HeartRateBpm><Value>157</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:40:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.025852</LatitudeDegrees>
-              <LongitudeDegrees>7.763869</LongitudeDegrees>
+              <LatitudeDegrees>45.04497</LatitudeDegrees>
+              <LongitudeDegrees>7.738736</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>596.9</AltitudeMeters>
-            <DistanceMeters>8451.7</DistanceMeters>
-            <HeartRateBpm><Value>133</Value></HeartRateBpm>
+            <AltitudeMeters>690.6</AltitudeMeters>
+            <DistanceMeters>5307.4</DistanceMeters>
+            <HeartRateBpm><Value>152</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:41:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.026465</LatitudeDegrees>
-              <LongitudeDegrees>7.765621</LongitudeDegrees>
+              <LatitudeDegrees>45.045529</LatitudeDegrees>
+              <LongitudeDegrees>7.740334</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>585.0</AltitudeMeters>
-            <DistanceMeters>8605.3</DistanceMeters>
-            <HeartRateBpm><Value>136</Value></HeartRateBpm>
+            <AltitudeMeters>693.0</AltitudeMeters>
+            <DistanceMeters>5447.5</DistanceMeters>
+            <HeartRateBpm><Value>157</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>89</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:42:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.027034</LatitudeDegrees>
-              <LongitudeDegrees>7.767403</LongitudeDegrees>
+              <LatitudeDegrees>45.04602</LatitudeDegrees>
+              <LongitudeDegrees>7.741875</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>572.5</AltitudeMeters>
-            <DistanceMeters>8759.0</DistanceMeters>
-            <HeartRateBpm><Value>133</Value></HeartRateBpm>
+            <AltitudeMeters>694.7</AltitudeMeters>
+            <DistanceMeters>5580.3</DistanceMeters>
+            <HeartRateBpm><Value>154</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>92</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:43:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.027497</LatitudeDegrees>
-              <LongitudeDegrees>7.769246</LongitudeDegrees>
+              <LatitudeDegrees>45.04642</LatitudeDegrees>
+              <LongitudeDegrees>7.743466</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>559.5</AltitudeMeters>
-            <DistanceMeters>8912.7</DistanceMeters>
-            <HeartRateBpm><Value>134</Value></HeartRateBpm>
+            <AltitudeMeters>695.9</AltitudeMeters>
+            <DistanceMeters>5712.9</DistanceMeters>
+            <HeartRateBpm><Value>154</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:44:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.027836</LatitudeDegrees>
-              <LongitudeDegrees>7.771141</LongitudeDegrees>
+              <LatitudeDegrees>45.046792</LatitudeDegrees>
+              <LongitudeDegrees>7.745546</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>545.9</AltitudeMeters>
-            <DistanceMeters>9066.3</DistanceMeters>
-            <HeartRateBpm><Value>127</Value></HeartRateBpm>
+            <AltitudeMeters>696.5</AltitudeMeters>
+            <DistanceMeters>5881.5</DistanceMeters>
+            <HeartRateBpm><Value>148</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:45:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.027867</LatitudeDegrees>
-              <LongitudeDegrees>7.773096</LongitudeDegrees>
+              <LatitudeDegrees>45.046819</LatitudeDegrees>
+              <LongitudeDegrees>7.747266</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>531.9</AltitudeMeters>
-            <DistanceMeters>9220.0</DistanceMeters>
-            <HeartRateBpm><Value>136</Value></HeartRateBpm>
+            <AltitudeMeters>696.4</AltitudeMeters>
+            <DistanceMeters>6016.6</DistanceMeters>
+            <HeartRateBpm><Value>156</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:46:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.027907</LatitudeDegrees>
-              <LongitudeDegrees>7.77505</LongitudeDegrees>
+              <LatitudeDegrees>45.046867</LatitudeDegrees>
+              <LongitudeDegrees>7.749574</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>517.3</AltitudeMeters>
-            <DistanceMeters>9373.7</DistanceMeters>
-            <HeartRateBpm><Value>132</Value></HeartRateBpm>
+            <AltitudeMeters>695.3</AltitudeMeters>
+            <DistanceMeters>6198.1</DistanceMeters>
+            <HeartRateBpm><Value>151</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:47:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.028208</LatitudeDegrees>
-              <LongitudeDegrees>7.776959</LongitudeDegrees>
+              <LatitudeDegrees>45.047196</LatitudeDegrees>
+              <LongitudeDegrees>7.751665</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>502.3</AltitudeMeters>
-            <DistanceMeters>9527.3</DistanceMeters>
-            <HeartRateBpm><Value>134</Value></HeartRateBpm>
+            <AltitudeMeters>693.3</AltitudeMeters>
+            <DistanceMeters>6366.4</DistanceMeters>
+            <HeartRateBpm><Value>152</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:48:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.028342</LatitudeDegrees>
-              <LongitudeDegrees>7.778905</LongitudeDegrees>
+              <LatitudeDegrees>45.047331</LatitudeDegrees>
+              <LongitudeDegrees>7.753626</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>486.8</AltitudeMeters>
-            <DistanceMeters>9681.0</DistanceMeters>
-            <HeartRateBpm><Value>128</Value></HeartRateBpm>
+            <AltitudeMeters>690.7</AltitudeMeters>
+            <DistanceMeters>6521.1</DistanceMeters>
+            <HeartRateBpm><Value>146</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:49:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.028756</LatitudeDegrees>
-              <LongitudeDegrees>7.780771</LongitudeDegrees>
+              <LatitudeDegrees>45.047782</LatitudeDegrees>
+              <LongitudeDegrees>7.75566</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>471.0</AltitudeMeters>
-            <DistanceMeters>9834.7</DistanceMeters>
-            <HeartRateBpm><Value>134</Value></HeartRateBpm>
+            <AltitudeMeters>687.0</AltitudeMeters>
+            <DistanceMeters>6688.6</DistanceMeters>
+            <HeartRateBpm><Value>151</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:50:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029026</LatitudeDegrees>
-              <LongitudeDegrees>7.782688</LongitudeDegrees>
+              <LatitudeDegrees>45.048107</LatitudeDegrees>
+              <LongitudeDegrees>7.757968</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>454.7</AltitudeMeters>
-            <DistanceMeters>9988.3</DistanceMeters>
-            <HeartRateBpm><Value>133</Value></HeartRateBpm>
+            <AltitudeMeters>681.9</AltitudeMeters>
+            <DistanceMeters>6873.5</DistanceMeters>
+            <HeartRateBpm><Value>149</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:51:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029157</LatitudeDegrees>
-              <LongitudeDegrees>7.784635</LongitudeDegrees>
+              <LatitudeDegrees>45.048289</LatitudeDegrees>
+              <LongitudeDegrees>7.760671</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>438.1</AltitudeMeters>
-            <DistanceMeters>10142.0</DistanceMeters>
-            <HeartRateBpm><Value>130</Value></HeartRateBpm>
+            <AltitudeMeters>674.7</AltitudeMeters>
+            <DistanceMeters>7086.9</DistanceMeters>
+            <HeartRateBpm><Value>144</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:52:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029384</LatitudeDegrees>
-              <LongitudeDegrees>7.786564</LongitudeDegrees>
+              <LatitudeDegrees>45.048624</LatitudeDegrees>
+              <LongitudeDegrees>7.763517</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>421.1</AltitudeMeters>
-            <DistanceMeters>10295.7</DistanceMeters>
-            <HeartRateBpm><Value>127</Value></HeartRateBpm>
+            <AltitudeMeters>665.5</AltitudeMeters>
+            <DistanceMeters>7313.5</DistanceMeters>
+            <HeartRateBpm><Value>138</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>83</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:53:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029355</LatitudeDegrees>
-              <LongitudeDegrees>7.788519</LongitudeDegrees>
+              <LatitudeDegrees>45.048587</LatitudeDegrees>
+              <LongitudeDegrees>7.766054</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>403.9</AltitudeMeters>
-            <DistanceMeters>10449.3</DistanceMeters>
-            <HeartRateBpm><Value>126</Value></HeartRateBpm>
+            <AltitudeMeters>656.1</AltitudeMeters>
+            <DistanceMeters>7512.8</DistanceMeters>
+            <HeartRateBpm><Value>137</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:54:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029205</LatitudeDegrees>
-              <LongitudeDegrees>7.790463</LongitudeDegrees>
+              <LatitudeDegrees>45.048379</LatitudeDegrees>
+              <LongitudeDegrees>7.768741</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>386.4</AltitudeMeters>
-            <DistanceMeters>10603.0</DistanceMeters>
-            <HeartRateBpm><Value>130</Value></HeartRateBpm>
+            <AltitudeMeters>644.9</AltitudeMeters>
+            <DistanceMeters>7725.2</DistanceMeters>
+            <HeartRateBpm><Value>139</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>88</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:55:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029174</LatitudeDegrees>
-              <LongitudeDegrees>7.792418</LongitudeDegrees>
+              <LatitudeDegrees>45.048333</LatitudeDegrees>
+              <LongitudeDegrees>7.771638</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>368.6</AltitudeMeters>
-            <DistanceMeters>10756.7</DistanceMeters>
-            <HeartRateBpm><Value>131</Value></HeartRateBpm>
+            <AltitudeMeters>631.4</AltitudeMeters>
+            <DistanceMeters>7952.8</DistanceMeters>
+            <HeartRateBpm><Value>137</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>82</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:56:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029106</LatitudeDegrees>
-              <LongitudeDegrees>7.794371</LongitudeDegrees>
+              <LatitudeDegrees>45.048225</LatitudeDegrees>
+              <LongitudeDegrees>7.77474</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>350.6</AltitudeMeters>
-            <DistanceMeters>10910.3</DistanceMeters>
-            <HeartRateBpm><Value>130</Value></HeartRateBpm>
+            <AltitudeMeters>615.4</AltitudeMeters>
+            <DistanceMeters>8196.8</DistanceMeters>
+            <HeartRateBpm><Value>133</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>87</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:57:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029047</LatitudeDegrees>
-              <LongitudeDegrees>7.796324</LongitudeDegrees>
+              <LatitudeDegrees>45.048127</LatitudeDegrees>
+              <LongitudeDegrees>7.777989</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>332.5</AltitudeMeters>
-            <DistanceMeters>11064.0</DistanceMeters>
-            <HeartRateBpm><Value>123</Value></HeartRateBpm>
+            <AltitudeMeters>596.9</AltitudeMeters>
+            <DistanceMeters>8452.3</DistanceMeters>
+            <HeartRateBpm><Value>122</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>86</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:58:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029142</LatitudeDegrees>
-              <LongitudeDegrees>7.798275</LongitudeDegrees>
+              <LatitudeDegrees>45.048252</LatitudeDegrees>
+              <LongitudeDegrees>7.780564</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>314.2</AltitudeMeters>
-            <DistanceMeters>11217.7</DistanceMeters>
-            <HeartRateBpm><Value>123</Value></HeartRateBpm>
+            <AltitudeMeters>581.0</AltitudeMeters>
+            <DistanceMeters>8655.1</DistanceMeters>
+            <HeartRateBpm><Value>127</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>83</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T09:59:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.02915</LatitudeDegrees>
-              <LongitudeDegrees>7.80023</LongitudeDegrees>
+              <LatitudeDegrees>45.048264</LatitudeDegrees>
+              <LongitudeDegrees>7.783487</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>295.7</AltitudeMeters>
-            <DistanceMeters>11371.3</DistanceMeters>
-            <HeartRateBpm><Value>127</Value></HeartRateBpm>
+            <AltitudeMeters>561.9</AltitudeMeters>
+            <DistanceMeters>8884.7</DistanceMeters>
+            <HeartRateBpm><Value>126</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>85</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T10:00:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029237</LatitudeDegrees>
-              <LongitudeDegrees>7.802182</LongitudeDegrees>
+              <LatitudeDegrees>45.048406</LatitudeDegrees>
+              <LongitudeDegrees>7.786657</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>277.2</AltitudeMeters>
-            <DistanceMeters>11525.0</DistanceMeters>
-            <HeartRateBpm><Value>124</Value></HeartRateBpm>
+            <AltitudeMeters>539.8</AltitudeMeters>
+            <DistanceMeters>9134.3</DistanceMeters>
+            <HeartRateBpm><Value>119</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T10:01:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.029275</LatitudeDegrees>
-              <LongitudeDegrees>7.804136</LongitudeDegrees>
+              <LatitudeDegrees>45.048468</LatitudeDegrees>
+              <LongitudeDegrees>7.789874</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>258.6</AltitudeMeters>
-            <DistanceMeters>11678.7</DistanceMeters>
-            <HeartRateBpm><Value>127</Value></HeartRateBpm>
+            <AltitudeMeters>516.0</AltitudeMeters>
+            <DistanceMeters>9387.0</DistanceMeters>
+            <HeartRateBpm><Value>120</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2026-06-22T10:02:00+02:00</Time>
             <Position>
-              <LatitudeDegrees>45.02922</LatitudeDegrees>
-              <LongitudeDegrees>7.80609</LongitudeDegrees>
+              <LatitudeDegrees>45.048371</LatitudeDegrees>
+              <LongitudeDegrees>7.793325</LongitudeDegrees>
             </Position>
-            <AltitudeMeters>240.0</AltitudeMeters>
-            <DistanceMeters>11832.3</DistanceMeters>
-            <HeartRateBpm><Value>130</Value></HeartRateBpm>
+            <AltitudeMeters>489.1</AltitudeMeters>
+            <DistanceMeters>9658.4</DistanceMeters>
+            <HeartRateBpm><Value>118</Value></HeartRateBpm>
             <Extensions><ns3:TPX><ns3:RunCadence>84</ns3:RunCadence></ns3:TPX></Extensions>
           </Trackpoint>
         </Track>

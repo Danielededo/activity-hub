@@ -114,7 +114,7 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
             <h3 className="text-xs font-semibold uppercase tracking-wide muted">
               Route
             </h3>
-            <RouteMap samples={prepared.samples} />
+            <RouteMap samples={prepared.samples} sportType={workout.sport_type} />
             <p className="text-xs muted">
               {series.returned} of {series.total} samples
               {series.stride > 1 && ` (every ${series.stride})`}

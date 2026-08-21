@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from app.services.analyzer import compute_metrics
+from app.services.analyzer import compute_metrics, haversine_distance
 from app.services.parsers import parse_file
 from scripts.generate_demo_data import build_activities
 
@@ -107,6 +107,44 @@ def test_the_committed_set_is_varied_enough_to_demo():
     # Weekly charts need more than one week of history to show a trend.
     assert len({p.start_time.isocalendar()[1] for p in parsed}) >= 4
     assert any(p.utc_offset_minutes is not None for p in parsed)
+
+
+@pytest.mark.skipif(not DEMO_DIR.is_dir(), reason="demo/activities is not checked out")
+def test_the_pace_varies_inside_an_activity():
+    """Otherwise nothing that reads speed has anything to demonstrate.
+
+    The generator used to pick one speed per activity and walk the whole route
+    at it, so every segment was identical and a route coloured by pace came out
+    a flat single tone. Anybody loading the demo set would have concluded the
+    feature was broken.
+    """
+    varied = 0
+    for path in demo_files():
+        parsed = parse_file(path.name, path.read_bytes())
+        speeds = _segment_speeds(parsed.track_points)
+        if len(speeds) >= 5 and max(speeds) > min(speeds) * 1.2:
+            varied += 1
+
+    assert varied >= 5, "no demo activity has a pace worth colouring"
+
+
+def _segment_speeds(points) -> list[float]:
+    """Metres per second for each hop that has both a position and a time."""
+    speeds = []
+    previous = None
+    for point in points:
+        if point.latitude is None or point.longitude is None or point.timestamp is None:
+            previous = None
+            continue
+        if previous is not None:
+            seconds = (point.timestamp - previous.timestamp).total_seconds()
+            if seconds > 0:
+                metres = haversine_distance(
+                    previous.latitude, previous.longitude, point.latitude, point.longitude
+                )
+                speeds.append(metres / seconds)
+        previous = point
+    return speeds
 
 
 @pytest.mark.skipif(not DEMO_DIR.is_dir(), reason="demo/activities is not checked out")
