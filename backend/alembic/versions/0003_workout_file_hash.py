@@ -29,9 +29,7 @@ def upgrade() -> None:
     # Batch mode so this also applies on SQLite, which cannot ALTER a column
     # or drop a constraint in place.
     with op.batch_alter_table("workouts") as batch:
-        batch.alter_column(
-            "file_hash", existing_type=sa.String(length=HASH_LENGTH), nullable=False
-        )
+        batch.alter_column("file_hash", existing_type=sa.String(length=HASH_LENGTH), nullable=False)
         batch.drop_constraint("uq_workout_user_start_source", type_="unique")
         batch.create_unique_constraint("uq_workout_user_file_hash", ["user_id", "file_hash"])
 

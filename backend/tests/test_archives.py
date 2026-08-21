@@ -76,8 +76,9 @@ def test_reads_a_gzipped_member():
 
 
 def test_directories_are_not_members():
-    content = make_zip({"activities/ride.gpx": gpx("2026-06-01T07:00:00Z")},
-                       directories=("activities/",))
+    content = make_zip(
+        {"activities/ride.gpx": gpx("2026-06-01T07:00:00Z")}, directories=("activities/",)
+    )
 
     assert [m.name for m in members_of(content)] == ["activities/ride.gpx"]
 

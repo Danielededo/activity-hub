@@ -154,9 +154,12 @@ def test_list_workouts_is_paginated(client, user, sample_tcx, sample_gpx):
     assert len(body["items"]) == 1
     # Newest first: the GPX run is a day later than the TCX ride.
     assert body["items"][0]["file_format"] == "gpx"
-    assert client.get(f"/api/workouts?user_id={user['id']}&limit=1&offset=1").json()["items"][0][
-        "file_format"
-    ] == "tcx"
+    assert (
+        client.get(f"/api/workouts?user_id={user['id']}&limit=1&offset=1").json()["items"][0][
+            "file_format"
+        ]
+        == "tcx"
+    )
 
 
 def test_list_workouts_filters_by_sport(client, user, sample_tcx, sample_gpx):

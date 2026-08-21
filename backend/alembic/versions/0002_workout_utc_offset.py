@@ -5,6 +5,7 @@ Revises: 0001_initial_schema
 Create Date: 2026-08-20
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa

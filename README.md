@@ -272,7 +272,14 @@ Choices worth knowing about:
 - **Start and finish are told apart by shape**, a disc and a square in text ink.
   Green against red is the obvious choice and fails outright for a red-green
   reader: those two sit 4.1 ΔE apart under simulated deuteranopia, where 8 is
-  the target.
+  the target. A route that finishes where it began gets **one** marker labelled
+  as both, because two of them sat on top of each other — and a loop is the
+  commonest shape of ride.
+- **The drawing is sized to the route, not to a square.** It used to be fitted
+  into a square and then letterboxed into a panel that is never square, so a
+  broad route was drawn at the height of the panel with half the width empty: a
+  wide loop used 42% of its panel and now uses 91%. The scale stays uniform
+  either way — shape is never distorted, only the space it is given changes.
 - **Sport colours come from a validated palette** and are assigned in fixed
   order. Two of the light-mode hues fall below 3:1 on white, so everything
   painted with them carries a visible label — identity is never colour alone.

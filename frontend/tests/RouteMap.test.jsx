@@ -46,6 +46,27 @@ function eastward(hops, startAt = EPOCH) {
   return samples
 }
 
+/**
+ * A track heading north-east, whose projected width and height come out equal.
+ *
+ * A degree of longitude is cos(latitude) as long as a degree of latitude, so the
+ * longitude step is divided by it. That makes the viewBox square, which is the
+ * only shape where a pointer mapped as a plain proportion of the element is
+ * *sometimes* right — and therefore the shape that shows when it is not.
+ */
+function diagonal(steps = 4, startAt = EPOCH) {
+  const cos = Math.cos((45 * Math.PI) / 180)
+  const samples = [{ latitude: 45, longitude: 7, timestamp: new Date(startAt).toISOString() }]
+  for (let step = 1; step <= steps; step += 1) {
+    samples.push({
+      latitude: 45 + step * 0.001,
+      longitude: 7 + (step * 0.001) / cos,
+      timestamp: new Date(startAt + step * 5_000).toISOString(),
+    })
+  }
+  return samples
+}
+
 /** Hops that vary in pace, slowest first, all of them plausible. */
 const VARIED = [10, 9, 8, 7, 6, 5, 4, 3].map((seconds) => [0.001, seconds])
 
@@ -92,6 +113,31 @@ describe('RouteMap geometry', () => {
     expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(Math.max(...ys) - Math.min(...ys))
     expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(100.01)
     expect(Math.max(...ys) - Math.min(...ys)).toBeLessThanOrEqual(100.01)
+  })
+
+  it('sizes the viewBox to the route rather than to a square', () => {
+    // The route used to be fitted into a square and then letterboxed into a
+    // panel that is never square, so a broad route was drawn at the height of
+    // the panel and left half the width empty.
+    render(<RouteMap samples={eastward(VARIED)} sportType="cycling" />)
+    const [, , width, height] = svg().getAttribute('viewBox').split(' ').map(Number)
+
+    expect(width).toBeGreaterThan(height * 5)
+  })
+
+  it('sizes it the other way for a route that runs north to south', () => {
+    const northward = [45.0, 45.002, 45.004, 45.006].map((latitude) => at(latitude, 7))
+    render(<RouteMap samples={northward} />)
+    const [, , width, height] = svg().getAttribute('viewBox').split(' ').map(Number)
+
+    expect(height).toBeGreaterThan(width * 5)
+  })
+
+  it('keeps a square route square', () => {
+    render(<RouteMap samples={diagonal()} sportType="cycling" />)
+    const [, , width, height] = svg().getAttribute('viewBox').split(' ').map(Number)
+
+    expect(width).toBeCloseTo(height, 1)
   })
 
   it('says so when there is no position data', () => {
@@ -201,6 +247,24 @@ describe('RouteMap markers', () => {
     expect(start.tagName).not.toBe(finish.tagName)
   })
 
+  it('draws one marker for a loop, because two would hide each other', () => {
+    // A loop is the commonest shape of ride, and the finish square sat exactly
+    // on top of the start disc — so the start was invisible.
+    const loop = [at(45, 7), at(45.002, 7.002), at(45.004, 7), at(45, 7)]
+    render(<RouteMap samples={loop} sportType="cycling" />)
+
+    expect(svg().querySelectorAll('rect')).toHaveLength(1)
+    expect(svg().querySelectorAll('circle')).toHaveLength(0)
+    expect(svg().querySelector('rect title').textContent).toBe('Start and finish')
+  })
+
+  it('still draws both for a route that ends somewhere else', () => {
+    render(<RouteMap samples={eastward(Array(3).fill([0.001, 5]))} sportType="cycling" />)
+
+    expect(svg().querySelector('circle title').textContent).toBe('Start')
+    expect(svg().querySelector('rect title').textContent).toBe('Finish')
+  })
+
   it('rings each marker in the surface colour so it survives a crossing track', () => {
     render(<RouteMap samples={eastward(Array(3).fill([0.001, 5]))} sportType="cycling" />)
     const start = svg().querySelector('circle')
@@ -275,26 +339,38 @@ describe('RouteMap hover', () => {
   })
 
   it('accounts for the letterboxing rather than scaling the pointer flat', () => {
-    // The SVG keeps its aspect ratio inside a 400x200 box, so the drawing is a
-    // 200-wide square with 100px of padding each side. At clientX 300 the
-    // pointer is at the right-hand edge of the drawing — the last sample.
-    // Treating x as a plain proportion of the element would land at 77% of the
-    // way along instead, several samples short.
-    render(<RouteMap samples={eastward(Array(5).fill([0.001, 5]))} sportType="cycling" />)
+    // A square viewBox inside a 400x200 box: the browser scales it to 200x200
+    // and centres it, leaving 100px of slack on each side. So clientX 300 is
+    // (300-100)/1.852 = 108 viewBox units in — past the last sample, which is
+    // therefore the nearest. Treating x as a plain proportion of the element
+    // gives 77 instead, and picks the sample before it.
+    render(<RouteMap samples={diagonal()} sportType="cycling" />)
 
-    hover(300, 100)
+    hover(300, 50)
 
     const ring = svg().querySelector('circle[fill="none"]')
     expect(Number(ring.getAttribute('cx'))).toBeCloseTo(100, 0)
   })
 
   it('picks the first sample at the other edge', () => {
-    render(<RouteMap samples={eastward(Array(5).fill([0.001, 5]))} sportType="cycling" />)
+    render(<RouteMap samples={diagonal()} sportType="cycling" />)
 
-    hover(100, 100)
+    hover(100, 200)
 
     const ring = svg().querySelector('circle[fill="none"]')
     expect(Number(ring.getAttribute('cx'))).toBeCloseTo(0, 0)
+  })
+
+  it('lets a wide route use the whole width', () => {
+    // The point of hugging the viewBox: an east-west track now spans the box,
+    // so its far end is at the far edge rather than three quarters of the way
+    // across.
+    render(<RouteMap samples={eastward(Array(5).fill([0.001, 5]))} sportType="cycling" />)
+
+    hover(400, 100)
+
+    const ring = svg().querySelector('circle[fill="none"]')
+    expect(Number(ring.getAttribute('cx'))).toBeCloseTo(100, 0)
   })
 
   it('reads the start as a zero, not as a missing figure', () => {
@@ -302,7 +378,7 @@ describe('RouteMap hover', () => {
     // file did not have, when in fact no time has passed there yet.
     render(<RouteMap samples={eastward(VARIED)} sportType="cycling" />)
 
-    hover(100, 100)
+    hover(0, 100)
 
     expect(screen.getByRole('tooltip').textContent).toMatch(/0s/)
   })

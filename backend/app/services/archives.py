@@ -124,9 +124,7 @@ def read_archive(
                 yield ArchiveMember(name, None, "not a .tcx or .gpx file")
                 continue
             if info.file_size > max_member_bytes:
-                yield ArchiveMember(
-                    name, None, f"larger than the {max_member_bytes} byte limit"
-                )
+                yield ArchiveMember(name, None, f"larger than the {max_member_bytes} byte limit")
                 continue
 
             try:

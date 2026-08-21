@@ -35,6 +35,12 @@ jobs:
       - name: Lint
         run: ruff check .
 
+      # Checked in CI because it was not: six files had drifted out of format
+      # while `ruff check` stayed green, and every branch that ran the formatter
+      # picked up unrelated churn it then had to revert.
+      - name: Format
+        run: ruff format --check .
+
       - name: Test
         run: pytest --cov=app --cov-report=term-missing
 
