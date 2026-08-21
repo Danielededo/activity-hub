@@ -62,6 +62,8 @@ To try it without your own data, load the bundled demo set:
 - **Export** — the summary as CSV and every activity as GPX in one zip, both
   honouring whatever filters are set. The zip this app writes is a zip it can
   read back.
+- **Readable on a phone**, down to a 320px screen: the activity table keeps the
+  columns that fit and earns the rest as the screen widens.
 
 ## What it looks like
 
@@ -96,6 +98,14 @@ elapsed time, so the same hill lands in the same place on both lines:
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/compare-dark.png">
   <img alt="Two rides compared: speed and elevation against distance travelled" src="docs/images/compare-light.png">
+</picture>
+
+It reads on a phone too, down to a 320px screen — the activity table keeps the
+columns that fit and earns the rest as the screen widens:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/phone-dark.png">
+  <img alt="The dashboard on a phone: stat tiles stacked two across, the weekly chart, the per-sport split" src="docs/images/phone-light.png" width="390">
 </picture>
 
 ## Your data
@@ -273,7 +283,7 @@ creates the profile from `DEFAULT_FIRST_NAME` instead of the first-run screen.
 
 ```bash
 cd backend && ruff check . && ruff format --check . && pytest   # 311 tests, no database needed
-cd frontend && npm run lint && npm test                        # 222 tests, jsdom
+cd frontend && npm run lint && npm test                        # 223 tests, jsdom
 ```
 
 The backend suite runs against in-memory SQLite, so there is nothing to

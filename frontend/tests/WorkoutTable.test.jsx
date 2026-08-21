@@ -142,6 +142,21 @@ describe('WorkoutTable', () => {
     expect(screen.getByText('Running')).toBeInTheDocument()
   })
 
+  it('still names the sport when the column is too narrow to exist', () => {
+    // The Sport column is dropped below the `sm` breakpoint, where a nine
+    // column table does not fit. jsdom applies no media queries, so this
+    // cannot assert the layout — what it pins is that the fallback exists at
+    // all: a phone gets a coloured dot beside the name, and a screen reader
+    // gets the sport in text rather than losing the fact entirely.
+    const { container } = renderTable()
+
+    const spoken = [...container.querySelectorAll('tbody .sr-only')].map((node) =>
+      node.textContent.trim(),
+    )
+    expect(spoken).toContain('· Cycling')
+    expect(spoken).toContain('· Running')
+  })
+
   it('invites a first upload when there is nothing yet', () => {
     renderTable({ workouts: [], total: 0 })
 

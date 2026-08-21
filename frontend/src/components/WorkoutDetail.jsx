@@ -140,7 +140,7 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
       )}
 
       {prepared && (
-        <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        <div className="mt-4 grid gap-6 *:min-w-0 lg:grid-cols-2">
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wide muted">
               Route
