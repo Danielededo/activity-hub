@@ -47,6 +47,20 @@ beforeEach(() => {
   api.fetchTrackPoints.mockResolvedValue(series(samples()))
 })
 
+describe('WorkoutDetail export', () => {
+  it('offers this activity as a GPX download', async () => {
+    render(<WorkoutDetail workout={RIDE} userId={7} onClose={vi.fn()} />)
+    // Awaited so the track and zone requests land inside the test rather than
+    // updating state after it has finished.
+    await screen.findByRole('heading', { name: 'Route' })
+
+    const link = screen.getByRole('link', { name: 'GPX' })
+
+    expect(link).toHaveAttribute('href', expect.stringContaining('/workouts/1/export.gpx'))
+    expect(link.getAttribute('href')).toContain('user_id=7')
+  })
+})
+
 describe('WorkoutDetail zones', () => {
   const BANDS = [
     { zone: 1, name: 'Recovery', min_bpm: 95, max_bpm: 113, seconds: 300 },

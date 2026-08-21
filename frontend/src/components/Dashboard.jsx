@@ -9,6 +9,7 @@ import {
   fetchWorkouts,
   fetchZones,
 } from '../api/client'
+import ExportPanel from './ExportPanel'
 import FilterBar, { EMPTY_FILTERS, hasFilters } from './FilterBar'
 import HeartRateZones from './HeartRateZones'
 import Records from './Records'
@@ -197,6 +198,8 @@ export default function Dashboard({ profile }) {
           filters={filters}
           onChange={changeFilters}
         />
+
+        <ExportPanel userId={userId} filters={filters} total={page.total} />
 
         <WorkoutTable
           workouts={page.items}

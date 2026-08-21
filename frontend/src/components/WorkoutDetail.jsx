@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { errorMessage, fetchTrackPoints, fetchWorkoutZones } from '../api/client'
+import { errorMessage, exportUrl, fetchTrackPoints, fetchWorkoutZones } from '../api/client'
 import RouteMap from './RouteMap'
 import TraceChart from './TraceChart'
 import ZoneBar from './ZoneBar'
@@ -88,13 +88,21 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
             {sportLabel(workout.sport_type)} · {workout.source} · {workout.file_format.toUpperCase()}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-md border border-[var(--border)] px-3 py-1 text-sm"
-        >
-          Close
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <a
+            className="rounded-md border border-[var(--border)] px-3 py-1 text-sm"
+            href={exportUrl(`/workouts/${workout.id}/export.gpx`, { userId })}
+          >
+            GPX
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-[var(--border)] px-3 py-1 text-sm"
+          >
+            Close
+          </button>
+        </div>
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
