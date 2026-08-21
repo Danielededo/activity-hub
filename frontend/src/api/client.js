@@ -71,3 +71,15 @@ export async function uploadWorkout(userId, file) {
   const { data } = await http.post('/upload', body, { params: { user_id: userId } })
   return data
 }
+
+/** Unpack an export archive. Returns counts plus a capped per-member list. */
+export async function uploadArchive(userId, file) {
+  const body = new FormData()
+  body.append('file', file)
+  const { data } = await http.post('/upload/archive', body, {
+    params: { user_id: userId },
+    // A full export is hundreds of files to parse and insert, one at a time.
+    timeout: 10 * 60_000,
+  })
+  return data
+}

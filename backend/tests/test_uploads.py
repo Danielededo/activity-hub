@@ -40,7 +40,26 @@ def test_settings_accept_an_explicit_database_url():
 
 
 def test_max_request_bytes_allows_for_multipart_framing():
-    assert settings.max_request_bytes == settings.max_upload_bytes + MULTIPART_OVERHEAD_BYTES
+    """The guard cannot know the route, so it allows the largest upload.
+
+    An archive is far bigger than a single activity, and the request-level guard
+    runs before routing, so it has to be the more generous of the two. The
+    narrower per-route limits are enforced in the routes themselves.
+    """
+    expected = max(settings.max_upload_bytes, settings.max_archive_bytes)
+
+    assert settings.max_request_bytes == expected + MULTIPART_OVERHEAD_BYTES
+
+
+def test_the_archive_cap_is_the_one_that_dominates():
+    parsed = Settings(
+        _env_file=None,
+        database_url="sqlite://",
+        max_upload_bytes=1_000,
+        max_archive_bytes=50_000,
+    )
+
+    assert parsed.max_request_bytes == 50_000 + MULTIPART_OVERHEAD_BYTES
 
 
 def test_cors_origins_accept_a_comma_separated_string():
@@ -111,7 +130,10 @@ def test_read_upload_accepts_content_exactly_at_the_limit():
 
 def test_oversized_body_is_rejected_before_it_is_parsed(client, monkeypatch):
     """The guard must fire on Content-Length, before multipart spools the body."""
+    # Both caps, or max_request_bytes stays at the archive limit and this test
+    # would build a 200 MiB body to prove a one-line comparison.
     monkeypatch.setattr(settings, "max_upload_bytes", 1024)
+    monkeypatch.setattr(settings, "max_archive_bytes", 1024)
     oversized = b"x" * (settings.max_request_bytes + 1)
 
     response = client.post(

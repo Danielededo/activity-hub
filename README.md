@@ -21,8 +21,8 @@ docker compose up --build     # first run takes a few minutes
 ```
 
 Open <http://localhost:8080>. The dashboard asks for your name once, and that is
-the whole of setup. Then add your `.tcx` and `.gpx` files in the upload box —
-select as many at a time as you like.
+the whole of setup. Then feed it your activities: drop files on the upload box,
+pick a folder, or hand it the entire `.zip` your watch or Strava exported.
 
 To try it without your own data, load the bundled demo set:
 
@@ -32,8 +32,10 @@ To try it without your own data, load the bundled demo set:
 
 ## What you get
 
-- **Upload TCX and GPX** — Garmin, Strava, Komoot and anything else that writes
-  standard files. Re-uploading is safe: files already stored are skipped.
+- **Upload TCX and GPX** — one file, a folder, a drag and drop, or the whole
+  export as a `.zip`. Garmin, Strava, Komoot and anything else that writes
+  standard files. Re-uploading is safe: files already stored are skipped, and
+  each file is reported separately as it lands.
 - **Lifetime totals** — distance, moving time, elevation, heart rate, with
   per-sport breakdowns.
 - **Weekly trend** over any window from 8 to 52 weeks.
@@ -96,6 +98,7 @@ Interactive docs at <http://localhost:8000/docs> when the stack is up.
 | GET | `/api/workouts/{id}/track-points?user_id=X` | Samples for a route map or HR trace, downsampled to `max_points` |
 | DELETE | `/api/workouts/{id}?user_id=X` | Cascades to track points; 404 if owned by someone else |
 | POST | `/api/upload?user_id=X` | Multipart `file`: one `.tcx` or `.gpx` |
+| POST | `/api/upload/archive?user_id=X` | Multipart `file`: a `.zip` export. Returns counts plus a per-file outcome |
 | GET | `/api/analysis/{user_id}` | Lifetime totals plus a per-sport breakdown |
 | GET | `/api/analysis/{user_id}/weekly?weeks=12` | One bucket per local week, quiet weeks zero-filled |
 
@@ -150,6 +153,26 @@ to that Monday, not to the Sunday it falls on in UTC.
 summaries, counts. The samples live in `track_points`, so nothing is stored
 twice.
 
+### Importing an archive
+
+`POST /api/upload/archive` takes the zip a service exports and stores every
+activity in it, reporting each file as `stored`, `duplicate`, `skipped` or
+`failed`. A real export is full of CSVs and images, so those are *skipped*, not
+errors; and one corrupt file does not stop the other three hundred.
+
+An archive from a user is hostile input, so the reader guards the three ways
+that goes wrong. **Zip bombs**: both the declared uncompressed total and each
+member are capped, and every read is bounded, so a header that lies cannot turn
+into memory use either. **Member floods**: the entry count is capped.
+**Nested archives**: refused rather than recursed into. Path traversal is absent
+by construction — members are read into memory, never extracted to disk, so
+there is no path to traverse.
+
+Members are processed one at a time, and that is load-bearing rather than merely
+simple: the near-duplicate check reads before it writes, so two files describing
+the same session could both pass it if they were handled at once — and the unique
+constraint would not catch them either, since their bytes differ.
+
 ### Duplicate detection
 
 Two questions, answered separately.
@@ -187,6 +210,9 @@ Choices worth knowing about:
   get km/h.
 - **Times are the activity's own local time**, from the UTC offset its file
   stated, in 24-hour form.
+- **Upload results appear as each file lands**, with a running count. A few
+  hundred files used to mean minutes of silence, which is indistinguishable
+  from a hang.
 
 ## Demo data
 
@@ -236,8 +262,8 @@ creates the profile from `DEFAULT_FIRST_NAME` instead of the first-run screen.
 ### Tests
 
 ```bash
-cd backend && ruff check . && pytest          # 146 tests, no database needed
-cd frontend && npm run lint && npm test       # 43 tests, jsdom
+cd backend && ruff check . && pytest          # 168 tests, no database needed
+cd frontend && npm run lint && npm test       # 57 tests, jsdom
 ```
 
 The backend suite runs against in-memory SQLite, so there is nothing to
