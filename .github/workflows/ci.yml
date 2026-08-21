@@ -109,56 +109,6 @@ jobs:
       - name: Build
         run: npm run build
 
-  helm:
-    name: Helm chart
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: azure/setup-helm@v4
-        with:
-          version: v3.16.3
-
-      - name: Lint
-        run: helm lint helm/activity-hub --set postgresql.auth.password=ci
-
-      - name: Render with the bundled database
-        run: |
-          helm template ci helm/activity-hub \
-            --set postgresql.auth.password=ci > /tmp/bundled.yaml
-
-      - name: Render against an external database
-        run: |
-          helm template ci helm/activity-hub \
-            --set postgresql.enabled=false \
-            --set externalDatabase.existingSecret=my-db > /tmp/external.yaml
-
-      - name: Render with an ingress
-        run: |
-          helm template ci helm/activity-hub \
-            --set postgresql.auth.password=ci \
-            --set ingress.enabled=true \
-            --set ingress.host=activity.example > /tmp/ingress.yaml
-
-      - name: Refuse to install without a database password
-        # The chart must fail loudly rather than render something guessable.
-        run: |
-          if helm template ci helm/activity-hub > /dev/null 2>&1; then
-            echo "Expected a failure when postgresql.auth.password is unset" >&2
-            exit 1
-          fi
-
-      - name: Refuse an external database with no secret
-        run: |
-          if helm template ci helm/activity-hub --set postgresql.enabled=false \
-              > /dev/null 2>&1; then
-            echo "Expected a failure when externalDatabase.existingSecret is unset" >&2
-            exit 1
-          fi
-
-      - name: Check the rendered manifests say what they should
-        run: python3 .github/scripts/check_chart.py /tmp/bundled.yaml /tmp/external.yaml /tmp/ingress.yaml
-
   compose:
     name: docker compose stack
     runs-on: ubuntu-latest

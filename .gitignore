@@ -53,10 +53,8 @@ pnpm-debug.log*
 *.key
 secrets.yaml
 
-# --- Docker and Helm ------------------------------------------------------
+# --- Docker ---------------------------------------------------------------
 docker-compose.override.yml
-helm/**/charts/
-*.tgz
 
 # --- Generated demo data --------------------------------------------------
 # demo/activities/ is committed; a full generated training year is not.
