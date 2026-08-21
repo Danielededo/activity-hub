@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SPORT_ORDER, palette, sportColor } from '../src/theme'
+import { SPORT_ORDER, palette, seriesColors, sportColor } from '../src/theme'
 
 describe('the sport palette', () => {
   it('keeps a fixed slot order', () => {
@@ -22,5 +22,26 @@ describe('the sport palette', () => {
     for (const sport of SPORT_ORDER) {
       expect(sportColor(sport, true)).not.toBe(sportColor(sport, false))
     }
+  })
+})
+
+describe('seriesColors', () => {
+  it('hands out the slots in order, so a chart never cycles hues', () => {
+    expect(seriesColors(3)).toEqual([palette().cycling, palette().running, palette().hiking])
+  })
+
+  it('gives a shorter chart the same colours as a longer one', () => {
+    // Colour follows the entity: losing a series must not repaint the ones
+    // that stayed, so the shorter list is a prefix of the longer.
+    const three = seriesColors(3)
+    expect(seriesColors(2)).toEqual(three.slice(0, 2))
+  })
+
+  it('stops at the four validated slots rather than inventing a fifth', () => {
+    expect(seriesColors(9)).toHaveLength(SPORT_ORDER.length)
+  })
+
+  it('steps dark mode separately', () => {
+    expect(seriesColors(3, true)).not.toEqual(seriesColors(3, false))
   })
 })

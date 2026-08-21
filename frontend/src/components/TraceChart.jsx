@@ -61,6 +61,12 @@ export default function TraceChart({ title, unit, samples, dataKey, formatValue,
                 fontSize: 12,
                 borderRadius: 6,
               }}
+              // The dot beside a value carries identity; the value itself
+              // wears text ink. Recharts colours the text with the series hue
+              // by default, which puts a 2.7:1 green — and a 2.0:1 pale blue —
+              // on a white tooltip: the one place the palette's contrast
+              // warning actually bites.
+              itemStyle={{ color: ink.tooltipInk }}
               labelFormatter={(x) => `At ${(xFormatter ?? formatElapsed)(x)}`}
               formatter={(value) => [formatValue ? formatValue(value) : `${value} ${unit}`, title]}
             />

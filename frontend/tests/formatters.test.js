@@ -8,9 +8,11 @@ import {
   formatElevation,
   formatHeartRate,
   formatLocalTime,
+  formatMonth,
   formatPaceOrSpeed,
   formatRate,
   formatShortDuration,
+  formatSigned,
   formatSpeed,
   sportLabel,
 } from '../src/utils/formatters'
@@ -99,6 +101,33 @@ describe('formatRate', () => {
   it('has nothing to say about a rate of nothing', () => {
     expect(formatRate('cycling', 0)).toBe('—')
     expect(formatRate('cycling', null)).toBe('—')
+  })
+})
+
+describe('formatMonth', () => {
+  it('carries the year, which a week label does not', () => {
+    // A year-long window ran from "Aug 22" to "Aug 21": two labels a year
+    // apart that read as the same fortnight.
+    expect(formatMonth('2025-08-22')).toMatch(/2025/)
+    expect(formatMonth('2026-08-21')).toMatch(/2026/)
+    expect(formatMonth('2026-08-21')).not.toBe(formatMonth('2025-08-22'))
+  })
+
+  it('has nothing to say about no date', () => {
+    expect(formatMonth(null)).toBe('—')
+  })
+})
+
+describe('formatSigned', () => {
+  it('marks a positive figure, because -8 and 8 read alike at a glance', () => {
+    expect(formatSigned(12.6)).toBe('+13')
+    expect(formatSigned(-14.2)).toBe('-14')
+  })
+
+  it('leaves zero unsigned', () => {
+    expect(formatSigned(0)).toBe('0')
+    expect(formatSigned(0.4)).toBe('0')
+    expect(formatSigned(null)).toBe('—')
   })
 })
 

@@ -229,6 +229,35 @@ class ZoneSummary(BaseModel):
     weekly: list[WeeklyZoneBucket]
 
 
+class FormDay(BaseModel):
+    """One calendar day of the fitness-and-fatigue series."""
+
+    day: date
+    #: Edwards' TRIMP earned on this day; 0.0 on a rest day.
+    load: float
+    #: The 42-day exponential average of load.
+    fitness: float
+    #: The 7-day exponential average of load.
+    fatigue: float
+    #: Yesterday's fitness minus yesterday's fatigue — freshness before today.
+    form: float
+
+
+class FormSummary(BaseModel):
+    user_id: int
+    max_heart_rate: int | None
+    #: configured | observed | unknown — observed is a floor, not a maximum.
+    max_heart_rate_source: str
+    days: int
+    #: Oldest first, one entry per calendar day including rest days.
+    series: list[FormDay]
+    #: Days of history walked before the window, so both averages start warm.
+    warmup_days: int
+    #: Activities in the window with no heart rate. They contribute no load, so
+    #: they read as rest days rather than merely going missing.
+    untracked_activities: int
+
+
 class RecordsSummary(BaseModel):
     user_id: int
     by_sport: list[SportRecords]

@@ -150,6 +150,12 @@ export default function HeartRateZones({ summary, weeks, onWeeksChange }) {
                 fontSize: 12,
                 borderRadius: 6,
               }}
+              // The dot beside a value carries identity; the value itself
+              // wears text ink. Recharts colours the text with the series hue
+              // by default, which puts a 2.7:1 green — and a 2.0:1 pale blue —
+              // on a white tooltip: the one place the palette's contrast
+              // warning actually bites.
+              itemStyle={{ color: ink.tooltipInk }}
               labelFormatter={(week) => `Week of ${formatWeek(week)}`}
               formatter={(minutes, key) => {
                 const zone = Number(String(key).slice(1))

@@ -7,7 +7,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { CHART_INK, comparePair } from '../theme'
+import { CHART_INK, seriesColors } from '../theme'
 import { useColorScheme } from '../hooks/useColorScheme'
 import { formatDistance } from '../utils/formatters'
 import { sharedGrid } from '../utils/track'
@@ -26,7 +26,7 @@ import { sharedGrid } from '../utils/track'
 export default function CompareChart({ title, unit, series, dataKey, formatValue, formatAxis }) {
   const dark = useColorScheme()
   const ink = CHART_INK[dark ? 'dark' : 'light']
-  const colours = comparePair(dark)
+  const colours = seriesColors(2, dark)
 
   const drawable = series.filter((entry) => entry.points.some((p) => p[dataKey] != null))
   if (drawable.length < 2) return null
@@ -91,6 +91,12 @@ export default function CompareChart({ title, unit, series, dataKey, formatValue
                 fontSize: 12,
                 borderRadius: 6,
               }}
+              // The dot beside a value carries identity; the value itself
+              // wears text ink. Recharts colours the text with the series hue
+              // by default, which puts a 2.7:1 green — and a 2.0:1 pale blue —
+              // on a white tooltip: the one place the palette's contrast
+              // warning actually bites.
+              itemStyle={{ color: ink.tooltipInk }}
               labelFormatter={(metres) => `At ${formatDistance(metres)}`}
               formatter={(value, key) => [
                 formatValue(value),
