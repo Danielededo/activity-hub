@@ -69,13 +69,70 @@ describe('WorkoutTable', () => {
     expect(onOpen).toHaveBeenCalledWith(RIDE)
   })
 
-  it('labels each delete button with what it deletes', async () => {
+  it('labels each delete button with what it deletes', () => {
+    renderTable()
+
+    expect(screen.getByRole('button', { name: 'Delete Morning ride' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Delete Easy run' })).toBeInTheDocument()
+  })
+
+  it('does not delete on the first click', async () => {
+    // There is no undo and the track points go with it, so one stray click on
+    // a narrow table cell must not be able to destroy an activity.
     const onDelete = vi.fn()
     renderTable({ onDelete })
 
     await userEvent.click(screen.getByRole('button', { name: 'Delete Easy run' }))
 
+    expect(onDelete).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Confirm deleting Easy run' })).toBeVisible()
+  })
+
+  it('deletes once confirmed', async () => {
+    const onDelete = vi.fn()
+    renderTable({ onDelete })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete Easy run' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm deleting Easy run' }))
+
     expect(onDelete).toHaveBeenCalledWith(RUN)
+  })
+
+  it('keeps the activity when the confirmation is cancelled', async () => {
+    const onDelete = vi.fn()
+    renderTable({ onDelete })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete Easy run' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Keep Easy run' }))
+
+    expect(onDelete).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Delete Easy run' })).toBeVisible()
+  })
+
+  it('puts Cancel where the Delete button was, so a double-click is harmless', async () => {
+    renderTable()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete Easy run' }))
+    const cell = screen.getByRole('button', { name: 'Keep Easy run' }).closest('td')
+    const order = [...cell.querySelectorAll('button')].map((button) =>
+      button.getAttribute('aria-label'),
+    )
+
+    // Right-aligned, so the last control sits under a cursor that has not
+    // moved since it clicked Delete.
+    expect(order).toEqual(['Confirm deleting Easy run', 'Keep Easy run'])
+  })
+
+  it('asks about one activity at a time', async () => {
+    // Arming a row must not arm the row somebody actually meant to keep.
+    renderTable()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete Easy run' }))
+
+    expect(screen.getByRole('button', { name: 'Delete Morning ride' })).toBeVisible()
+    expect(
+      screen.queryByRole('button', { name: 'Confirm deleting Morning ride' }),
+    ).not.toBeInTheDocument()
   })
 
   it('names every sport in text, never by colour alone', () => {
@@ -89,6 +146,15 @@ describe('WorkoutTable', () => {
     renderTable({ workouts: [], total: 0 })
 
     expect(screen.getByText(/no activities yet/i)).toBeInTheDocument()
+  })
+
+  it('says the filters matched nothing rather than telling you to upload', () => {
+    // "Upload a file to get started" is wrong and confusing advice for
+    // somebody who has hundreds of activities and one narrow filter.
+    renderTable({ workouts: [], total: 0, filtered: true })
+
+    expect(screen.getByText(/no activities match these filters/i)).toBeInTheDocument()
+    expect(screen.queryByText(/no activities yet/i)).not.toBeInTheDocument()
   })
 
   it('hides paging when everything fits on one page', () => {
