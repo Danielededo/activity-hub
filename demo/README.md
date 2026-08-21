@@ -55,6 +55,11 @@ Five weeks of cycling, running and hiking, alternating between Garmin-flavoured
 TCX and Strava/Komoot-flavoured GPX, with plausible heart rate, cadence and
 elevation profiles. A few files state a real UTC offset instead of `Z`.
 
+The pace varies within each activity — slower uphill, quicker down — so a chart
+or a route coloured by speed has something to show. It used to be one speed per
+activity, which made every segment identical and any speed encoding come out a
+flat single tone.
+
 The `edge-*` files exist to exercise what real exports get wrong:
 
 | File | What it exercises |

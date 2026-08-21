@@ -128,8 +128,19 @@ def build_samples(
 ) -> list[Sample]:
     """Walk a route, accumulating position, elevation and effort."""
     speed = max(0.5, rng.gauss(profile.speed_ms, profile.speed_jitter))
+    # The nominal length, which shapes the elevation profile. The distance
+    # actually walked comes out a little different, because the pace varies
+    # step by step below.
     total_distance = speed * duration
     climb = rng.uniform(40.0, 600.0)
+
+    # The per-step pace noise comes from its own generator, seeded from figures
+    # this activity has already drawn. Taking it from `rng` would consume
+    # numbers the schedule downstream depends on, so adding pace variation
+    # would silently reshuffle which activities exist at all — different dates,
+    # sports and filenames, from a change that was meant to touch only the
+    # samples inside them.
+    jitter = random.Random(f"{duration}:{speed:.6f}:{climb:.6f}")
 
     lat, lon = ORIGIN_LAT + rng.uniform(-0.02, 0.02), ORIGIN_LON + rng.uniform(-0.02, 0.02)
     heading = rng.uniform(0.0, 360.0)
@@ -140,6 +151,14 @@ def build_samples(
     for seconds in range(0, duration + 1, step_seconds):
         elevation = _elevation(distance, total_distance, climb)
         grade = (elevation - previous_elevation) / max(1.0, speed * step_seconds)
+
+        # Vary the pace within the activity: slower up, quicker down, with a
+        # little noise. One speed for a whole ride made every segment identical,
+        # which left anything that reads speed — a pace chart, a route coloured
+        # by it — with nothing to show on the demo set. Tying it to the grade
+        # also makes the pace agree with the elevation profile beside it.
+        step_speed = max(0.8, speed * min(1.6, max(0.45, 1.0 - 7.0 * grade)))
+        step_speed *= max(0.75, min(1.25, jitter.gauss(1.0, 0.07)))
 
         # Warm up over the first five minutes, then drift upwards, and work
         # harder uphill. Clamped to a plausible human range.
@@ -165,8 +184,8 @@ def build_samples(
         )
 
         heading += rng.gauss(0.0, 7.0)
-        lat, lon = _step(lat, lon, heading, speed * step_seconds)
-        distance += speed * step_seconds
+        lat, lon = _step(lat, lon, heading, step_speed * step_seconds)
+        distance += step_speed * step_seconds
         previous_elevation = elevation
 
     return samples
@@ -287,7 +306,7 @@ def to_gpx(activity: Activity) -> str:
     rng = random.Random(activity.name + activity.start.isoformat())
     lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        f"<gpx creator={quoteattr(rng.choice(GPX_CREATORS))} version=\"1.1\""
+        f'<gpx creator={quoteattr(rng.choice(GPX_CREATORS))} version="1.1"'
         ' xmlns="http://www.topografix.com/GPX/1/1"'
         ' xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">',
         "  <metadata>",

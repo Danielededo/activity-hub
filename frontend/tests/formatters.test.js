@@ -7,6 +7,7 @@ import {
   formatHeartRate,
   formatLocalTime,
   formatPaceOrSpeed,
+  formatRate,
   sportLabel,
 } from '../src/utils/formatters'
 
@@ -66,6 +67,19 @@ describe('local time', () => {
     // Mixing "06:45 PM" and "08:45" in one column reads as two kinds of number.
     expect(formatLocalTime('2026-05-03T22:30:00Z', 120)).toMatch(/^\d{2}:\d{2}$/)
     expect(formatLocalTime('2026-05-03T22:30:00Z', null)).toMatch(/^\d{2}:\d{2}$/)
+  })
+})
+
+describe('formatRate', () => {
+  it('gives a cyclist speed and a runner pace from the same rate', () => {
+    // 5 m/s is 18 km/h, and 3:20 per kilometre.
+    expect(formatRate('cycling', 5)).toBe('18.0 km/h')
+    expect(formatRate('running', 5)).toBe('3:20 /km')
+  })
+
+  it('has nothing to say about a rate of nothing', () => {
+    expect(formatRate('cycling', 0)).toBe('—')
+    expect(formatRate('cycling', null)).toBe('—')
   })
 })
 
