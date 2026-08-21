@@ -47,8 +47,9 @@ To try it without your own data, load the bundled demo set:
   the activity's own local time.
 - **Filter and search** by sport, date range and name, with paging over the
   result.
-- **Per-activity detail** — the route, the heart-rate trace and the elevation
-  profile.
+- **Per-activity detail** — the route, and traces for heart rate, cadence and
+  elevation.
+
 - **Duplicate detection** that catches the same session exported twice from two
   different services, not just the same file twice.
 
@@ -209,16 +210,27 @@ session still works: a ride and a run at the same time are different sports.
 
 Lifetime totals as stat tiles, weekly distance as a bar chart, distance per
 sport, an upload box that reports each file separately, and a table of every
-activity. Opening one draws its route, its heart rate and its elevation.
+activity. Opening one draws its route and traces its heart rate, cadence and
+elevation.
 
 Choices worth knowing about:
 
 - **Weekly distance is bars, not a line.** The weeks are discrete buckets; a
   line between them would imply a continuous quantity nobody measured, and a
   quiet week is a real zero.
-- **Heart rate and elevation get a chart each.** Two measures of different
-  scale on two y-axes make the crossing point an artefact of the axis ranges,
-  and readers take it to mean something.
+- **Heart rate, cadence and elevation get a chart each.** Two measures of
+  different scale on two y-axes make the crossing point an artefact of the axis
+  ranges, and readers take it to mean something. The two body measures sit
+  together and the terrain that explains them comes after.
+- **Cadence is reported as recorded, in the sport's own unit.** Cycling is
+  crank revolutions per minute. On foot, TCX `RunCadence` and GPX `cad` are
+  written per leg, so the figure is strides per minute — roughly half the
+  steps-per-minute a watch shows. It is not doubled to match: nothing in either
+  format says which convention a file used, and an exporter that already counts
+  both feet would then read twice as fast as the run was.
+- **An activity with no cadence sensor gets no cadence chart** rather than a
+  flat line at zero, which would say the sensor read nothing rather than that
+  there was no sensor.
 - **The route has no basemap.** Tiles would mean asking a third party for the
   map of wherever you exercise, which is the opposite of the point of
   self-hosting. The line is the shape of the ride.

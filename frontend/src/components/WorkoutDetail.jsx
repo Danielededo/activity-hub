@@ -3,6 +3,8 @@ import { errorMessage, fetchTrackPoints } from '../api/client'
 import RouteMap from './RouteMap'
 import TraceChart from './TraceChart'
 import {
+  cadenceUnit,
+  formatCadence,
   formatDistance,
   formatDuration,
   formatElevation,
@@ -75,7 +77,7 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
         </button>
       </div>
 
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
+      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
         {[
           ['Distance', formatDistance(workout.total_distance)],
           ['Time', formatDuration(workout.total_time)],
@@ -85,6 +87,7 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
           ],
           ['Climb', formatElevation(workout.total_elevation_gain)],
           ['Heart rate', formatHeartRate(workout.avg_heart_rate)],
+          ['Cadence', formatCadence(workout.avg_cadence, workout.sport_type)],
         ].map(([label, value]) => (
           <div key={label}>
             <dt className="text-xs uppercase tracking-wide muted">
@@ -119,6 +122,10 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
           </div>
 
           <div className="space-y-6">
+            {/* Heart rate then cadence then elevation: the two measures of
+                how hard the body was working sit together, and the terrain
+                that explains them comes after. Each has its own chart — see
+                TraceChart on why they do not share a frame. */}
             <TraceChart
               title="Heart rate"
               unit="bpm"
@@ -126,6 +133,14 @@ export default function WorkoutDetail({ workout, userId, onClose }) {
               samples={prepared.samples}
               xFormatter={xFormatter}
               formatValue={(value) => `${value} bpm`}
+            />
+            <TraceChart
+              title="Cadence"
+              unit={cadenceUnit(workout.sport_type)}
+              dataKey="cadence"
+              samples={prepared.samples}
+              xFormatter={xFormatter}
+              formatValue={(value) => formatCadence(value, workout.sport_type)}
             />
             <TraceChart
               title="Elevation"

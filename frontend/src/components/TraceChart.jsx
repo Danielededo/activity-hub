@@ -9,7 +9,7 @@ import {
 } from 'recharts'
 import { CHART_INK, SINGLE_SERIES } from '../theme'
 import { useColorScheme } from '../hooks/useColorScheme'
-import { formatDuration } from '../utils/formatters'
+import { formatElapsed } from '../utils/formatters'
 
 /**
  * One measure over the course of an activity.
@@ -39,7 +39,7 @@ export default function TraceChart({ title, unit, samples, dataKey, formatValue,
               dataKey="elapsed"
               type="number"
               domain={['dataMin', 'dataMax']}
-              tickFormatter={xFormatter ?? formatDuration}
+              tickFormatter={xFormatter ?? formatElapsed}
               tick={{ fill: ink.axis, fontSize: 11 }}
               stroke={ink.grid}
               // Without a gap the last tick collides with the one before it.
@@ -61,7 +61,7 @@ export default function TraceChart({ title, unit, samples, dataKey, formatValue,
                 fontSize: 12,
                 borderRadius: 6,
               }}
-              labelFormatter={(x) => `At ${(xFormatter ?? formatDuration)(x)}`}
+              labelFormatter={(x) => `At ${(xFormatter ?? formatElapsed)(x)}`}
               formatter={(value) => [formatValue ? formatValue(value) : `${value} ${unit}`, title]}
             />
             <Line
