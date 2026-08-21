@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { CHART_INK, SINGLE_SERIES, ORDINAL_RAMP } from '../theme'
 import { useColorScheme } from '../hooks/useColorScheme'
-import { haversineDistance } from '../utils/geo'
+import { measureTrack } from '../utils/track'
 import { formatDistance, formatElapsed, formatRate } from '../utils/formatters'
 
 // The longer side of a projected route, in viewBox units. The shorter side
@@ -20,15 +20,6 @@ const PAD = 4
  * markers there hides one behind the other.
  */
 const SAME_PLACE = 3
-
-/**
- * Above this a "speed" is a GPS artefact, not movement (m/s, ≈ 120 km/h).
- *
- * Deliberately a speed and not a distance: the samples arrive downsampled, so
- * consecutive ones can be hundreds of metres apart quite legitimately, and a
- * distance ceiling would throw away real riding at a high stride.
- */
-const IMPLAUSIBLE_SPEED_MS = 120_000 / 3_600
 
 /**
  * Project located samples, north up and undistorted, with a viewBox that hugs
@@ -79,39 +70,6 @@ function project(samples) {
       height: spanY * scale + PAD * 2,
     },
   }
-}
-
-/**
- * Metres and seconds along the track, and the speed of each hop.
- *
- * There is one fewer speed than there are points: `speeds[i]` belongs to the
- * hop arriving at point i + 1.
- */
-function measure(points) {
-  const distances = [0]
-  const elapsed = [0]
-  const speeds = []
-  const first = points[0].sample.timestamp
-  const start = first ? new Date(first).getTime() : null
-
-  for (let index = 1; index < points.length; index += 1) {
-    const from = points[index - 1].sample
-    const to = points[index].sample
-    const metres = haversineDistance(from.latitude, from.longitude, to.latitude, to.longitude)
-    distances.push(distances[index - 1] + metres)
-
-    if (start == null || !to.timestamp) {
-      elapsed.push(elapsed[index - 1])
-      speeds.push(null)
-      continue
-    }
-    elapsed.push((new Date(to.timestamp).getTime() - start) / 1000)
-    const seconds = elapsed[index] - elapsed[index - 1]
-    const speed = seconds > 0 ? metres / seconds : null
-    speeds.push(speed != null && speed <= IMPLAUSIBLE_SPEED_MS ? speed : null)
-  }
-
-  return { distances, elapsed, speeds }
 }
 
 /**
@@ -225,7 +183,9 @@ export default function RouteMap({ samples, sportType }) {
     const projected = project(samples)
     if (!projected) return null
     const { points, view } = projected
-    const { distances, elapsed, speeds } = measure(points)
+    // The shared helper measures samples; the projection above keeps the
+    // points it drew them at.
+    const { distances, elapsed, speeds } = measureTrack(points.map((point) => point.sample))
     const bands = speedBands(speeds)
 
     // The legend is the test of whether the encoding says anything at all. If

@@ -86,3 +86,17 @@ export function sportColor(sport, dark = false) {
 export function palette(dark = false) {
   return dark ? DARK : LIGHT
 }
+
+/**
+ * The two colours a comparison uses, in fixed order: this activity, then the
+ * other one.
+ *
+ * Slots one and two of the validated categorical palette — the pair whose
+ * separation the validator checks first, and the one it checks under simulated
+ * colour vision deficiency. Shared so the summary figures and the charts
+ * beneath them key off the same two hues instead of drifting apart.
+ */
+export function comparePair(dark = false) {
+  const hues = palette(dark)
+  return [hues.cycling, hues.running]
+}
