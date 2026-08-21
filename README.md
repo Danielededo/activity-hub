@@ -54,6 +54,9 @@ To try it without your own data, load the bundled demo set:
   in, and how fast at that point.
 - **Duplicate detection** that catches the same session exported twice from two
   different services, not just the same file twice.
+- **Export** — the summary as CSV and every activity as GPX in one zip, both
+  honouring whatever filters are set. The zip this app writes is a zip it can
+  read back.
 
 ## Your data
 
@@ -136,6 +139,9 @@ Interactive docs at <http://localhost:8000/docs> when the stack is up.
 | GET | `/api/analysis/{user_id}/records` | Per-sport records and distance bests, plus totals by local year |
 | GET | `/api/analysis/{user_id}/zones?weeks=12` | Time in each heart-rate zone, lifetime and by week, with load |
 | GET | `/api/workouts/{id}/zones?user_id=X` | One activity's time in zone and the load it earned |
+| GET | `/api/workouts/{id}/export.gpx?user_id=X` | This activity as GPX, rebuilt from its samples |
+| GET | `/api/export/activities.csv?user_id=X` | One row per activity; takes the same filters as the list |
+| GET | `/api/export/activities.zip?user_id=X` | Every matching activity as a GPX file, in one zip |
 
 Upload failures are explicit: `404` unknown user, `400` empty file, `409`
 already stored, `413` over the size limit, `422` unreadable or unsupported file.
@@ -286,6 +292,18 @@ Choices worth knowing about:
 - **Deleting asks twice.** There is no undo and the track points go with it, so
   the destructive click is the second one — and Cancel is where the Delete
   button just was, so a double-click cancels.
+- **The export is two formats because one is not enough.** GPX carries the
+  samples and has nowhere to put a device's own totals — a TCX states its
+  distance and average heart rate per lap, and a reader of the GPX has to
+  recompute both from the positions. So the CSV carries the figures this app
+  stored and the GPX carries the samples behind them. A test asserts the gap
+  rather than leaving it to be discovered.
+- **Downloads are links, not buttons.** The browser streams the file straight to
+  disk with the name the server chose; pulling the bytes into JavaScript first
+  would buy nothing and fall over on exactly the export big enough to matter.
+- **A GPX filename is the date, the sport and the id**, never the activity name.
+  A name can hold anything at all, and a zip full of files named after user
+  input is a zip nobody can unpack safely.
 - **Zones are derived on request, not stored.** What is stored is the histogram
   — how many seconds at each beat per minute — because zones hang off a maximum
   heart rate that *moves*: one harder session and every previous activity's
@@ -417,11 +435,12 @@ backend/
 │   ├── database.py        engine, session factory, declarative base
 │   ├── models/            User, Workout, TrackPoint, WorkoutBest
 │   ├── schemas/           request/response models
-│   ├── routers/           health, users, workouts, upload, analysis
+│   ├── routers/           health, users, workouts, upload, analysis, export
 │   └── services/
 │       ├── analyzer.py    metric derivation and aggregate reporting
 │       ├── records.py     the window scan, and records over it
 │       ├── zones.py       the heart-rate histogram, and zones over it
+│       ├── exports.py     CSV, GPX and the zip of them
 │       └── parsers/       base, TCX, GPX, factory
 ├── alembic/               migrations
 ├── scripts/               demo data generator, profile bootstrap, two backfills

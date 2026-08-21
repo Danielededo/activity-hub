@@ -12,21 +12,27 @@ import { vi } from 'vitest'
  * one it does not care about gets a promise rather than a crash. Tests override
  * the ones they are about with mockResolvedValue.
  *
- * `errorMessage` is passed through rather than mocked: it is a pure formatter,
- * and tests assert on the message it produces.
+ * Not everything the client exports talks to the network. The pure helpers are
+ * passed through untouched, because a component uses their return value
+ * directly — mocking `exportUrl` to resolve a promise would put a Promise in an
+ * href — and because tests assert on what they produce.
  *
  * Use it as:
  *   vi.mock('../src/api/client', async (importOriginal) =>
  *     (await import('./mockClient')).mockClient(importOriginal))
  */
+
+/** Client exports that compute rather than fetch, and so are never mocked. */
+const PURE = new Set(['errorMessage', 'exportUrl'])
+
 export async function mockClient(importOriginal) {
   const actual = await importOriginal()
   const mocked = {}
   for (const [name, value] of Object.entries(actual)) {
-    mocked[name] = typeof value === 'function' ? vi.fn().mockResolvedValue(undefined) : value
+    mocked[name] =
+      typeof value === 'function' && !PURE.has(name)
+        ? vi.fn().mockResolvedValue(undefined)
+        : value
   }
-  return {
-    ...mocked,
-    errorMessage: (error, fallback) => error?.message ?? fallback ?? 'error',
-  }
+  return mocked
 }

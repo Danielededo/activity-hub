@@ -11,6 +11,7 @@ from app.config import settings
 from app.database import get_db
 from app.models import TrackPoint, Workout
 from app.schemas import TrackPointSeries, WorkoutList, WorkoutRead, WorkoutZones
+from app.services.exports import gpx_filename, workout_gpx
 from app.services.filters import workout_filters
 from app.services.workouts import track_point_count
 from app.services.zones import workout_zones
@@ -146,6 +147,26 @@ def get_workout_zones(
     """Time in each heart-rate zone for one activity, and the load it earned."""
     workout = get_owned_workout_or_404(workout_id, user_id, db)
     return WorkoutZones.model_validate(workout_zones(db, workout))
+
+
+@router.get("/{workout_id}/export.gpx")
+def export_workout_gpx(
+    workout_id: int,
+    user_id: int = Query(..., ge=1),
+    db: Session = Depends(get_db),
+) -> Response:
+    """This activity as GPX, rebuilt from the samples that were stored.
+
+    Not the original bytes — those are not kept — but everything this app
+    understood about the file, written so that this app's own parser reads it
+    back to the same figures.
+    """
+    workout = get_owned_workout_or_404(workout_id, user_id, db)
+    return Response(
+        content=workout_gpx(db, workout),
+        media_type="application/gpx+xml",
+        headers={"Content-Disposition": f'attachment; filename="{gpx_filename(workout)}"'},
+    )
 
 
 @router.delete("/{workout_id}", status_code=status.HTTP_204_NO_CONTENT)

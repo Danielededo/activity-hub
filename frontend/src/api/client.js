@@ -105,6 +105,23 @@ export async function fetchWeekly(userId, weeks = 12) {
   return data
 }
 
+/**
+ * The URL a download link should point at.
+ *
+ * Built rather than fetched: letting the browser follow a link is what makes
+ * the file land in the downloads folder with the name the server chose. Fetching
+ * it into memory and handing it to a blob URL would work too, and would break
+ * on a library big enough to matter.
+ */
+export function exportUrl(path, { userId, sportType, dateFrom, dateTo, q } = {}) {
+  const params = new URLSearchParams({ user_id: String(userId) })
+  if (sportType) params.set('sport_type', sportType)
+  if (dateFrom) params.set('date_from', dateFrom)
+  if (dateTo) params.set('date_to', dateTo)
+  if (q) params.set('q', q)
+  return `${baseURL}${path}?${params}`
+}
+
 export async function uploadWorkout(userId, file) {
   const body = new FormData()
   body.append('file', file)
