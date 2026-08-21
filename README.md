@@ -41,6 +41,9 @@ To try it without your own data, load the bundled demo set:
 - **Weekly trend** over any window from 8 to 52 weeks.
 - **Heart-rate zones and training load** — how much time goes into each of five
   zones, per activity and per week, with Edwards' TRIMP as the load figure.
+- **Fitness, fatigue and form** — the 42-day and 7-day exponential averages of
+  daily load, and the difference between them, so a build and a taper are
+  visible as shapes rather than guessed at.
 - **Personal bests** — the fastest 1 km, 5 km, 10 km, half marathon and
   marathon you have ever covered, per sport, each naming the activity that set
   it. Plus the furthest, longest and biggest-climbing activity of each sport,
@@ -140,6 +143,7 @@ Interactive docs at <http://localhost:8000/docs> when the stack is up.
 | GET | `/api/analysis/{user_id}/weekly?weeks=12` | One bucket per local week, quiet weeks zero-filled |
 | GET | `/api/analysis/{user_id}/records` | Per-sport records and distance bests, plus totals by local year |
 | GET | `/api/analysis/{user_id}/zones?weeks=12` | Time in each heart-rate zone, lifetime and by week, with load |
+| GET | `/api/analysis/{user_id}/form?days=90` | Fitness, fatigue and form, one entry per calendar day |
 | GET | `/api/workouts/{id}/zones?user_id=X` | One activity's time in zone and the load it earned |
 | GET | `/api/workouts/{id}/export.gpx?user_id=X` | This activity as GPX, rebuilt from its samples |
 | GET | `/api/export/activities.csv?user_id=X` | One row per activity; takes the same filters as the list |
@@ -330,6 +334,28 @@ Choices worth knowing about:
 - **Load is Edwards' TRIMP**: minutes in a zone weighted by the zone, one
   through five. Banister's needs a resting heart rate and a sex-specific
   exponential that this app does not ask for; Edwards' needs only the zones.
+- **Fitness and fatigue step once per calendar day, not once per activity.** A
+  rest week has to *lower* both, and walking activities would skip exactly the
+  days where that happens — the lines would rise at every session and never fall
+  between them.
+- **The averages decay by `1 - e^(-1/τ)`, not by `1/τ`.** The two look
+  interchangeable and are 7% apart at a seven-day constant, which compounds over
+  a season into a fatigue line that is visibly wrong.
+- **Form is yesterday's difference.** It answers "how fresh am I *before*
+  today's session"; using today's own figures would fold a session into its own
+  readiness score, so a hard morning would report that you were already tired
+  when you set out.
+- **The window is walked from the first activity ever**, and only the last N
+  days are returned. Starting the walk at the window would start both averages
+  at zero, so the first six weeks of every chart would show fitness climbing out
+  of an artefact of where the chart begins. A genuinely cold start still says so.
+- **An activity with no heart rate is counted out loud.** It earns no load, so
+  it does not merely go missing — it reads as a *rest day*, which lowers fatigue
+  and lifts form. A hard strapless week would otherwise look like a taper.
+- **Form shares one axis with fitness and fatigue.** The usual version of this
+  chart puts it on a second y-scale, which makes the point where the lines cross
+  an artefact of the two ranges rather than anything that happened. All three are
+  the same measure in the same unit, so one axis is the honest one.
 - **A personal best is the fastest stretch, not the average.** The 5 km best is
   the quickest any five kilometres were covered inside any activity, found by
   sliding a window over the samples — so a hard middle kilometre of an easy run
@@ -419,8 +445,8 @@ creates the profile from `DEFAULT_FIRST_NAME` instead of the first-run screen.
 ### Tests
 
 ```bash
-cd backend && ruff check . && ruff format --check . && pytest   # 289 tests, no database needed
-cd frontend && npm run lint && npm test                        # 202 tests, jsdom
+cd backend && ruff check . && ruff format --check . && pytest   # 311 tests, no database needed
+cd frontend && npm run lint && npm test                        # 222 tests, jsdom
 ```
 
 The backend suite runs against in-memory SQLite, so there is nothing to
@@ -470,6 +496,7 @@ backend/
 │       ├── analyzer.py    metric derivation and aggregate reporting
 │       ├── records.py     the window scan, and records over it
 │       ├── zones.py       the heart-rate histogram, and zones over it
+│       ├── form.py        daily load, and the averages over it
 │       ├── exports.py     CSV, GPX and the zip of them
 │       └── parsers/       base, TCX, GPX, factory
 ├── alembic/               migrations
@@ -486,6 +513,7 @@ frontend/
 │   └── components/        Dashboard, StatsCards, TrendChart, SportBreakdown,
 │                          WorkoutTable, FilterBar, UploadForm, ExportPanel,
 │                          Records, YearlyTotals, HeartRateZones, ZoneBar,
+│                          FormChart,
 │                          WorkoutDetail, RouteMap, TraceChart,
 │                          CompareActivities, CompareChart, FirstRunScreen
 ├── nginx.conf             serves the build, proxies /api

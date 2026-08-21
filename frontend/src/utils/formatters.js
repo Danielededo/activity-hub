@@ -117,6 +117,18 @@ export function formatSpeed(metresPerSecond) {
   return `${(metresPerSecond * 3.6).toFixed(1)} km/h`
 }
 
+/**
+ * A training-load figure, rounded, with an explicit sign when it can be either.
+ *
+ * Form is the only figure here that goes negative, and "-8" against "8" is a
+ * difference a reader can miss; "+8" against "-8" is not. Zero gets no sign.
+ */
+export function formatSigned(value) {
+  if (value == null) return '—'
+  const rounded = Math.round(value)
+  return rounded > 0 ? `+${rounded}` : String(rounded)
+}
+
 export function formatDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString(undefined, {
@@ -146,6 +158,18 @@ export function formatLocalTime(iso, utcOffsetMinutes) {
 export function sportLabel(sportType) {
   if (!sportType) return 'Other'
   return sportType.charAt(0).toUpperCase() + sportType.slice(1)
+}
+
+/**
+ * A month and year, for an axis whose window is longer than a year.
+ *
+ * formatWeek drops the year, which is right on a twelve-week chart and wrong on
+ * a twelve-month one: a year of days ran from "Aug 22" to "Aug 21", two labels
+ * that read as the same fortnight rather than as a year apart.
+ */
+export function formatMonth(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
 }
 
 export function formatWeek(weekStart) {

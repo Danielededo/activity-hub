@@ -88,15 +88,15 @@ export function palette(dark = false) {
 }
 
 /**
- * The two colours a comparison uses, in fixed order: this activity, then the
- * other one.
+ * The first `count` categorical hues, in the palette's fixed slot order.
  *
- * Slots one and two of the validated categorical palette — the pair whose
- * separation the validator checks first, and the one it checks under simulated
- * colour vision deficiency. Shared so the summary figures and the charts
- * beneath them key off the same two hues instead of drifting apart.
+ * One helper for every chart that needs a handful of series, so colour follows
+ * the entity and the order never changes: a chart that gains or loses a series
+ * does not repaint the ones that stayed. Capped at the four validated slots — a
+ * fifth series is a fold into "other" or a second chart, never a hue picked by
+ * eye, which is the one thing the colour method forbids.
  */
-export function comparePair(dark = false) {
+export function seriesColors(count, dark = false) {
   const hues = palette(dark)
-  return [hues.cycling, hues.running]
+  return SPORT_ORDER.slice(0, count).map((slot) => hues[slot])
 }

@@ -3,6 +3,7 @@ import {
   deleteWorkout,
   errorMessage,
   fetchAnalysis,
+  fetchForm,
   fetchRecords,
   fetchWeekly,
   fetchWorkout,
@@ -11,6 +12,7 @@ import {
 } from '../api/client'
 import ExportPanel from './ExportPanel'
 import FilterBar, { EMPTY_FILTERS, hasFilters } from './FilterBar'
+import FormChart from './FormChart'
 import HeartRateZones from './HeartRateZones'
 import Records from './Records'
 import SportBreakdown from './SportBreakdown'
@@ -32,7 +34,9 @@ export default function Dashboard({ profile }) {
   const [weekly, setWeekly] = useState(null)
   const [records, setRecords] = useState(null)
   const [zones, setZones] = useState(null)
+  const [form, setForm] = useState(null)
   const [weeks, setWeeks] = useState(12)
+  const [days, setDays] = useState(90)
   const [page, setPage] = useState({ items: [], total: 0, offset: 0 })
   const [offset, setOffset] = useState(0)
   const [filters, setFilters] = useState(EMPTY_FILTERS)
@@ -55,6 +59,11 @@ export default function Dashboard({ profile }) {
     [userId, weeks],
   )
 
+  // Its own request rather than one more entry in loadTotals: the form chart's
+  // range is counted in days and everything above it in weeks, so sharing the
+  // callback would re-fetch four unrelated things every time one dropdown moved.
+  const loadForm = useCallback(() => fetchForm(userId, days), [userId, days])
+
   const loadList = useCallback(
     () => fetchWorkouts({ userId, limit: PAGE_SIZE, offset, ...filters }),
     [userId, offset, filters],
@@ -65,6 +74,11 @@ export default function Dashboard({ profile }) {
     setWeekly(trend)
     setRecords(bests)
     setZones(inZone)
+    setError(null)
+  }, [])
+
+  const applyForm = useCallback((series) => {
+    setForm(series)
     setError(null)
   }, [])
 
@@ -91,6 +105,20 @@ export default function Dashboard({ profile }) {
 
   useEffect(() => {
     let cancelled = false
+    loadForm()
+      .then((data) => {
+        if (!cancelled) applyForm(data)
+      })
+      .catch((caught) => {
+        if (!cancelled) fail(caught, 'Could not load your training load')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [loadForm, applyForm, fail])
+
+  useEffect(() => {
+    let cancelled = false
     loadList()
       .then((data) => {
         if (!cancelled) applyList(data)
@@ -107,6 +135,9 @@ export default function Dashboard({ profile }) {
     loadTotals()
       .then(applyTotals)
       .catch((caught) => fail(caught, 'Could not load your training'))
+    loadForm()
+      .then(applyForm)
+      .catch((caught) => fail(caught, 'Could not load your training load'))
     loadList()
       .then(applyList)
       .catch((caught) => fail(caught, 'Could not load your activities'))
@@ -170,6 +201,11 @@ export default function Dashboard({ profile }) {
         </div>
 
         <HeartRateZones summary={zones} weeks={weeks} onWeeksChange={setWeeks} />
+
+        {/* After the zones, not before: this chart averages the load figure
+            that panel introduces, and leading with it would use a unit the
+            reader has not met yet. */}
+        <FormChart summary={form} days={days} onDaysChange={setDays} />
 
         <UploadForm userId={userId} onUploaded={reload} />
 

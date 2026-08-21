@@ -6,8 +6,15 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
-from app.schemas import AnalysisSummary, RecordsSummary, WeeklyAnalysis, ZoneSummary
+from app.schemas import (
+    AnalysisSummary,
+    FormSummary,
+    RecordsSummary,
+    WeeklyAnalysis,
+    ZoneSummary,
+)
 from app.services.analyzer import user_summary, weekly_summary
+from app.services.form import user_form
 from app.services.records import user_records
 from app.services.zones import user_zones
 
@@ -64,3 +71,23 @@ def get_zones(
     """
     _require_user(user_id, db)
     return ZoneSummary.model_validate(user_zones(db, user_id, weeks=weeks))
+
+
+@router.get("/{user_id}/form", response_model=FormSummary)
+def get_form(
+    user_id: int,
+    days: int = Query(90, ge=7, le=730, description="How many calendar days to report"),
+    db: Session = Depends(get_db),
+) -> FormSummary:
+    """Fitness, fatigue and form, one entry per calendar day.
+
+    Exponential averages of the same Edwards' TRIMP the zone breakdown reports —
+    42 days for fitness, 7 for fatigue, the difference for form. Walked from the
+    first activity ever so the reported window starts warm rather than climbing
+    out of a zero that only means "this is where the chart begins".
+
+    An activity with no heart rate earns no load, so it reads as a rest day
+    rather than going quietly missing; the response counts them.
+    """
+    _require_user(user_id, db)
+    return FormSummary.model_validate(user_form(db, user_id, days=days))

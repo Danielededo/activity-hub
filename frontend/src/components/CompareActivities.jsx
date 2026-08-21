@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { errorMessage, fetchTrackPoints, fetchWorkouts } from '../api/client'
 import CompareChart from './CompareChart'
-import { comparePair } from '../theme'
+import { seriesColors } from '../theme'
 import { useColorScheme } from '../hooks/useColorScheme'
 import {
   formatDate,
@@ -80,7 +80,7 @@ export default function CompareActivities({ workout, userId }) {
 
   if (!candidates.length) return null
 
-  const colours = comparePair(dark)
+  const colours = seriesColors(2, dark)
   const chosen = Number(otherId) || null
   const ready = chosen != null && loaded?.id === chosen ? loaded : null
   const loading = chosen != null && !ready && !error

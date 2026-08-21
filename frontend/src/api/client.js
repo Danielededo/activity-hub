@@ -94,6 +94,12 @@ export async function fetchZones(userId, weeks = 12) {
   return data
 }
 
+/** Fitness, fatigue and form, one entry per calendar day. */
+export async function fetchForm(userId, days = 90) {
+  const { data } = await http.get(`/analysis/${userId}/form`, { params: { days } })
+  return data
+}
+
 /** One activity's time in zone. Empty when it recorded no heart rate. */
 export async function fetchWorkoutZones(workoutId, userId) {
   const { data } = await http.get(`/workouts/${workoutId}/zones`, { params: { user_id: userId } })
