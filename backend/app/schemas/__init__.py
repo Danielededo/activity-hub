@@ -3,7 +3,11 @@ from app.schemas.workout import (
     AnalysisSummary,
     ArchiveMemberRead,
     ArchiveUploadRead,
+    DistanceBest,
+    RecordHolder,
+    RecordsSummary,
     SportBreakdown,
+    SportRecords,
     TrackPointRead,
     TrackPointSeries,
     WeeklyAnalysis,
@@ -11,13 +15,18 @@ from app.schemas.workout import (
     WorkoutList,
     WorkoutRead,
     WorkoutSummary,
+    YearlyTotals,
 )
 
 __all__ = [
     "AnalysisSummary",
     "ArchiveMemberRead",
     "ArchiveUploadRead",
+    "DistanceBest",
+    "RecordHolder",
+    "RecordsSummary",
     "SportBreakdown",
+    "SportRecords",
     "TrackPointRead",
     "TrackPointSeries",
     "UserCreate",
@@ -27,4 +36,5 @@ __all__ = [
     "WorkoutList",
     "WorkoutRead",
     "WorkoutSummary",
+    "YearlyTotals",
 ]

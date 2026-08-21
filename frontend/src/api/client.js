@@ -82,6 +82,12 @@ export async function fetchAnalysis(userId) {
   return data
 }
 
+/** Per-sport records and standard-distance bests, plus totals by year. */
+export async function fetchRecords(userId) {
+  const { data } = await http.get(`/analysis/${userId}/records`)
+  return data
+}
+
 export async function fetchWeekly(userId, weeks = 12) {
   const { data } = await http.get(`/analysis/${userId}/weekly`, { params: { weeks } })
   return data
