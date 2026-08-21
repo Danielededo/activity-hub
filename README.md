@@ -13,7 +13,7 @@ user identified by a `user_id` query parameter.
 | Phase | Scope | State |
 | --- | --- | --- |
 | 1 | FastAPI backend, parsers, analyzer, migrations, tests | done |
-| 2 | React + Vite + Tailwind dashboard | not started |
+| 2 | React + Vite + Tailwind dashboard | done |
 | 3 | docker-compose and Helm chart | not started |
 
 ## Stack
@@ -41,6 +41,51 @@ up. For a headless deployment that never opens a browser, `python -m
 scripts.ensure_user` creates the profile from `DEFAULT_FIRST_NAME`.
 
 The API is then on http://localhost:8000, with interactive docs at `/docs`.
+
+## Running the dashboard
+
+```bash
+cd frontend
+npm install
+npm run dev            # http://localhost:5173, proxying /api to :8000
+```
+
+The dev server proxies `/api`, and the nginx image serves the API on the same
+origin, so the browser never makes a cross-origin request and CORS never comes
+into it. On first run the dashboard asks for your name; after that it goes
+straight to your training.
+
+```bash
+npm run lint
+npm test               # 43 tests, jsdom
+npm run build
+docker build -t activity-hub-web ./frontend   # nginx, API_URL at container start
+```
+
+### What the dashboard shows
+
+Lifetime totals as stat tiles, weekly distance as a bar chart, distance per
+sport, an upload box that reports each file separately, and a table of every
+activity. Opening one draws its route, its heart rate and its elevation.
+
+Some choices worth knowing about:
+
+- **Weekly distance is bars, not a line.** The weeks are discrete buckets; a
+  line between them would imply a continuous quantity nobody measured, and a
+  quiet week is a real zero.
+- **Heart rate and elevation get a chart each.** Two measures of different
+  scale on two y-axes make the crossing point an artefact of the axis ranges,
+  and readers take it to mean something.
+- **The route has no basemap.** Tiles would mean asking a third party for the
+  map of wherever you exercise, which is the opposite of the point of
+  self-hosting. The line is the shape of the ride.
+- **Sport colours come from a validated palette** and are assigned in fixed
+  order. Two of the light-mode hues fall below 3:1 on white, so everything
+  painted with them carries a visible label — identity is never colour alone.
+- **Metric only, no unit toggle.** Runners get minutes per kilometre, cyclists
+  get km/h.
+- **Times are the activity's own local time**, from the UTC offset its file
+  stated, in 24-hour form.
 
 ### Tests
 
@@ -149,8 +194,20 @@ backend/
 │   └── services/
 │       ├── analyzer.py    metric derivation and aggregate reporting
 │       └── parsers/       base, TCX, GPX, factory
-├── alembic/               migrations (0001 creates the whole schema)
+├── alembic/               migrations
+├── scripts/               demo data generator, profile bootstrap
 └── tests/                 parsers, analyzer, API
+
+frontend/
+├── src/
+│   ├── App.jsx            first-run screen or dashboard
+│   ├── theme.js           the validated sport palette, both modes
+│   ├── api/client.js      every call this app makes
+│   ├── utils/formatters.js  metric formatting
+│   └── components/        Dashboard, StatsCards, TrendChart, WorkoutTable,
+│                          UploadForm, WorkoutDetail, RouteMap, TraceChart
+├── nginx.conf             serves the build, proxies /api
+└── tests/                 formatters, palette, components
 ```
 
 Repository-level files: `LICENSE`, `.gitignore`, `.editorconfig` (shared
