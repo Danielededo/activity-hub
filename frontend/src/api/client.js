@@ -32,9 +32,31 @@ export async function createProfile({ firstName, lastName }) {
   return data
 }
 
-export async function fetchWorkouts({ userId, limit = 20, offset = 0, sportType }) {
+/**
+ * A page of activities, narrowed by whatever filters are set.
+ *
+ * Empty filter values are dropped rather than sent as blanks: `sport_type=`
+ * would be a filter for the sport named "", which matches nothing.
+ */
+export async function fetchWorkouts({
+  userId,
+  limit = 20,
+  offset = 0,
+  sportType,
+  dateFrom,
+  dateTo,
+  q,
+}) {
   const { data } = await http.get('/workouts', {
-    params: { user_id: userId, limit, offset, sport_type: sportType || undefined },
+    params: {
+      user_id: userId,
+      limit,
+      offset,
+      sport_type: sportType || undefined,
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
+      q: q || undefined,
+    },
   })
   return data
 }

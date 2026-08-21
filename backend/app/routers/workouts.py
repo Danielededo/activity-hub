@@ -1,5 +1,6 @@
 """Listing, detail and deletion of stored workouts."""
 
+from datetime import date
 from math import ceil
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -10,6 +11,7 @@ from app.config import settings
 from app.database import get_db
 from app.models import TrackPoint, Workout
 from app.schemas import TrackPointSeries, WorkoutList, WorkoutRead
+from app.services.filters import workout_filters
 from app.services.workouts import track_point_count
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
@@ -37,12 +39,31 @@ def list_workouts(
     limit: int = Query(20, ge=1, le=200),
     offset: int = Query(0, ge=0),
     sport_type: str | None = Query(None, description="Filter to a single sport"),
+    date_from: date | None = Query(None, description="On or after this local date"),
+    date_to: date | None = Query(None, description="On or before this local date"),
+    q: str | None = Query(None, max_length=255, description="Substring of the activity name"),
     db: Session = Depends(get_db),
 ) -> WorkoutList:
-    """Most recent workouts first."""
-    filters = [Workout.user_id == user_id]
-    if sport_type:
-        filters.append(Workout.sport_type == sport_type)
+    """Most recent workouts first, narrowed by whatever filters were given.
+
+    `total` counts everything that matches, not the page, so the caller can
+    page through a filtered result and say how much of it there is.
+    """
+    if date_from and date_to and date_from > date_to:
+        # Silently returning nothing would look like "you have no activities
+        # then" rather than "those dates are the wrong way round".
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="date_from must not be after date_to",
+        )
+
+    filters = workout_filters(
+        user_id,
+        sport_type=sport_type,
+        date_from=date_from,
+        date_to=date_to,
+        query=q,
+    )
 
     total = db.execute(select(func.count(Workout.id)).where(*filters)).scalar() or 0
     items = (
@@ -98,9 +119,7 @@ def get_track_points(
         )
     ).one()
     if not total:
-        return TrackPointSeries(
-            workout_id=workout_id, total=0, returned=0, stride=1, items=[]
-        )
+        return TrackPointSeries(workout_id=workout_id, total=0, returned=0, stride=1, items=[])
 
     stride = max(1, ceil(total / max_points))
     query = select(TrackPoint).where(TrackPoint.workout_id == workout_id)

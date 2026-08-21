@@ -8,6 +8,7 @@ import {
   fetchWorkout,
   fetchWorkouts,
 } from '../api/client'
+import FilterBar, { EMPTY_FILTERS, hasFilters } from './FilterBar'
 import Records from './Records'
 import SportBreakdown from './SportBreakdown'
 import StatsCards from './StatsCards'
@@ -30,49 +31,81 @@ export default function Dashboard({ profile }) {
   const [weeks, setWeeks] = useState(12)
   const [page, setPage] = useState({ items: [], total: 0, offset: 0 })
   const [offset, setOffset] = useState(0)
+  const [filters, setFilters] = useState(EMPTY_FILTERS)
   const [selected, setSelected] = useState(null)
   const [error, setError] = useState(null)
 
-  // The fetch is separate from applying it, so the effect below sets state in
-  // a promise callback rather than in its own body — and the same path serves
-  // the manual refresh after an upload or a delete.
-  const fetchAll = useCallback(
-    () =>
-      Promise.all([
-        fetchAnalysis(userId),
-        fetchWeekly(userId, weeks),
-        fetchWorkouts({ userId, limit: PAGE_SIZE, offset }),
-        fetchRecords(userId),
-      ]),
-    [userId, weeks, offset],
+  // Loading is split from applying it, so the effects below set state in a
+  // promise callback rather than in their own body. Totals and the list are
+  // also split from each other: the lifetime figures, the trend and the
+  // records do not depend on the filters, so narrowing the list must not
+  // re-request them.
+  const loadTotals = useCallback(
+    () => Promise.all([fetchAnalysis(userId), fetchWeekly(userId, weeks), fetchRecords(userId)]),
+    [userId, weeks],
   )
 
-  const apply = useCallback(([analysis, trend, workouts, bests]) => {
+  const loadList = useCallback(
+    () => fetchWorkouts({ userId, limit: PAGE_SIZE, offset, ...filters }),
+    [userId, offset, filters],
+  )
+
+  const applyTotals = useCallback(([analysis, trend, bests]) => {
     setSummary(analysis)
     setWeekly(trend)
-    setPage({ items: workouts.items, total: workouts.total, offset: workouts.offset })
     setRecords(bests)
     setError(null)
   }, [])
 
+  const applyList = useCallback((workouts) => {
+    setPage({ items: workouts.items, total: workouts.total, offset: workouts.offset })
+    setError(null)
+  }, [])
+
+  const fail = useCallback((caught, fallback) => setError(errorMessage(caught, fallback)), [])
+
   useEffect(() => {
     let cancelled = false
-    fetchAll()
+    loadTotals()
       .then((data) => {
-        if (!cancelled) apply(data)
+        if (!cancelled) applyTotals(data)
       })
       .catch((caught) => {
-        if (!cancelled) setError(errorMessage(caught, 'Could not load your training'))
+        if (!cancelled) fail(caught, 'Could not load your training')
       })
     return () => {
       cancelled = true
     }
-  }, [fetchAll, apply])
+  }, [loadTotals, applyTotals, fail])
+
+  useEffect(() => {
+    let cancelled = false
+    loadList()
+      .then((data) => {
+        if (!cancelled) applyList(data)
+      })
+      .catch((caught) => {
+        if (!cancelled) fail(caught, 'Could not load your activities')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [loadList, applyList, fail])
 
   function reload() {
-    fetchAll()
-      .then(apply)
-      .catch((caught) => setError(errorMessage(caught, 'Could not load your training')))
+    loadTotals()
+      .then(applyTotals)
+      .catch((caught) => fail(caught, 'Could not load your training'))
+    loadList()
+      .then(applyList)
+      .catch((caught) => fail(caught, 'Could not load your activities'))
+  }
+
+  function changeFilters(next) {
+    // Back to the first page: page three of the whole library is not page
+    // three of a filtered one, and landing past the end shows nothing.
+    setOffset(0)
+    setFilters(next)
   }
 
   // A record names an activity but does not carry it, so opening one from
@@ -80,7 +113,7 @@ export default function Dashboard({ profile }) {
   function openById(workoutId) {
     fetchWorkout(workoutId, userId)
       .then(setSelected)
-      .catch((caught) => setError(errorMessage(caught, 'Could not open that activity')))
+      .catch((caught) => fail(caught, 'Could not open that activity'))
   }
 
   async function remove(workout) {
@@ -89,7 +122,7 @@ export default function Dashboard({ profile }) {
       if (selected?.id === workout.id) setSelected(null)
       reload()
     } catch (caught) {
-      setError(errorMessage(caught, 'Could not delete the activity'))
+      fail(caught, 'Could not delete the activity')
     }
   }
 
@@ -144,6 +177,15 @@ export default function Dashboard({ profile }) {
           </Suspense>
         )}
 
+        <FilterBar
+          // The sports somebody has actually recorded, so the list never offers
+          // a filter that can only come back empty. Deliberately the unfiltered
+          // breakdown: the options should not vanish as you narrow things down.
+          sports={summary?.by_sport ?? []}
+          filters={filters}
+          onChange={changeFilters}
+        />
+
         <WorkoutTable
           workouts={page.items}
           total={page.total}
@@ -152,6 +194,7 @@ export default function Dashboard({ profile }) {
           onPage={setOffset}
           onOpen={setSelected}
           onDelete={remove}
+          filtered={hasFilters(filters)}
         />
       </div>
     </div>
