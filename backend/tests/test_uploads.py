@@ -49,6 +49,29 @@ def test_cors_origins_accept_a_comma_separated_string():
     assert parsed.cors_origins == ["http://a", "http://b"]
 
 
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("", []),
+        ("   ", []),
+        ("http://a,http://b", ["http://a", "http://b"]),
+        ("  http://a , , http://b ", ["http://a", "http://b"]),
+        ('["http://a"]', ["http://a"]),
+    ],
+)
+def test_cors_origins_from_the_environment(monkeypatch, raw, expected):
+    """The environment source must not try to JSON-decode this first.
+
+    It did, which meant CORS_ORIGINS failed for every value an operator would
+    plausibly write — the empty string a compose file passes through, and the
+    comma-separated form the .env.example documents.
+    """
+    monkeypatch.setenv("CORS_ORIGINS", raw)
+    monkeypatch.setenv("DATABASE_URL", "sqlite://")
+
+    assert Settings(_env_file=None).cors_origins == expected
+
+
 # -- the upload reader ---------------------------------------------------
 
 

@@ -109,6 +109,103 @@ jobs:
       - name: Build
         run: npm run build
 
+  helm:
+    name: Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.3
+
+      - name: Lint
+        run: helm lint helm/activity-hub --set postgresql.auth.password=ci
+
+      - name: Render with the bundled database
+        run: |
+          helm template ci helm/activity-hub \
+            --set postgresql.auth.password=ci > /tmp/bundled.yaml
+
+      - name: Render against an external database
+        run: |
+          helm template ci helm/activity-hub \
+            --set postgresql.enabled=false \
+            --set externalDatabase.existingSecret=my-db > /tmp/external.yaml
+
+      - name: Render with an ingress
+        run: |
+          helm template ci helm/activity-hub \
+            --set postgresql.auth.password=ci \
+            --set ingress.enabled=true \
+            --set ingress.host=activity.example > /tmp/ingress.yaml
+
+      - name: Refuse to install without a database password
+        # The chart must fail loudly rather than render something guessable.
+        run: |
+          if helm template ci helm/activity-hub > /dev/null 2>&1; then
+            echo "Expected a failure when postgresql.auth.password is unset" >&2
+            exit 1
+          fi
+
+      - name: Refuse an external database with no secret
+        run: |
+          if helm template ci helm/activity-hub --set postgresql.enabled=false \
+              > /dev/null 2>&1; then
+            echo "Expected a failure when externalDatabase.existingSecret is unset" >&2
+            exit 1
+          fi
+
+      - name: Check the rendered manifests say what they should
+        run: python3 .github/scripts/check_chart.py /tmp/bundled.yaml /tmp/external.yaml /tmp/ingress.yaml
+
+  compose:
+    name: docker compose stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start
+        run: docker compose up -d --build --wait --wait-timeout 300
+
+      - name: The dashboard is served
+        run: |
+          test "$(curl -sS -o /dev/null -w '%{http_code}' http://localhost:8080/)" = "200"
+
+      - name: The dashboard proxies the API on its own origin
+        # Same-origin is the whole reason CORS never comes into it, so prove it
+        # through the web container rather than against the API directly.
+        run: |
+          status=$(curl -sS -o /tmp/me.json -w '%{http_code}' http://localhost:8080/api/users/me)
+          test "$status" = "404" || { echo "expected 404 before a profile, got $status"; cat /tmp/me.json; exit 1; }
+
+      - name: Create the profile and upload an activity
+        run: |
+          curl -sS -f -X POST http://localhost:8080/api/users/ \
+            -H 'Content-Type: application/json' \
+            -d '{"first_name":"CI","last_name":"Runner"}' > /dev/null
+          curl -sS -f -F "file=@demo/activities/2026-06-13-cycling.gpx" \
+            "http://localhost:8080/api/upload?user_id=1" > /dev/null
+
+      - name: The activity comes back through the stack
+        run: |
+          curl -sS -f http://localhost:8080/api/analysis/1 > /tmp/analysis.json
+          python3 -c "
+          import json, sys
+          d = json.load(open('/tmp/analysis.json'))
+          assert d['workout_count'] == 1, d
+          assert d['total_distance'] > 0, d
+          print('stack round trip ok:', d['workout_count'], 'activity,', round(d['total_distance']/1000, 1), 'km')
+          "
+
+      - name: Logs
+        if: failure()
+        run: docker compose logs --tail 80
+
+      - name: Stop
+        if: always()
+        run: docker compose down -v
+
   docker:
     name: Docker image
     runs-on: ubuntu-latest
