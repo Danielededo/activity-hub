@@ -89,7 +89,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v4
         with:
@@ -110,13 +110,22 @@ jobs:
         run: npm run build
 
   compose:
-    name: docker compose stack
+    # Also the image build check: `--build` builds both Dockerfiles, and the
+    # stack then runs them, which is strictly more than building them alone.
+    name: Images and compose stack
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build and start
         run: docker compose up -d --build --wait --wait-timeout 300
+
+      - name: The API migrated itself and reports healthy
+        # The image's own command migrates and then serves. A 503 here would
+        # mean it came up without a schema; asserted explicitly so a failure
+        # says which half broke rather than just "unhealthy".
+        run: |
+          curl -fsS http://localhost:8000/api/health | tee /dev/stderr | grep -q '"status":"ok"'
 
       - name: The dashboard is served
         run: |
@@ -155,57 +164,3 @@ jobs:
       - name: Stop
         if: always()
         run: docker compose down -v
-
-  docker:
-    name: Docker image
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: activity
-          POSTGRES_PASSWORD: activity
-          POSTGRES_DB: activity_hub
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U activity -d activity_hub"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Build the API image
-        run: docker build -t activity-hub-api:ci ./backend
-
-      - name: Build the frontend image
-        run: docker build -t activity-hub-web:ci ./frontend
-
-      - name: Start the container
-        # --network host lets the container reach the postgres service on localhost.
-        run: |
-          docker run -d --name activity-hub-ci --network host \
-            -e DATABASE_URL=postgresql+psycopg2://activity:activity@localhost:5432/activity_hub \
-            activity-hub-api:ci
-
-      - name: Wait for the API to report healthy
-        run: |
-          for _ in $(seq 1 30); do
-            if curl -fsS http://localhost:8000/api/health | tee /dev/stderr | grep -q '"status":"ok"'; then
-              echo "API is healthy"
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "API did not become healthy in 60s"
-          docker logs activity-hub-ci
-          exit 1
-
-      - name: Container logs
-        if: always()
-        run: docker logs activity-hub-ci
-
-      - name: Stop the container
-        if: always()
-        run: docker rm -f activity-hub-ci
