@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { sportColor } from '../theme'
 import { useColorScheme } from '../hooks/useColorScheme'
 import {
@@ -12,14 +13,27 @@ import {
 } from '../utils/formatters'
 
 /** The table view: every activity, in numbers, not colour. */
-export default function WorkoutTable({ workouts, total, limit, offset, onPage, onOpen, onDelete }) {
+export default function WorkoutTable({
+  workouts,
+  total,
+  limit,
+  offset,
+  onPage,
+  onOpen,
+  onDelete,
+  filtered = false,
+}) {
   const dark = useColorScheme()
+  // Which row has been asked to be deleted and is waiting for a confirmation.
+  const [confirming, setConfirming] = useState(null)
 
   if (!workouts?.length) {
     return (
       <section className="panel p-6 text-center">
         <p className="text-sm muted">
-          No activities yet. Upload a TCX or GPX file to get started.
+          {filtered
+            ? 'No activities match these filters.'
+            : 'No activities yet. Upload a TCX or GPX file to get started.'}
         </p>
       </section>
     )
@@ -54,7 +68,12 @@ export default function WorkoutTable({ workouts, total, limit, offset, onPage, o
               <th scope="col" className="px-4 py-2 text-right font-medium">Pace</th>
               <th scope="col" className="px-4 py-2 text-right font-medium">Climb</th>
               <th scope="col" className="px-4 py-2 text-right font-medium">HR</th>
-              <th scope="col" className="px-4 py-2"><span className="sr-only">Actions</span></th>
+              {/* Pinned: the confirmation is wider than the Delete button it
+                  replaces, and without a fixed width every column shifts
+                  sideways the moment somebody arms a delete. */}
+              <th scope="col" className="w-32 px-4 py-2">
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]">
@@ -98,15 +117,45 @@ export default function WorkoutTable({ workouts, total, limit, offset, onPage, o
                 <td className="px-4 py-2 text-right tabular-nums">
                   {formatHeartRate(workout.avg_heart_rate)}
                 </td>
-                <td className="px-4 py-2 text-right">
-                  <button
-                    type="button"
-                    onClick={() => onDelete(workout)}
-                    aria-label={`Delete ${workout.name}`}
-                    className="muted text-xs hover:text-red-700 dark:hover:text-red-400"
-                  >
-                    Delete
-                  </button>
+                <td className="whitespace-nowrap px-4 py-2 text-right">
+                  {confirming === workout.id ? (
+                    // Deleting takes the track points with it and there is no
+                    // undo, so the destructive click is the second one.
+                    //
+                    // Cancel comes second on purpose: it lands where the
+                    // Delete button just was, so a double-click cancels
+                    // instead of deleting. Do not reorder these two.
+                    <span className="inline-flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setConfirming(null)
+                          onDelete(workout)
+                        }}
+                        aria-label={`Confirm deleting ${workout.name}`}
+                        className="text-xs font-medium text-red-700 dark:text-red-400"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(null)}
+                        aria-label={`Keep ${workout.name}`}
+                        className="muted text-xs"
+                      >
+                        Cancel
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirming(workout.id)}
+                      aria-label={`Delete ${workout.name}`}
+                      className="muted text-xs hover:text-red-700 dark:hover:text-red-400"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
