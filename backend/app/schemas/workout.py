@@ -46,6 +46,30 @@ class WorkoutList(BaseModel):
     offset: int
 
 
+class TrackPointRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    sequence: int
+    timestamp: datetime | None
+    latitude: float | None
+    longitude: float | None
+    elevation: float | None
+    heart_rate: int | None
+    cadence: int | None
+
+
+class TrackPointSeries(BaseModel):
+    """A workout's samples, downsampled to something a chart can draw."""
+
+    workout_id: int
+    #: Samples stored for this workout.
+    total: int
+    returned: int
+    #: 1 means every sample; n means every nth, plus the final one.
+    stride: int
+    items: list[TrackPointRead]
+
+
 class SportBreakdown(BaseModel):
     sport_type: str
     workout_count: int

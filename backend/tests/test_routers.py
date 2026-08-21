@@ -28,27 +28,43 @@ def test_root_advertises_the_api(client):
 
 
 def test_create_and_read_user(client):
-    created = client.post("/api/users/", json={"username": "ada", "email": "ada@example.com"})
+    created = client.post("/api/users/", json={"first_name": "Ada", "last_name": "Lovelace"})
     assert created.status_code == 201
     body = created.json()
-    assert body["username"] == "ada"
+    assert body["first_name"] == "Ada"
+    assert body["full_name"] == "Ada Lovelace"
     assert body["id"] > 0
 
     fetched = client.get(f"/api/users/{body['id']}")
     assert fetched.status_code == 200
-    assert fetched.json()["email"] == "ada@example.com"
+    assert fetched.json()["last_name"] == "Lovelace"
 
 
-def test_duplicate_username_conflicts(client, user):
-    response = client.post(
-        "/api/users/", json={"username": user["username"], "email": "other@example.com"}
-    )
+def test_a_profile_without_a_surname(client):
+    """Plenty of people go by one name; the surname is optional."""
+    body = client.post("/api/users/", json={"first_name": "Prince"}).json()
+
+    assert body["last_name"] is None
+    assert body["full_name"] == "Prince"
+
+
+def test_a_blank_surname_is_stored_as_absent(client):
+    body = client.post("/api/users/", json={"first_name": "Ada", "last_name": "   "}).json()
+
+    assert body["last_name"] is None
+
+
+def test_a_second_profile_is_refused(client, user):
+    """One deployment, one person: a second profile would just be invisible."""
+    response = client.post("/api/users/", json={"first_name": "Someone"})
+
     assert response.status_code == 409
+    assert "/api/users/me" in response.json()["detail"]
 
 
-def test_invalid_email_is_rejected(client):
-    response = client.post("/api/users/", json={"username": "bob", "email": "not-an-email"})
-    assert response.status_code == 422
+def test_a_blank_first_name_is_rejected(client):
+    assert client.post("/api/users/", json={"first_name": "   "}).status_code == 422
+    assert client.post("/api/users/", json={}).status_code == 422
 
 
 def test_unknown_user_is_404(client):
@@ -157,11 +173,10 @@ def test_list_workouts_requires_a_user_id(client):
     assert client.get("/api/workouts").status_code == 422
 
 
-def test_list_workouts_is_empty_for_another_user(client, user, sample_tcx):
+def test_list_workouts_is_empty_for_another_user(client, user, other_user, sample_tcx):
     upload(client, user["id"], sample_tcx, "ride.tcx")
-    other = client.post("/api/users/", json={"username": "eve", "email": "eve@example.com"}).json()
 
-    assert client.get(f"/api/workouts?user_id={other['id']}").json()["total"] == 0
+    assert client.get(f"/api/workouts?user_id={other_user['id']}").json()["total"] == 0
 
 
 def test_get_workout_detail(client, user, sample_tcx):
@@ -184,27 +199,24 @@ def test_get_workout_requires_a_user_id(client, user, sample_tcx):
     assert client.get(f"/api/workouts/{workout_id}").status_code == 422
 
 
-def test_another_users_workout_is_not_readable(client, user, sample_tcx):
+def test_another_users_workout_is_not_readable(client, user, other_user, sample_tcx):
     """Owned by someone else must answer 404, not 403: no existence leak."""
     workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
-    other = client.post(
-        "/api/users/", json={"username": "mallory", "email": "mallory@example.com"}
-    ).json()
 
-    assert client.get(f"/api/workouts/{workout_id}?user_id={other['id']}").status_code == 404
+    response = client.get(f"/api/workouts/{workout_id}?user_id={other_user['id']}")
+
+    assert response.status_code == 404
 
 
-def test_another_users_workout_is_not_deletable(client, db_session, user, sample_tcx):
+def test_another_users_workout_is_not_deletable(client, db_session, user, other_user, sample_tcx):
     from app.models import Workout
 
     workout_id = upload(client, user["id"], sample_tcx, "ride.tcx").json()["id"]
-    other = client.post(
-        "/api/users/", json={"username": "mallory", "email": "mallory@example.com"}
-    ).json()
 
-    assert client.delete(f"/api/workouts/{workout_id}?user_id={other['id']}").status_code == 404
-    # Still there.
-    assert db_session.get(Workout, workout_id) is not None
+    deleted = client.delete(f"/api/workouts/{workout_id}?user_id={other_user['id']}")
+
+    assert deleted.status_code == 404
+    assert db_session.get(Workout, workout_id) is not None  # still there
 
 
 def test_delete_workout_removes_its_track_points(client, db_session, user, sample_tcx):

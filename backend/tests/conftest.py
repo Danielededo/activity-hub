@@ -156,10 +156,25 @@ def client(db_session):
 @pytest.fixture
 def user(client):
     response = client.post(
-        "/api/users/", json={"username": "daniele", "email": "daniele@example.com"}
+        "/api/users/", json={"first_name": "Daniele", "last_name": "De Dominicis"}
     )
     assert response.status_code == 201, response.text
     return response.json()
+
+
+@pytest.fixture
+def other_user(db_session, user):
+    """A second profile, inserted directly.
+
+    POST /api/users/ refuses a second one on purpose, so the tests that check
+    per-user isolation set the row up instead of going through the API.
+    """
+    from app.models import User
+
+    second = User(first_name="Mallory")
+    db_session.add(second)
+    db_session.commit()
+    return {"id": second.id, "first_name": second.first_name}
 
 
 @pytest.fixture

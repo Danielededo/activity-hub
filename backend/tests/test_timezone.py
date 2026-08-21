@@ -85,7 +85,7 @@ def test_local_date_treats_a_naive_timestamp_as_utc():
 
 @pytest.fixture
 def rider(db_session):
-    user = User(username="rider", email="rider@example.com")
+    user = User(first_name="Rider")
     db_session.add(user)
     db_session.flush()
     return user

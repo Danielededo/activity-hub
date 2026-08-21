@@ -26,6 +26,14 @@ class Settings(BaseSettings):
     #: offset. An IANA name, e.g. "Europe/Rome".
     display_timezone: str = "UTC"
 
+    # Only used by scripts.ensure_user, for headless setups that never open the
+    # dashboard. The normal path is the first-run screen asking who you are.
+    default_first_name: str = "Athlete"
+    default_last_name: str | None = None
+
+    #: Hard ceiling on track points returned in one response.
+    max_track_points: int = 20_000
+
     #: Two activities from the same user starting within this window and sharing
     #: a sport are treated as the same session exported twice.
     duplicate_window_seconds: int = 300

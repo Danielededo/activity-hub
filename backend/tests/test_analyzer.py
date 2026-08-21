@@ -152,7 +152,7 @@ def make_workout(user_id: int, start_time: datetime, **kwargs) -> Workout:
 
 @pytest.fixture
 def populated(db_session):
-    user = User(username="rider", email="rider@example.com")
+    user = User(first_name="Rider")
     db_session.add(user)
     db_session.flush()
 
@@ -208,7 +208,7 @@ def test_user_summary_points_at_the_longest_workout(db_session, populated):
 
 
 def test_user_summary_for_a_user_without_workouts(db_session):
-    user = User(username="new", email="new@example.com")
+    user = User(first_name="Newcomer")
     db_session.add(user)
     db_session.commit()
 

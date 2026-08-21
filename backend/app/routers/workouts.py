@@ -1,12 +1,15 @@
 """Listing, detail and deletion of stored workouts."""
 
+from math import ceil
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
-from app.models import Workout
-from app.schemas import WorkoutList, WorkoutRead
+from app.models import TrackPoint, Workout
+from app.schemas import TrackPointSeries, WorkoutList, WorkoutRead
 from app.services.workouts import track_point_count
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
@@ -65,6 +68,52 @@ def get_workout(
     workout = get_owned_workout_or_404(workout_id, user_id, db)
     return WorkoutRead.model_validate(workout).model_copy(
         update={"track_point_count": track_point_count(db, workout_id)}
+    )
+
+
+@router.get("/{workout_id}/track-points", response_model=TrackPointSeries)
+def get_track_points(
+    workout_id: int,
+    user_id: int = Query(..., ge=1),
+    max_points: int = Query(
+        2_000,
+        ge=2,
+        le=settings.max_track_points,
+        description="Downsample to at most this many samples",
+    ),
+    db: Session = Depends(get_db),
+) -> TrackPointSeries:
+    """The workout's samples, for a route map or a heart-rate trace.
+
+    Downsampled rather than paginated: a caller drawing a line wants the shape
+    of the whole activity, not page three of it. An hour of riding is some
+    3,600 samples and no chart has that many pixels, so the server strides the
+    series and says which stride it used.
+    """
+    get_owned_workout_or_404(workout_id, user_id, db)
+
+    total, last_sequence = db.execute(
+        select(func.count(TrackPoint.id), func.max(TrackPoint.sequence)).where(
+            TrackPoint.workout_id == workout_id
+        )
+    ).one()
+    if not total:
+        return TrackPointSeries(
+            workout_id=workout_id, total=0, returned=0, stride=1, items=[]
+        )
+
+    stride = max(1, ceil(total / max_points))
+    query = select(TrackPoint).where(TrackPoint.workout_id == workout_id)
+    if stride > 1:
+        # Keep the final sample as well, so a downsampled track does not stop
+        # short of where the activity actually ended.
+        query = query.where(
+            or_(TrackPoint.sequence % stride == 0, TrackPoint.sequence == last_sequence)
+        )
+
+    items = db.execute(query.order_by(TrackPoint.sequence)).scalars().all()
+    return TrackPointSeries(
+        workout_id=workout_id, total=total, returned=len(items), stride=stride, items=items
     )
 
 

@@ -31,10 +31,14 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env        # point DATABASE_URL at your PostgreSQL instance
-alembic upgrade head        # create the schema
+cp .env.example .env             # point DATABASE_URL at your PostgreSQL instance
+alembic upgrade head             # create the schema
 uvicorn app.main:app --reload
 ```
+
+The dashboard asks who you are on first run, so there is nothing else to set
+up. For a headless deployment that never opens a browser, `python -m
+scripts.ensure_user` creates the profile from `DEFAULT_FIRST_NAME`.
 
 The API is then on http://localhost:8000, with interactive docs at `/docs`.
 
@@ -79,10 +83,12 @@ volume comes up ready.
 | Method | Path | Notes |
 | --- | --- | --- |
 | GET | `/api/health` | 503 when the database is unreachable |
-| POST | `/api/users/` | 409 on a duplicate username or email |
+| GET | `/api/users/me` | The profile; 404 before one exists |
+| POST | `/api/users/` | Creates the profile; 409 if one already exists |
 | GET | `/api/users/{id}` | |
 | GET | `/api/workouts?user_id=X` | `limit`, `offset`, optional `sport_type`; newest first |
 | GET | `/api/workouts/{id}?user_id=X` | Includes `raw_data` and `track_point_count`; 404 if owned by someone else |
+| GET | `/api/workouts/{id}/track-points?user_id=X` | Samples for a route map or HR trace, downsampled to `max_points` |
 | DELETE | `/api/workouts/{id}?user_id=X` | Cascades to track points; 404 if owned by someone else |
 | POST | `/api/upload?user_id=X` | Multipart `file`: one `.tcx` or `.gpx` |
 | GET | `/api/analysis/{user_id}` | Lifetime totals plus a per-sport breakdown |
@@ -149,6 +155,29 @@ backend/
 
 Repository-level files: `LICENSE`, `.gitignore`, `.editorconfig` (shared
 indentation rules across Python, JS and YAML) and `.github/workflows/ci.yml`.
+
+## One user, no authentication
+
+The deployment serves exactly one person: whoever is self-hosting it. On first
+run `GET /api/users/me` answers 404, the dashboard asks for a name, and that is
+the whole of setup — no id to configure, and no placeholder profile invented on
+your behalf.
+
+The profile is only a name. With one user and no authentication there is
+nothing to log in as and nothing to send mail to, so there is no username and
+no email; the surname is optional, because plenty of people go by one name.
+`POST /api/users/` refuses a second profile: /users/me resolves to the lowest
+id, so an extra row would simply be invisible.
+
+Activity files cannot supply the name. GPX 1.1 has a slot for it
+(`metadata/author/name`) and TCX has none — its `Author` is the application and
+its `Creator` is the device — and in practice the big exporters leave it empty
+anyway, which is the right call for personal data.
+
+`user_id` stays in the schema and on every endpoint. It is not a security
+boundary — without authentication nothing here is — it scopes data, and the
+ownership checks stop accidental cross-reads rather than attacks. Keeping it
+costs nothing and leaves the door open to a second person.
 
 ## Demo data
 
