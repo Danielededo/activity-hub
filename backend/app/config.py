@@ -1,10 +1,12 @@
 """Application settings, loaded from the environment or a local .env file."""
 
+import json
 from functools import lru_cache
+from typing import Annotated
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 #: Slack allowed on top of max_upload_bytes for multipart framing and headers.
 MULTIPART_OVERHEAD_BYTES = 1024 * 1024
@@ -19,7 +21,10 @@ class Settings(BaseSettings):
     database_url: str = Field(min_length=1)
 
     api_prefix: str = "/api"
-    cors_origins: list[str] = ["http://localhost:5173"]
+    # NoDecode because the environment source would otherwise try to JSON-decode
+    # this before any validator runs, which fails on both "" and the
+    # comma-separated form below. With it, the raw string reaches _split_origins.
+    cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
     max_upload_bytes: int = 20 * 1024 * 1024
 
     #: Wall-clock timezone used to bucket activities whose file states no UTC
@@ -43,8 +48,14 @@ class Settings(BaseSettings):
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_origins(cls, value: object) -> object:
-        """Accept a comma-separated string so .env stays readable."""
-        if isinstance(value, str) and not value.strip().startswith("["):
+        """Accept a comma-separated string so .env stays readable.
+
+        An empty value means no origin needs allowing, which is the normal case:
+        the dashboard proxies /api on its own origin.
+        """
+        if isinstance(value, str):
+            if value.strip().startswith("["):
+                return json.loads(value)
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
