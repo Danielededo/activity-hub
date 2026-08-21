@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
-from app.schemas import AnalysisSummary, WeeklyAnalysis
+from app.schemas import AnalysisSummary, RecordsSummary, WeeklyAnalysis
 from app.services.analyzer import user_summary, weekly_summary
+from app.services.records import user_records
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
@@ -33,3 +34,15 @@ def get_weekly(
     """Per-week totals, oldest first, with empty weeks zero-filled."""
     _require_user(user_id, db)
     return WeeklyAnalysis.model_validate(weekly_summary(db, user_id, weeks=weeks))
+
+
+@router.get("/{user_id}/records", response_model=RecordsSummary)
+def get_records(user_id: int, db: Session = Depends(get_db)) -> RecordsSummary:
+    """Per-sport records and standard-distance bests, plus totals by year.
+
+    The distance bests come from windows computed when each file was stored, so
+    an activity uploaded before that existed has none until
+    scripts/backfill_bests.py has been run.
+    """
+    _require_user(user_id, db)
+    return RecordsSummary.model_validate(user_records(db, user_id))

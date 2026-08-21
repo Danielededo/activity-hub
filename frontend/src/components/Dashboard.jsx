@@ -3,14 +3,18 @@ import {
   deleteWorkout,
   errorMessage,
   fetchAnalysis,
+  fetchRecords,
   fetchWeekly,
+  fetchWorkout,
   fetchWorkouts,
 } from '../api/client'
+import Records from './Records'
 import SportBreakdown from './SportBreakdown'
 import StatsCards from './StatsCards'
 import TrendChart from './TrendChart'
 import UploadForm from './UploadForm'
 import WorkoutTable from './WorkoutTable'
+import YearlyTotals from './YearlyTotals'
 
 // Split out: the route map and the per-activity traces are only needed once
 // somebody opens an activity, so they stay out of the first paint.
@@ -22,6 +26,7 @@ export default function Dashboard({ profile }) {
   const userId = profile.id
   const [summary, setSummary] = useState(null)
   const [weekly, setWeekly] = useState(null)
+  const [records, setRecords] = useState(null)
   const [weeks, setWeeks] = useState(12)
   const [page, setPage] = useState({ items: [], total: 0, offset: 0 })
   const [offset, setOffset] = useState(0)
@@ -37,14 +42,16 @@ export default function Dashboard({ profile }) {
         fetchAnalysis(userId),
         fetchWeekly(userId, weeks),
         fetchWorkouts({ userId, limit: PAGE_SIZE, offset }),
+        fetchRecords(userId),
       ]),
     [userId, weeks, offset],
   )
 
-  const apply = useCallback(([analysis, trend, workouts]) => {
+  const apply = useCallback(([analysis, trend, workouts, bests]) => {
     setSummary(analysis)
     setWeekly(trend)
     setPage({ items: workouts.items, total: workouts.total, offset: workouts.offset })
+    setRecords(bests)
     setError(null)
   }, [])
 
@@ -66,6 +73,14 @@ export default function Dashboard({ profile }) {
     fetchAll()
       .then(apply)
       .catch((caught) => setError(errorMessage(caught, 'Could not load your training')))
+  }
+
+  // A record names an activity but does not carry it, so opening one from
+  // there means fetching it first.
+  function openById(workoutId) {
+    fetchWorkout(workoutId, userId)
+      .then(setSelected)
+      .catch((caught) => setError(errorMessage(caught, 'Could not open that activity')))
   }
 
   async function remove(workout) {
@@ -101,6 +116,13 @@ export default function Dashboard({ profile }) {
             <TrendChart buckets={weekly?.buckets} weeks={weeks} onWeeksChange={setWeeks} />
           </div>
           <SportBreakdown bySport={summary?.by_sport} />
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <Records bySport={records?.by_sport} onOpenWorkout={openById} />
+          </div>
+          <YearlyTotals years={records?.yearly} />
         </div>
 
         <UploadForm userId={userId} onUploaded={reload} />

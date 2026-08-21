@@ -8,7 +8,9 @@ vi.mock('../src/api/client', () => ({
   fetchProfile: vi.fn(),
   createProfile: vi.fn(),
   fetchAnalysis: vi.fn(),
+  fetchRecords: vi.fn(),
   fetchWeekly: vi.fn(),
+  fetchWorkout: vi.fn(),
   fetchWorkouts: vi.fn(),
   fetchTrackPoints: vi.fn(),
   deleteWorkout: vi.fn(),
@@ -32,6 +34,7 @@ function stubDashboard() {
   })
   api.fetchWeekly.mockResolvedValue({ user_id: 1, weeks: 12, buckets: [] })
   api.fetchWorkouts.mockResolvedValue({ items: [], total: 0, limit: 20, offset: 0 })
+  api.fetchRecords.mockResolvedValue({ user_id: 1, by_sport: [], yearly: [] })
 }
 
 describe('App', () => {
