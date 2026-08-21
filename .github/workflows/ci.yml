@@ -82,6 +82,33 @@ jobs:
       - name: Check the downgrade path
         run: alembic downgrade base
 
+  frontend:
+    name: Frontend lint, test and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
   docker:
     name: Docker image
     runs-on: ubuntu-latest
@@ -102,8 +129,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Build the image
+      - name: Build the API image
         run: docker build -t activity-hub-api:ci ./backend
+
+      - name: Build the frontend image
+        run: docker build -t activity-hub-web:ci ./frontend
 
       - name: Start the container
         # --network host lets the container reach the postgres service on localhost.

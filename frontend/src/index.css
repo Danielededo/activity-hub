@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* Chart surfaces and ink. Both modes are chosen, not flipped: the dark steps
+   were validated against the dark surface, not derived from the light ones. */
+:root {
+  --surface: #ffffff;
+  --surface-sunken: #f8fafc;
+  --grid: #e2e8f0;
+  --border: #e2e8f0;
+  --ink: #0f172a;
+  --ink-muted: #64748b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #1f1f1e;
+    --surface-sunken: #141413;
+    --grid: #3a3a38;
+    --border: #3a3a38;
+    --ink: #f5f5f4;
+    --ink-muted: #a3a3a0;
+  }
+}
+
+body {
+  background: var(--surface-sunken);
+  color: var(--ink);
+}
+
+/* One panel style, so a card never drifts away from the surface the chart
+   palette was validated against. */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.muted {
+  color: var(--ink-muted);
+}
