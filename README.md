@@ -52,6 +52,8 @@ To try it without your own data, load the bundled demo set:
 - **Per-activity detail** — the route coloured by speed, with traces for heart
   rate, cadence and elevation. Hovering the route reports how far in, how long
   in, and how fast at that point.
+- **Compare two activities** of the same sport on a shared distance axis —
+  speed and elevation, so the same hill lands in the same place on both lines.
 - **Duplicate detection** that catches the same session exported twice from two
   different services, not just the same file twice.
 - **Export** — the summary as CSV and every activity as GPX in one zip, both
@@ -232,7 +234,7 @@ session still works: a ride and a run at the same time are different sports.
 Lifetime totals as stat tiles, weekly distance as a bar chart, distance per
 sport, an upload box that reports each file separately, and a table of every
 activity. Opening one draws its route and traces its heart rate, cadence and
-elevation.
+elevation, and can put a second activity of the same sport next to it.
 
 Choices worth knowing about:
 
@@ -272,7 +274,14 @@ Choices worth knowing about:
 - **Start and finish are told apart by shape**, a disc and a square in text ink.
   Green against red is the obvious choice and fails outright for a red-green
   reader: those two sit 4.1 ΔE apart under simulated deuteranopia, where 8 is
-  the target.
+  the target. A route that finishes where it began gets **one** marker labelled
+  as both, because two of them sat on top of each other — and a loop is the
+  commonest shape of ride.
+- **The drawing is sized to the route, not to a square.** It used to be fitted
+  into a square and then letterboxed into a panel that is never square, so a
+  broad route was drawn at the height of the panel with half the width empty: a
+  wide loop used 42% of its panel and now uses 91%. The scale stays uniform
+  either way — shape is never distorted, only the space it is given changes.
 - **Sport colours come from a validated palette** and are assigned in fixed
   order. Two of the light-mode hues fall below 3:1 on white, so everything
   painted with them carries a visible label — identity is never colour alone.
@@ -340,6 +349,27 @@ Choices worth knowing about:
   not move the date a record was set.
 - **Every record names the activity that holds it**, and opening it fetches that
   activity: a figure with nothing behind it cannot be checked.
+- **A comparison is against distance, not elapsed time.** Run the same route a
+  minute slower and a time axis pulls the two apart from the first hill, while a
+  distance axis keeps the hill in the same place — which is the whole reason for
+  putting them together.
+- **Same sport only.** Comparing a run against a ride on a distance axis is
+  arithmetic nobody asked a question about, and offering it invites the
+  comparison rather than the pace of it.
+- **Both activities are resampled onto one grid.** Merging each track's own
+  samples into shared rows leaves a value for one activity and a gap for the
+  other in every row, so a chart that does not bridge gaps draws both lines
+  shattered into fragments exactly where they overlap. Where the shorter
+  activity ends its line stops rather than being stretched to the length of the
+  longer one.
+- **The comparison charts speak km/h for every sport**, unlike everywhere else.
+  A whole activity always moved, so its pace is a number; a single sample often
+  did not, and the pace of a standstill is unbounded — a minutes-per-kilometre
+  axis rendered its zero as a dash and read faster as it climbed. Pace stays
+  where it is well defined, in the summary above the charts.
+- **The two summary figures carry the colour of their line.** Two numbers
+  stacked under one label are anonymous otherwise, and the reader should not
+  have to guess which activity the second one belongs to.
 
 ## Demo data
 
@@ -389,8 +419,8 @@ creates the profile from `DEFAULT_FIRST_NAME` instead of the first-run screen.
 ### Tests
 
 ```bash
-cd backend && ruff check . && pytest          # 168 tests, no database needed
-cd frontend && npm run lint && npm test       # 57 tests, jsdom
+cd backend && ruff check . && ruff format --check . && pytest   # 289 tests, no database needed
+cd frontend && npm run lint && npm test                        # 202 tests, jsdom
 ```
 
 The backend suite runs against in-memory SQLite, so there is nothing to
@@ -451,9 +481,13 @@ frontend/
 │   ├── App.jsx            first-run screen or dashboard
 │   ├── theme.js           the validated sport palette, both modes
 │   ├── api/client.js      every call this app makes
-│   ├── utils/formatters.js  metric formatting
-│   └── components/        Dashboard, StatsCards, TrendChart, WorkoutTable,
-│                          UploadForm, WorkoutDetail, RouteMap, TraceChart
+│   ├── hooks/             useColorScheme
+│   ├── utils/             formatters, geo, track measurement, zone shares
+│   └── components/        Dashboard, StatsCards, TrendChart, SportBreakdown,
+│                          WorkoutTable, FilterBar, UploadForm, ExportPanel,
+│                          Records, YearlyTotals, HeartRateZones, ZoneBar,
+│                          WorkoutDetail, RouteMap, TraceChart,
+│                          CompareActivities, CompareChart, FirstRunScreen
 ├── nginx.conf             serves the build, proxies /api
 └── tests/                 formatters, palette, components
 

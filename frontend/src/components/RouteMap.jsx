@@ -1,24 +1,39 @@
 import { useMemo, useState } from 'react'
 import { CHART_INK, SINGLE_SERIES, ORDINAL_RAMP } from '../theme'
 import { useColorScheme } from '../hooks/useColorScheme'
-import { haversineDistance } from '../utils/geo'
+import { measureTrack } from '../utils/track'
 import { formatDistance, formatElapsed, formatRate } from '../utils/formatters'
 
-// The drawing box, and the viewBox padded around it to fit the stroke width.
+// The longer side of a projected route, in viewBox units. The shorter side
+// comes out proportionally smaller, and the viewBox is sized to whatever that
+// turns out to be — see `project`.
 const BOX = 100
-const VIEW_MIN = -4
-const VIEW_SIZE = 108
+
+// Room around the drawing for a stroke that sits astride the outermost points.
+const PAD = 4
 
 /**
- * Above this a "speed" is a GPS artefact, not movement (m/s, ≈ 120 km/h).
+ * How close the two ends have to be, in viewBox units, to be one marker.
  *
- * Deliberately a speed and not a distance: the samples arrive downsampled, so
- * consecutive ones can be hundreds of metres apart quite legitimately, and a
- * distance ceiling would throw away real riding at a high stride.
+ * Roughly the width of a marker, and about 3% of the route's longest axis. A
+ * loop that finishes within that of where it started is a loop, and drawing two
+ * markers there hides one behind the other.
  */
-const IMPLAUSIBLE_SPEED_MS = 120_000 / 3_600
+const SAME_PLACE = 3
 
-/** Project located samples into the box, north up and undistorted. */
+/**
+ * Project located samples, north up and undistorted, with a viewBox that hugs
+ * them.
+ *
+ * The route used to be fitted into a square, which the SVG then letterboxed
+ * into a box that is never square — so a broad route was drawn at the height of
+ * the panel and left half the width empty. Sizing the viewBox to the route
+ * instead lets the browser scale it until it runs out of *either* axis, which
+ * is as large as it can be drawn without distorting it.
+ *
+ * The scale stays uniform, so shape is preserved either way. What changes is
+ * how much of the panel a route that is wider than it is tall gets to use.
+ */
 function project(samples) {
   const located = (samples ?? []).filter(
     (sample) => sample.latitude != null && sample.longitude != null,
@@ -38,48 +53,23 @@ function project(samples) {
   const spanX = Math.max((maxLon - minLon) * Math.cos(midLat), 1e-6)
   const spanY = Math.max(maxLat - minLat, 1e-6)
   const scale = Math.min(BOX / spanX, BOX / spanY)
-  const offsetX = (BOX - spanX * scale) / 2
-  const offsetY = (BOX - spanY * scale) / 2
 
-  return located.map((sample) => ({
+  const points = located.map((sample) => ({
     sample,
-    x: offsetX + (sample.longitude - minLon) * Math.cos(midLat) * scale,
+    x: (sample.longitude - minLon) * Math.cos(midLat) * scale,
     // SVG y grows downwards; north should be up.
-    y: offsetY + (maxLat - sample.latitude) * scale,
+    y: (maxLat - sample.latitude) * scale,
   }))
-}
 
-/**
- * Metres and seconds along the track, and the speed of each hop.
- *
- * There is one fewer speed than there are points: `speeds[i]` belongs to the
- * hop arriving at point i + 1.
- */
-function measure(points) {
-  const distances = [0]
-  const elapsed = [0]
-  const speeds = []
-  const first = points[0].sample.timestamp
-  const start = first ? new Date(first).getTime() : null
-
-  for (let index = 1; index < points.length; index += 1) {
-    const from = points[index - 1].sample
-    const to = points[index].sample
-    const metres = haversineDistance(from.latitude, from.longitude, to.latitude, to.longitude)
-    distances.push(distances[index - 1] + metres)
-
-    if (start == null || !to.timestamp) {
-      elapsed.push(elapsed[index - 1])
-      speeds.push(null)
-      continue
-    }
-    elapsed.push((new Date(to.timestamp).getTime() - start) / 1000)
-    const seconds = elapsed[index] - elapsed[index - 1]
-    const speed = seconds > 0 ? metres / seconds : null
-    speeds.push(speed != null && speed <= IMPLAUSIBLE_SPEED_MS ? speed : null)
+  return {
+    points,
+    view: {
+      minX: -PAD,
+      minY: -PAD,
+      width: spanX * scale + PAD * 2,
+      height: spanY * scale + PAD * 2,
+    },
   }
-
-  return { distances, elapsed, speeds }
 }
 
 /**
@@ -143,18 +133,19 @@ function runsOf(points, speeds, edges) {
 }
 
 /** Pointer position in viewBox units, accounting for the letterboxing. */
-function toViewBox(rect, clientX, clientY) {
+function toViewBox(rect, clientX, clientY, view) {
   if (!rect.width || !rect.height) return null
-  // preserveAspectRatio defaults to xMidYMid meet: one uniform scale with the
-  // longer axis padded and the drawing centred. Mapping the pointer as a plain
-  // proportion of the element would land it somewhere else entirely on any box
-  // that is not square, which is every box this is drawn in.
-  const scale = Math.min(rect.width, rect.height) / VIEW_SIZE
-  const padX = (rect.width - VIEW_SIZE * scale) / 2
-  const padY = (rect.height - VIEW_SIZE * scale) / 2
+  // preserveAspectRatio defaults to xMidYMid meet: one uniform scale, whichever
+  // axis runs out first, with the slack split evenly and the drawing centred.
+  // Mapping the pointer as a plain proportion of the element would land it
+  // somewhere else entirely — the viewBox and the element almost never share an
+  // aspect ratio.
+  const scale = Math.min(rect.width / view.width, rect.height / view.height)
+  const padX = (rect.width - view.width * scale) / 2
+  const padY = (rect.height - view.height * scale) / 2
   return {
-    x: VIEW_MIN + (clientX - rect.left - padX) / scale,
-    y: VIEW_MIN + (clientY - rect.top - padY) / scale,
+    x: view.minX + (clientX - rect.left - padX) / scale,
+    y: view.minY + (clientY - rect.top - padY) / scale,
   }
 }
 
@@ -189,9 +180,12 @@ export default function RouteMap({ samples, sportType }) {
   const [hover, setHover] = useState(null)
 
   const track = useMemo(() => {
-    const points = project(samples)
-    if (!points) return null
-    const { distances, elapsed, speeds } = measure(points)
+    const projected = project(samples)
+    if (!projected) return null
+    const { points, view } = projected
+    // The shared helper measures samples; the projection above keeps the
+    // points it drew them at.
+    const { distances, elapsed, speeds } = measureTrack(points.map((point) => point.sample))
     const bands = speedBands(speeds)
 
     // The legend is the test of whether the encoding says anything at all. If
@@ -205,6 +199,7 @@ export default function RouteMap({ samples, sportType }) {
 
     return {
       points,
+      view,
       distances,
       elapsed,
       speeds,
@@ -219,7 +214,7 @@ export default function RouteMap({ samples, sportType }) {
     return <p className="text-xs muted">This activity has no position data.</p>
   }
 
-  const { points, distances, elapsed, speeds, edges, slowest, fastest } = track
+  const { points, view, distances, elapsed, speeds, edges, slowest, fastest } = track
   const last = points.length - 1
   // Whether the file carried any timings at all, which is a different question
   // from whether the pointer happens to be at the start.
@@ -229,6 +224,10 @@ export default function RouteMap({ samples, sportType }) {
   // ramp's middle step, so a lost signal would read as "average pace" rather
   // than "not measured". Grey says not measured. With no encoding at all there
   // is nothing to be mistaken for, so the plain line stays plain.
+  // Whether the route finishes where it started, close enough that two markers
+  // would sit on top of each other.
+  const closed =
+    Math.hypot(points[last].x - points[0].x, points[last].y - points[0].y) < SAME_PLACE
   const unknown = edges ? ink.axis : plain
   const hasUnknown = Boolean(edges) && speeds.some((speed) => speed == null)
   // A coloured line needs more width than a plain one: five steps of a single
@@ -238,7 +237,7 @@ export default function RouteMap({ samples, sportType }) {
 
   function move(event) {
     const rect = event.currentTarget.getBoundingClientRect()
-    const at = toViewBox(rect, event.clientX, event.clientY)
+    const at = toViewBox(rect, event.clientX, event.clientY, view)
     if (!at) return
     setHover({
       index: nearestIndex(points, at),
@@ -254,8 +253,18 @@ export default function RouteMap({ samples, sportType }) {
   return (
     <figure className="relative m-0">
       <svg
-        viewBox={`${VIEW_MIN} ${VIEW_MIN} ${VIEW_SIZE} ${VIEW_SIZE}`}
-        className="h-56 w-full touch-none"
+        viewBox={`${view.minX} ${view.minY} ${view.width.toFixed(2)} ${view.height.toFixed(2)}`}
+        className="mx-auto w-full touch-none"
+        // The box follows the route's own shape, within bounds, instead of
+        // always being a short wide strip. A north-south track was being drawn
+        // at a sixth of the panel; a broad one now fills the width. The cap
+        // stops a square route from making the panel absurdly tall, and the
+        // floor stops a very wide one from becoming a sliver.
+        style={{
+          aspectRatio: `${view.width} / ${view.height}`,
+          maxHeight: '22rem',
+          minHeight: '9rem',
+        }}
         role="img"
         aria-label={
           edges
@@ -284,18 +293,24 @@ export default function RouteMap({ samples, sportType }) {
             not by colour. Green against red is the obvious choice and fails
             outright for a red-green reader — those two sit 4.1 ΔE apart under
             simulated deuteranopia, where 8 is the target. The ring in the
-            surface colour keeps both legible where the track crosses itself. */}
-        <circle
-          cx={points[0].x}
-          cy={points[0].y}
-          r="2.4"
-          fill={ink.marker}
-          stroke={ink.surface}
-          strokeWidth="2"
-          vectorEffect="non-scaling-stroke"
-        >
-          <title>Start</title>
-        </circle>
+            surface colour keeps both legible where the track crosses itself.
+
+            A loop ends where it began, and drawing both there put the square on
+            top of the disc — so the start was simply invisible on the commonest
+            shape of ride. One marker, and its label says it is both. */}
+        {!closed && (
+          <circle
+            cx={points[0].x}
+            cy={points[0].y}
+            r="2.4"
+            fill={ink.marker}
+            stroke={ink.surface}
+            strokeWidth="2"
+            vectorEffect="non-scaling-stroke"
+          >
+            <title>Start</title>
+          </circle>
+        )}
         <rect
           x={points[last].x - 2.1}
           y={points[last].y - 2.1}
@@ -306,7 +321,7 @@ export default function RouteMap({ samples, sportType }) {
           strokeWidth="2"
           vectorEffect="non-scaling-stroke"
         >
-          <title>Finish</title>
+          <title>{closed ? 'Start and finish' : 'Finish'}</title>
         </rect>
 
         {hover && (
