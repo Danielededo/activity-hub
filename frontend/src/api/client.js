@@ -88,6 +88,18 @@ export async function fetchRecords(userId) {
   return data
 }
 
+/** Time in each heart-rate zone, lifetime and by week, with training load. */
+export async function fetchZones(userId, weeks = 12) {
+  const { data } = await http.get(`/analysis/${userId}/zones`, { params: { weeks } })
+  return data
+}
+
+/** One activity's time in zone. Empty when it recorded no heart rate. */
+export async function fetchWorkoutZones(workoutId, userId) {
+  const { data } = await http.get(`/workouts/${workoutId}/zones`, { params: { user_id: userId } })
+  return data
+}
+
 export async function fetchWeekly(userId, weeks = 12) {
   const { data } = await http.get(`/analysis/${userId}/weekly`, { params: { weeks } })
   return data

@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
-from app.schemas import AnalysisSummary, RecordsSummary, WeeklyAnalysis
+from app.schemas import AnalysisSummary, RecordsSummary, WeeklyAnalysis, ZoneSummary
 from app.services.analyzer import user_summary, weekly_summary
 from app.services.records import user_records
+from app.services.zones import user_zones
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
@@ -46,3 +47,20 @@ def get_records(user_id: int, db: Session = Depends(get_db)) -> RecordsSummary:
     """
     _require_user(user_id, db)
     return RecordsSummary.model_validate(user_records(db, user_id))
+
+
+@router.get("/{user_id}/zones", response_model=ZoneSummary)
+def get_zones(
+    user_id: int,
+    weeks: int = Query(12, ge=1, le=104, description="How many ISO weeks to report"),
+    db: Session = Depends(get_db),
+) -> ZoneSummary:
+    """Time in each heart-rate zone, lifetime and by week, with training load.
+
+    Zones are derived on request rather than stored, because they hang off a
+    maximum heart rate that changes: a single harder session moves every
+    previous activity's zones. An activity uploaded before the histogram existed
+    contributes nothing until scripts/backfill_hr_zones.py has been run.
+    """
+    _require_user(user_id, db)
+    return ZoneSummary.model_validate(user_zones(db, user_id, weeks=weeks))

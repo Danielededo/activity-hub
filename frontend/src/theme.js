@@ -53,11 +53,17 @@ export const CHART_INK = {
 }
 
 /**
- * Five ordinal steps of one hue, slow to fast, for colouring a route by speed.
+ * Five ordinal steps of one hue, low to high, for any ordered five-way scale.
+ *
+ * Used for route speed and for heart-rate zones. One ramp rather than two
+ * because the documented palette specifies steps for a single sequential hue,
+ * and inventing a second by eye is the one thing the colour method forbids. The
+ * two never share a screen — speed lives on an activity's route, zones on the
+ * dashboard — so there is nothing for a reader to confuse.
  *
  * Ordinal rather than the full sequential range: every step has to stay visible
- * against the panel, because a pale segment here means "slow", not "absent" — a
- * step that receded into the surface would break the line into gaps. Both modes
+ * against the panel, because the pale end here means "the low end of a scale",
+ * not "absent" — a step that receded into the surface would vanish. Both modes
  * clear the 2:1 floor for the step nearest their own surface (2.11:1 on white,
  * 2.04:1 on the dark panel), are monotone in lightness with gaps of at least
  * 0.06, and hold to a 3° hue spread. Validated, not chosen by eye; re-run the
@@ -67,7 +73,7 @@ export const CHART_INK = {
  * the dark surface, which is why its ends are 600 and 200 rather than 650 and
  * 250.
  */
-export const SPEED_RAMP = {
+export const ORDINAL_RAMP = {
   light: ['#86b6ef', '#5598e7', '#2a78d6', '#1c5cab', '#104281'],
   dark: ['#184f95', '#256abf', '#3987e5', '#6da7ec', '#9ec5f4'],
 }

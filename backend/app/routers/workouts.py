@@ -10,9 +10,10 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.models import TrackPoint, Workout
-from app.schemas import TrackPointSeries, WorkoutList, WorkoutRead
+from app.schemas import TrackPointSeries, WorkoutList, WorkoutRead, WorkoutZones
 from app.services.filters import workout_filters
 from app.services.workouts import track_point_count
+from app.services.zones import workout_zones
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
@@ -134,6 +135,17 @@ def get_track_points(
     return TrackPointSeries(
         workout_id=workout_id, total=total, returned=len(items), stride=stride, items=items
     )
+
+
+@router.get("/{workout_id}/zones", response_model=WorkoutZones)
+def get_workout_zones(
+    workout_id: int,
+    user_id: int = Query(..., ge=1),
+    db: Session = Depends(get_db),
+) -> WorkoutZones:
+    """Time in each heart-rate zone for one activity, and the load it earned."""
+    workout = get_owned_workout_or_404(workout_id, user_id, db)
+    return WorkoutZones.model_validate(workout_zones(db, workout))
 
 
 @router.delete("/{workout_id}", status_code=status.HTTP_204_NO_CONTENT)

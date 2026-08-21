@@ -3,10 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import WorkoutDetail from '../src/components/WorkoutDetail'
 import * as api from '../src/api/client'
 
-vi.mock('../src/api/client', () => ({
-  errorMessage: (error, fallback) => error?.message ?? fallback ?? 'error',
-  fetchTrackPoints: vi.fn(),
-}))
+vi.mock('../src/api/client', async (importOriginal) =>
+  (await import('./mockClient')).mockClient(importOriginal),
+)
 
 const RIDE = {
   id: 1,
@@ -46,6 +45,58 @@ function series(items) {
 beforeEach(() => {
   vi.clearAllMocks()
   api.fetchTrackPoints.mockResolvedValue(series(samples()))
+})
+
+describe('WorkoutDetail zones', () => {
+  const BANDS = [
+    { zone: 1, name: 'Recovery', min_bpm: 95, max_bpm: 113, seconds: 300 },
+    { zone: 2, name: 'Endurance', min_bpm: 114, max_bpm: 132, seconds: 900 },
+    { zone: 3, name: 'Tempo', min_bpm: 133, max_bpm: 151, seconds: 0 },
+    { zone: 4, name: 'Threshold', min_bpm: 152, max_bpm: 170, seconds: 0 },
+    { zone: 5, name: 'VO2 max', min_bpm: 171, max_bpm: null, seconds: 0 },
+  ]
+
+  it('shows the time in zone for this activity', async () => {
+    api.fetchWorkoutZones.mockResolvedValue({
+      workout_id: 1,
+      max_heart_rate: 190,
+      max_heart_rate_source: 'observed',
+      zones: BANDS,
+      seconds_below_zones: 0,
+      load: 35,
+    })
+
+    render(<WorkoutDetail workout={RIDE} userId={1} onClose={vi.fn()} />)
+
+    expect(await screen.findByText(/Z2 Endurance/)).toBeVisible()
+    expect(screen.getByText('35')).toBeInTheDocument()
+  })
+
+  it('shows nothing about zones for an activity with no heart rate', async () => {
+    api.fetchWorkoutZones.mockResolvedValue({
+      workout_id: 1,
+      max_heart_rate: null,
+      max_heart_rate_source: 'unknown',
+      zones: [],
+      seconds_below_zones: 0,
+      load: 0,
+    })
+
+    render(<WorkoutDetail workout={RIDE} userId={1} onClose={vi.fn()} />)
+
+    await screen.findByRole('heading', { name: 'Heart rate' })
+    expect(screen.queryByText(/time in zone/i)).not.toBeInTheDocument()
+  })
+
+  it('still draws the activity when the zone request fails', async () => {
+    // A missing breakdown is not worth losing the traces somebody asked to see.
+    api.fetchWorkoutZones.mockRejectedValue(new Error('nope'))
+
+    render(<WorkoutDetail workout={RIDE} userId={1} onClose={vi.fn()} />)
+
+    expect(await screen.findByRole('heading', { name: 'Heart rate' })).toBeVisible()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
 })
 
 describe('WorkoutDetail cadence', () => {

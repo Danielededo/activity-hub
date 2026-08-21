@@ -4,17 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Dashboard from '../src/components/Dashboard'
 import * as api from '../src/api/client'
 
-vi.mock('../src/api/client', () => ({
-  errorMessage: (error, fallback) => error?.message ?? fallback ?? 'error',
-  fetchAnalysis: vi.fn(),
-  fetchRecords: vi.fn(),
-  fetchWeekly: vi.fn(),
-  fetchWorkout: vi.fn(),
-  fetchWorkouts: vi.fn(),
-  deleteWorkout: vi.fn(),
-  uploadWorkout: vi.fn(),
-  uploadArchive: vi.fn(),
-}))
+vi.mock('../src/api/client', async (importOriginal) =>
+  (await import('./mockClient')).mockClient(importOriginal),
+)
 
 const PROFILE = { id: 7, first_name: 'Daniele', full_name: 'Daniele De Dominicis' }
 
@@ -118,6 +110,7 @@ describe('Dashboard filtering', () => {
     expect(api.fetchWeekly).toHaveBeenCalledTimes(1)
     // Records are lifetime figures as well: a filter does not narrow them.
     expect(api.fetchRecords).toHaveBeenCalledTimes(1)
+    expect(api.fetchZones).toHaveBeenCalledTimes(1)
   })
 
   it('passes a date range through', async () => {

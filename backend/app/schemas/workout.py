@@ -181,6 +181,54 @@ class YearlyTotals(BaseModel):
     total_elevation_gain: float
 
 
+class ZoneBandRead(BaseModel):
+    """One heart-rate zone and the time spent in it."""
+
+    zone: int
+    name: str
+    min_bpm: int
+    #: None for the top zone, which has no ceiling.
+    max_bpm: int | None
+    seconds: float
+
+
+class WorkoutZones(BaseModel):
+    """One activity's time in zone. Empty when it recorded no heart rate."""
+
+    workout_id: int
+    max_heart_rate: int | None
+    #: configured | observed | unknown — observed is a floor, not a maximum.
+    max_heart_rate_source: str
+    zones: list[ZoneBandRead]
+    #: Time under the floor of zone one: real, but not training.
+    seconds_below_zones: float
+    #: Edwards' TRIMP: minutes in each zone weighted by the zone.
+    load: float
+
+
+class WeeklyZoneSeconds(BaseModel):
+    zone: int
+    seconds: float
+
+
+class WeeklyZoneBucket(BaseModel):
+    week_start: date
+    load: float
+    seconds: list[WeeklyZoneSeconds]
+
+
+class ZoneSummary(BaseModel):
+    user_id: int
+    max_heart_rate: int | None
+    max_heart_rate_source: str
+    weeks: int
+    zones: list[ZoneBandRead]
+    seconds_below_zones: float
+    total_load: float
+    #: Oldest first, quiet weeks zero-filled, each carrying its own load.
+    weekly: list[WeeklyZoneBucket]
+
+
 class RecordsSummary(BaseModel):
     user_id: int
     by_sport: list[SportRecords]

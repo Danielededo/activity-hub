@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { CHART_INK, SINGLE_SERIES, SPEED_RAMP } from '../theme'
+import { CHART_INK, SINGLE_SERIES, ORDINAL_RAMP } from '../theme'
 import { useColorScheme } from '../hooks/useColorScheme'
 import { haversineDistance } from '../utils/geo'
 import { formatDistance, formatElapsed, formatRate } from '../utils/formatters'
@@ -99,7 +99,7 @@ function measure(points) {
  */
 function speedBands(speeds) {
   const known = speeds.filter((speed) => speed != null).sort((a, b) => a - b)
-  if (known.length < SPEED_RAMP.light.length) return null
+  if (known.length < ORDINAL_RAMP.light.length) return null
 
   const edges = [0.2, 0.4, 0.6, 0.8].map(
     (fraction) => known[Math.floor(fraction * (known.length - 1))],
@@ -184,7 +184,7 @@ function nearestIndex(points, at) {
 export default function RouteMap({ samples, sportType }) {
   const dark = useColorScheme()
   const ink = CHART_INK[dark ? 'dark' : 'light']
-  const ramp = dark ? SPEED_RAMP.dark : SPEED_RAMP.light
+  const ramp = dark ? ORDINAL_RAMP.dark : ORDINAL_RAMP.light
   const plain = dark ? SINGLE_SERIES.dark : SINGLE_SERIES.light
   const [hover, setHover] = useState(null)
 
