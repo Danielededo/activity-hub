@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "activity-hub.fullname" . }}-api
+  labels:
+    {{- include "activity-hub.labels" . | nindent 4 }}
+data:
+  # Non-secret settings only. The database URL lives in a Secret.
+  DISPLAY_TIMEZONE: {{ .Values.api.displayTimezone | quote }}
+  MAX_UPLOAD_BYTES: {{ .Values.api.maxUploadBytes | quote }}
+  DEBUG: {{ .Values.api.debug | quote }}
+  # The dashboard proxies /api on its own origin, so no browser origin needs
+  # allowing. Set this only when something else calls the API directly.
+  CORS_ORIGINS: ""

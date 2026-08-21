@@ -14,7 +14,7 @@ user identified by a `user_id` query parameter.
 | --- | --- | --- |
 | 1 | FastAPI backend, parsers, analyzer, migrations, tests | done |
 | 2 | React + Vite + Tailwind dashboard | done |
-| 3 | docker-compose and Helm chart | not started |
+| 3 | docker-compose and Helm chart | done |
 
 ## Stack
 
@@ -208,6 +208,9 @@ frontend/
 │                          UploadForm, WorkoutDetail, RouteMap, TraceChart
 ├── nginx.conf             serves the build, proxies /api
 └── tests/                 formatters, palette, components
+
+helm/activity-hub/        chart: API, dashboard, optional PostgreSQL, optional ingress
+docker-compose.yml        the local stack
 ```
 
 Repository-level files: `LICENSE`, `.gitignore`, `.editorconfig` (shared
@@ -235,6 +238,51 @@ anyway, which is the right call for personal data.
 boundary — without authentication nothing here is — it scopes data, and the
 ownership checks stop accidental cross-reads rather than attacks. Keeping it
 costs nothing and leaves the door open to a second person.
+
+## Running the whole thing
+
+```bash
+cp .env.example .env       # change POSTGRES_PASSWORD
+docker compose up --build
+open http://localhost:8080
+```
+
+PostgreSQL, the API and the dashboard. Only the dashboard is published; it
+proxies `/api` to the API on the compose network, so the browser makes
+same-origin requests and CORS never comes into it. The API is published too, on
+8000, because it is handy — not because the dashboard needs it.
+
+## Kubernetes
+
+```bash
+# The images are not published anywhere, so build them where the cluster can see them.
+docker build -t activity-hub-api:0.1.0 ./backend
+docker build -t activity-hub-web:0.1.0 ./frontend
+
+helm install activity-hub ./helm/activity-hub \
+  --set postgresql.auth.password=something-better-than-this
+```
+
+Then `kubectl port-forward svc/activity-hub-web 8080`, or set
+`ingress.enabled=true` and `ingress.host=…`.
+
+A few things the chart does deliberately:
+
+- **Migrations run in an init container**, not in the app command, so the API
+  never serves against a schema it has not applied. That is also why
+  `api.replicaCount` is 1: two pods starting together would race on them.
+  Raising it means moving the migration to a Job with a pre-upgrade hook.
+- **Readiness checks the database; liveness does not.** A pod that cannot reach
+  PostgreSQL should stop taking traffic, but a database blip should not restart
+  an otherwise healthy process.
+- **There is no default database password.** `helm install` fails until you set
+  one, rather than starting with something guessable.
+- **PostgreSQL is bundled but optional.** `postgresql.enabled=true` gives a
+  single replica with a volume so one command produces a working app; nothing
+  backs it up. Set it to `false` and point `externalDatabase.existingSecret` at
+  a URL for anything you would miss.
+- **One ingress rule.** Everything goes to the dashboard, which proxies `/api`
+  itself, so there is no second rule to keep in step and no CORS.
 
 ## Demo data
 
