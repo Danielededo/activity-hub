@@ -17,7 +17,7 @@ With the API running and a user created:
 ```bash
 curl -X POST http://localhost:8000/api/users/ \
   -H 'Content-Type: application/json' \
-  -d '{"username":"demo","email":"demo@example.com"}'
+  -d '{"first_name":"Demo","last_name":"Athlete"}'
 
 ./demo/load.sh                      # defaults to user 1 on localhost:8000
 API=http://host:8000/api USER_ID=2 ./demo/load.sh

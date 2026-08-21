@@ -35,12 +35,11 @@ def test_the_same_bytes_are_rejected_under_a_different_name(client, user, sample
     assert "identical file" in second.json()["detail"]
 
 
-def test_the_same_file_is_allowed_for_a_different_user(client, user, sample_gpx):
+def test_the_same_file_is_allowed_for_a_different_user(client, user, other_user, sample_gpx):
     """The hash is scoped per user: two people may ride together."""
     assert upload(client, user["id"], sample_gpx, "run.gpx").status_code == 201
-    other = client.post("/api/users/", json={"username": "bo", "email": "bo@example.com"}).json()
 
-    assert upload(client, other["id"], sample_gpx, "run.gpx").status_code == 201
+    assert upload(client, other_user["id"], sample_gpx, "run.gpx").status_code == 201
 
 
 # -- the same session, exported twice -----------------------------------

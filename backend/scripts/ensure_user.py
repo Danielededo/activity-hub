@@ -1,10 +1,9 @@
-"""Create the single user this deployment serves, if it does not exist yet.
+"""Create the profile this deployment serves, if it does not exist yet.
 
-Idempotent, and run from the container entrypoint next to `alembic upgrade
-head`, so a fresh volume comes up ready and the dashboard never has to ask who
-it is talking to. Kept out of application startup on purpose: a route handler
-or a lifespan hook writing to the database on boot is harder to reason about
-than one explicit step in the entrypoint.
+Not part of the container entrypoint: the dashboard asks who you are on first
+run, which is friendlier than inventing a placeholder name you would then want
+to change. This script is for the headless cases — an API-only deployment, a
+smoke test, loading the demo data before any browser is involved.
 
     python -m scripts.ensure_user
 """
@@ -30,7 +29,7 @@ def ensure_user(db: Session) -> tuple[User | None, str]:
         note = "" if total == 1 else f" ({total} users present, using the lowest id)"
         return existing, f"already present{note}"
 
-    user = User(username=settings.default_username, email=settings.default_email)
+    user = User(first_name=settings.default_first_name, last_name=settings.default_last_name)
     db.add(user)
     try:
         db.commit()
@@ -53,7 +52,7 @@ def main() -> int:
     if user is None:
         print("No user could be established", file=sys.stderr)
         return 1
-    print(f"user {user.id} ({user.username}): {outcome}")
+    print(f"user {user.id} ({user.full_name}): {outcome}")
     return 0
 
 

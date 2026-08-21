@@ -25,8 +25,7 @@ USER activity
 
 EXPOSE 8000
 
-# Migrate, then make sure the single user this deployment serves exists, so a
-# fresh volume comes up ready and the dashboard has someone to ask about.
-CMD ["sh", "-c", "alembic upgrade head \
-    && python -m scripts.ensure_user \
-    && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Apply migrations before serving, so a fresh volume comes up ready. The
+# profile is not created here: the dashboard asks who you are on first run.
+# Headless deployments can run `python -m scripts.ensure_user` themselves.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

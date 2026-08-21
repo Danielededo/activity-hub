@@ -51,7 +51,7 @@ def make_workout(db_session, user_id: int, point_count: int) -> int:
 
 @pytest.fixture
 def rider(db_session):
-    user = User(username="rider", email="rider@example.com")
+    user = User(first_name="Rider")
     db_session.add(user)
     db_session.commit()
     return user
@@ -171,7 +171,7 @@ def test_a_workout_without_samples_returns_an_empty_series(client, db_session, r
 
 def test_another_users_samples_are_not_readable(client, db_session, rider):
     workout_id = make_workout(db_session, rider.id, 10)
-    other = User(username="mallory", email="mallory@example.com")
+    other = User(first_name="Mallory")
     db_session.add(other)
     db_session.commit()
 

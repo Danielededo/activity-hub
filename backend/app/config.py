@@ -26,10 +26,10 @@ class Settings(BaseSettings):
     #: offset. An IANA name, e.g. "Europe/Rome".
     display_timezone: str = "UTC"
 
-    # The deployment is single-user: whoever is self-hosting it. These name the
-    # row that scripts.ensure_user creates, so the dashboard never has to ask.
-    default_username: str = "athlete"
-    default_email: str = "athlete@localhost"
+    # Only used by scripts.ensure_user, for headless setups that never open the
+    # dashboard. The normal path is the first-run screen asking who you are.
+    default_first_name: str = "Athlete"
+    default_last_name: str | None = None
 
     #: Hard ceiling on track points returned in one response.
     max_track_points: int = 20_000
