@@ -297,6 +297,26 @@ describe('RouteMap hover', () => {
     expect(Number(ring.getAttribute('cx'))).toBeCloseTo(0, 0)
   })
 
+  it('reads the start as a zero, not as a missing figure', () => {
+    // formatDuration answers "—" for zero; on a tooltip that reads as data the
+    // file did not have, when in fact no time has passed there yet.
+    render(<RouteMap samples={eastward(VARIED)} sportType="cycling" />)
+
+    hover(100, 100)
+
+    expect(screen.getByRole('tooltip').textContent).toMatch(/0s/)
+  })
+
+  it('says nothing about time for a track that has none', () => {
+    render(<RouteMap samples={[at(45, 7), at(45, 7.001), at(45, 7.002)]} sportType="cycling" />)
+
+    hover(200, 100)
+
+    const tip = screen.getByRole('tooltip')
+    expect(tip.textContent).toMatch(/in/)
+    expect(tip.textContent).not.toMatch(/0s/)
+  })
+
   it('clears when the pointer leaves', () => {
     render(<RouteMap samples={eastward(VARIED)} sportType="cycling" />)
     hover(200, 100)

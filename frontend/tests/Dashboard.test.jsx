@@ -7,7 +7,9 @@ import * as api from '../src/api/client'
 vi.mock('../src/api/client', () => ({
   errorMessage: (error, fallback) => error?.message ?? fallback ?? 'error',
   fetchAnalysis: vi.fn(),
+  fetchRecords: vi.fn(),
   fetchWeekly: vi.fn(),
+  fetchWorkout: vi.fn(),
   fetchWorkouts: vi.fn(),
   deleteWorkout: vi.fn(),
   uploadWorkout: vi.fn(),
@@ -62,6 +64,7 @@ beforeEach(() => {
     by_sport: BY_SPORT,
   })
   api.fetchWeekly.mockResolvedValue({ user_id: 7, weeks: 12, buckets: [] })
+  api.fetchRecords.mockResolvedValue({ user_id: 7, by_sport: [], yearly: [] })
   api.fetchWorkouts.mockResolvedValue(listOf(20))
 })
 
@@ -113,6 +116,8 @@ describe('Dashboard filtering', () => {
 
     expect(api.fetchAnalysis).toHaveBeenCalledTimes(1)
     expect(api.fetchWeekly).toHaveBeenCalledTimes(1)
+    // Records are lifetime figures as well: a filter does not narrow them.
+    expect(api.fetchRecords).toHaveBeenCalledTimes(1)
   })
 
   it('passes a date range through', async () => {

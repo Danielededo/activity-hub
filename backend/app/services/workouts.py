@@ -13,10 +13,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.models import TrackPoint, User, Workout
+from app.models import TrackPoint, User, Workout, WorkoutBest
 from app.services.analyzer import compute_metrics
 from app.services.archives import read_archive
 from app.services.parsers import ParserError, parse_file
+from app.services.records import fastest_windows
 
 
 class WorkoutServiceError(Exception):
@@ -122,6 +123,19 @@ def store_workout(db: Session, user_id: int, filename: str | None, content: byte
                     "cadence": point.cadence,
                 }
                 for point in parsed.track_points
+            ],
+        )
+
+    # Computed here rather than on request: the samples are in memory now, and
+    # answering "fastest 5 km" later would mean re-reading every track point of
+    # every activity to produce a figure that never changes.
+    windows = fastest_windows(parsed.track_points)
+    if windows:
+        db.execute(
+            insert(WorkoutBest),
+            [
+                {"workout_id": workout.id, "distance_m": metres, "duration_s": duration}
+                for metres, duration in windows.items()
             ],
         )
 

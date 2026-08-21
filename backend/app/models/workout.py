@@ -61,6 +61,11 @@ class Workout(Base, TimestampMixin):
         passive_deletes=True,
         order_by="TrackPoint.sequence",
     )
+    bests: Mapped[list["WorkoutBest"]] = relationship(  # noqa: F821
+        back_populates="workout",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def __repr__(self) -> str:
         return f"<Workout id={self.id} sport={self.sport_type!r} start={self.start_time}>"

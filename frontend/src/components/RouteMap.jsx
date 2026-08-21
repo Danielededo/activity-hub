@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { CHART_INK, SINGLE_SERIES, SPEED_RAMP } from '../theme'
 import { useColorScheme } from '../hooks/useColorScheme'
 import { haversineDistance } from '../utils/geo'
-import { formatDistance, formatDuration, formatRate } from '../utils/formatters'
+import { formatDistance, formatElapsed, formatRate } from '../utils/formatters'
 
 // The drawing box, and the viewBox padded around it to fit the stroke width.
 const BOX = 100
@@ -221,6 +221,9 @@ export default function RouteMap({ samples, sportType }) {
 
   const { points, distances, elapsed, speeds, edges, slowest, fastest } = track
   const last = points.length - 1
+  // Whether the file carried any timings at all, which is a different question
+  // from whether the pointer happens to be at the start.
+  const timed = elapsed[last] > 0
   // A stretch whose speed is unknown while the rest of the track is coloured
   // cannot wear a step of the ramp: the single-series blue happens to be the
   // ramp's middle step, so a lost signal would read as "average pace" rather
@@ -332,9 +335,10 @@ export default function RouteMap({ samples, sportType }) {
           }}
         >
           <div>{formatDistance(distances[hover.index])} in</div>
-          {/* Absent at the start rather than shown as a zero: formatDuration
-              answers "—" for nothing, and no time has passed there yet. */}
-          {elapsed[hover.index] > 0 && <div>{formatDuration(elapsed[hover.index])}</div>}
+          {/* Only for a track that has timings at all — but then the start
+              reads "0s" rather than dropping the line and resizing the
+              tooltip as the pointer moves over it. */}
+          {timed && <div>{formatElapsed(elapsed[hover.index])}</div>}
           {hoveredSpeed != null && <div>{formatRate(sportType, hoveredSpeed)}</div>}
         </div>
       )}

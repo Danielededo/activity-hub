@@ -23,6 +23,18 @@ export function formatDuration(seconds) {
   return `${minutes}m ${String(total % 60).padStart(2, '0')}s`
 }
 
+/**
+ * A position on an elapsed-time axis.
+ *
+ * formatDuration answers "—" for zero, which is right for a duration nobody
+ * recorded and wrong for the origin of an axis: the first tick of every trace
+ * was rendering as a dash.
+ */
+export function formatElapsed(seconds) {
+  if (seconds == null) return '—'
+  return seconds <= 0 ? '0s' : formatDuration(seconds)
+}
+
 export function formatElevation(metres) {
   if (metres == null) return '—'
   return `${Math.round(metres)} m`
@@ -32,8 +44,22 @@ export function formatHeartRate(bpm) {
   return bpm == null ? '—' : `${Math.round(bpm)} bpm`
 }
 
-export function formatCadence(rpm) {
-  return rpm == null ? '—' : `${Math.round(rpm)} rpm`
+/**
+ * What a cadence figure is counted in, for this sport.
+ *
+ * Cyclists count crank revolutions. On foot, TCX `RunCadence` and GPX `cad`
+ * are written per leg by Garmin, Strava and Komoot alike, so the figure is
+ * strides per minute — roughly half the steps-per-minute a watch displays.
+ * It is reported as recorded rather than doubled: an exporter that already
+ * counts both feet would then read twice as fast as the run actually was, and
+ * nothing in either format says which convention a file used.
+ */
+export function cadenceUnit(sportType) {
+  return PACE_SPORTS.has(sportType) ? 'spm' : 'rpm'
+}
+
+export function formatCadence(value, sportType) {
+  return value == null ? '—' : `${Math.round(value)} ${cadenceUnit(sportType)}`
 }
 
 /** Minutes per kilometre for foot sports, km/h for everything else. */

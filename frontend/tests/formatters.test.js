@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  cadenceUnit,
   formatCadence,
   formatDistance,
   formatDuration,
+  formatElapsed,
   formatElevation,
   formatHeartRate,
   formatLocalTime,
@@ -93,5 +95,27 @@ describe('small helpers', () => {
     expect(formatHeartRate(142.6)).toBe('143 bpm')
     expect(formatCadence(null)).toBe('—')
     expect(formatElevation(416.7)).toBe('417 m')
+  })
+
+  it('counts cadence in revolutions on a bike and in strides on foot', () => {
+    // A run's cadence is written per leg by every exporter this reads, so it
+    // is strides per minute, not crank revolutions.
+    expect(formatCadence(82.4, 'cycling')).toBe('82 rpm')
+    expect(formatCadence(86, 'running')).toBe('86 spm')
+    expect(formatCadence(58, 'hiking')).toBe('58 spm')
+  })
+
+  it('puts a zero on an axis, not a dash', () => {
+    // formatDuration answers "—" for zero, which is right for a duration that
+    // was never recorded and wrong for the origin of a trace's x axis.
+    expect(formatElapsed(0)).toBe('0s')
+    expect(formatElapsed(90)).toBe('1m 30s')
+    expect(formatElapsed(null)).toBe('—')
+  })
+
+  it('names the cadence unit without a value, for a chart axis', () => {
+    expect(cadenceUnit('cycling')).toBe('rpm')
+    expect(cadenceUnit('running')).toBe('spm')
+    expect(cadenceUnit(undefined)).toBe('rpm')
   })
 })

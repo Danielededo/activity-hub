@@ -132,3 +132,57 @@ class WeeklyAnalysis(BaseModel):
     user_id: int
     weeks: int
     buckets: list[WeeklyBucket]
+
+
+class RecordHolder(BaseModel):
+    """The activity that holds a record, and the figure it holds it with.
+
+    `value` is metres for a distance record, seconds for a duration one and
+    metres of ascent for a climb — whatever the record it belongs to measures.
+    """
+
+    workout_id: int
+    workout_name: str
+    start_time: datetime
+    utc_offset_minutes: int | None
+    value: float
+
+
+class DistanceBest(BaseModel):
+    """The fastest a standard distance was ever covered, and where."""
+
+    label: str
+    distance_m: int
+    duration_s: float
+    workout_id: int
+    workout_name: str
+    start_time: datetime
+    utc_offset_minutes: int | None
+
+
+class SportRecords(BaseModel):
+    """One sport's records. Each is null until an activity qualifies."""
+
+    sport_type: str
+    workout_count: int
+    longest_distance: RecordHolder | None
+    longest_duration: RecordHolder | None
+    biggest_climb: RecordHolder | None
+    distance_bests: list[DistanceBest]
+
+
+class YearlyTotals(BaseModel):
+    """A calendar year of training, in local years."""
+
+    year: int
+    workout_count: int
+    total_distance: float
+    total_time: float
+    total_elevation_gain: float
+
+
+class RecordsSummary(BaseModel):
+    user_id: int
+    by_sport: list[SportRecords]
+    #: Most recent year first.
+    yearly: list[YearlyTotals]

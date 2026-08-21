@@ -39,13 +39,17 @@ To try it without your own data, load the bundled demo set:
 - **Lifetime totals** — distance, moving time, elevation, heart rate, with
   per-sport breakdowns.
 - **Weekly trend** over any window from 8 to 52 weeks.
+- **Personal bests** — the fastest 1 km, 5 km, 10 km, half marathon and
+  marathon you have ever covered, per sport, each naming the activity that set
+  it. Plus the furthest, longest and biggest-climbing activity of each sport,
+  and totals by year.
 - **Every activity in a table** with pace or speed depending on the sport, in
   the activity's own local time.
 - **Filter and search** by sport, date range and name, with paging over the
   result.
-- **Per-activity detail** — the route coloured by speed, with the heart-rate
-  trace and the elevation profile. Hovering the route reports how far in, how
-  long in, and how fast at that point.
+- **Per-activity detail** — the route coloured by speed, with traces for heart
+  rate, cadence and elevation. Hovering the route reports how far in, how long
+  in, and how fast at that point.
 - **Duplicate detection** that catches the same session exported twice from two
   different services, not just the same file twice.
 
@@ -86,6 +90,18 @@ docker compose up -d --build
 Schema migrations run automatically when the API container starts, so there is
 no separate step. The volume is untouched.
 
+One exception, once: personal bests are computed when a file is uploaded, so
+activities stored before that feature existed have none until they are filled
+in.
+
+```bash
+docker compose exec backend python -m scripts.backfill_bests
+```
+
+It reads one activity at a time, is safe to interrupt and safe to re-run — it
+only looks at activities with no bests yet. `--recompute` redoes every
+activity, which is only needed if the window calculation itself changes.
+
 ## API
 
 Interactive docs at <http://localhost:8000/docs> when the stack is up.
@@ -104,6 +120,7 @@ Interactive docs at <http://localhost:8000/docs> when the stack is up.
 | POST | `/api/upload/archive?user_id=X` | Multipart `file`: a `.zip` export. Returns counts plus a per-file outcome |
 | GET | `/api/analysis/{user_id}` | Lifetime totals plus a per-sport breakdown |
 | GET | `/api/analysis/{user_id}/weekly?weeks=12` | One bucket per local week, quiet weeks zero-filled |
+| GET | `/api/analysis/{user_id}/records` | Per-sport records and distance bests, plus totals by local year |
 
 Upload failures are explicit: `404` unknown user, `400` empty file, `409`
 already stored, `413` over the size limit, `422` unreadable or unsupported file.
@@ -193,16 +210,27 @@ session still works: a ride and a run at the same time are different sports.
 
 Lifetime totals as stat tiles, weekly distance as a bar chart, distance per
 sport, an upload box that reports each file separately, and a table of every
-activity. Opening one draws its route, its heart rate and its elevation.
+activity. Opening one draws its route and traces its heart rate, cadence and
+elevation.
 
 Choices worth knowing about:
 
 - **Weekly distance is bars, not a line.** The weeks are discrete buckets; a
   line between them would imply a continuous quantity nobody measured, and a
   quiet week is a real zero.
-- **Heart rate and elevation get a chart each.** Two measures of different
-  scale on two y-axes make the crossing point an artefact of the axis ranges,
-  and readers take it to mean something.
+- **Heart rate, cadence and elevation get a chart each.** Two measures of
+  different scale on two y-axes make the crossing point an artefact of the axis
+  ranges, and readers take it to mean something. The two body measures sit
+  together and the terrain that explains them comes after.
+- **Cadence is reported as recorded, in the sport's own unit.** Cycling is
+  crank revolutions per minute. On foot, TCX `RunCadence` and GPX `cad` are
+  written per leg, so the figure is strides per minute — roughly half the
+  steps-per-minute a watch shows. It is not doubled to match: nothing in either
+  format says which convention a file used, and an exporter that already counts
+  both feet would then read twice as fast as the run was.
+- **An activity with no cadence sensor gets no cadence chart** rather than a
+  flat line at zero, which would say the sensor read nothing rather than that
+  there was no sensor.
 - **The route has no basemap.** Tiles would mean asking a third party for the
   map of wherever you exercise, which is the opposite of the point of
   self-hosting. What a bare line can still say is the shape of the ride and
@@ -243,6 +271,25 @@ Choices worth knowing about:
 - **Deleting asks twice.** There is no undo and the track points go with it, so
   the destructive click is the second one — and Cancel is where the Delete
   button just was, so a double-click cancels.
+- **A personal best is the fastest stretch, not the average.** The 5 km best is
+  the quickest any five kilometres were covered inside any activity, found by
+  sliding a window over the samples — so a hard middle kilometre of an easy run
+  is still a record. The window is interpolated between samples, or the answer
+  would depend on how often the watch happened to write a point.
+- **Standing still and losing signal cannot set a record.** A pause adds time
+  and no distance; a hop longer than a plausible step adds time and no distance
+  either. Both would otherwise read as impossibly fast.
+- **Bests are computed at upload, not on request.** That is the one moment the
+  samples are already in memory. Answering later would mean re-reading every
+  track point of every activity for a figure that never changes.
+- **Window distances come from the positions, not from the file's own total.** A
+  wheel-measured total is the better number for the activity as a whole, but it
+  says nothing about *where inside* the activity a kilometre was, which is what
+  a window needs.
+- **A tie keeps the earlier activity.** Riding the same loop to the metre should
+  not move the date a record was set.
+- **Every record names the activity that holds it**, and opening it fetches that
+  activity: a figure with nothing behind it cannot be checked.
 
 ## Demo data
 
@@ -336,14 +383,15 @@ backend/
 │   ├── main.py            FastAPI app, CORS, router wiring
 │   ├── config.py          pydantic-settings, reads .env
 │   ├── database.py        engine, session factory, declarative base
-│   ├── models/            User, Workout, TrackPoint
+│   ├── models/            User, Workout, TrackPoint, WorkoutBest
 │   ├── schemas/           request/response models
 │   ├── routers/           health, users, workouts, upload, analysis
 │   └── services/
 │       ├── analyzer.py    metric derivation and aggregate reporting
+│       ├── records.py     the window scan, and records over it
 │       └── parsers/       base, TCX, GPX, factory
 ├── alembic/               migrations
-├── scripts/               demo data generator, profile bootstrap
+├── scripts/               demo data generator, profile bootstrap, bests backfill
 └── tests/                 parsers, analyzer, API
 
 frontend/
