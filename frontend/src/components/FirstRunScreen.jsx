@@ -28,7 +28,7 @@ export default function FirstRunScreen({ onCreated }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
+    <main className="mx-auto flex max-w-md flex-1 flex-col justify-center px-6 py-12">
       <h1 className="text-2xl font-semibold">Welcome to Activity Hub</h1>
       <p className="mt-2 text-sm muted">
         Your activity files do not carry your name, so tell us once and we will not ask again.

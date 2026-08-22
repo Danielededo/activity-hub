@@ -281,7 +281,7 @@ creates the profile from `DEFAULT_FIRST_NAME` instead of the first-run screen.
 
 ```bash
 cd backend && ruff check . && ruff format --check . && pytest   # 343 tests, no database needed
-cd frontend && npm run lint && npm test                        # 223 tests, jsdom
+cd frontend && npm run lint && npm test                        # 232 tests, jsdom
 ```
 
 The backend suite runs against in-memory SQLite, so there is nothing to

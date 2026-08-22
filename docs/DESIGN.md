@@ -338,6 +338,25 @@ propagation without clipping anything; `overflow-x: hidden` on `html`, on `body`
 and on the page container all changed nothing. That is why the `table-scroll`
 utility exists instead of a bare `overflow-x-auto`.
 
+**A flex item's width is fit-content, not "fill the parent".** The footer
+turned the page into a `min-h-screen` column so it sits at the bottom on a
+short screen rather than below the fold. That made the dashboard a flex item,
+and a flex item takes its cross size from its content — so the activity table
+pushed it to 339px inside a 320px column and dragged the document out with it,
+the same 19px overflow the `table-scroll` utility had just been written to
+stop. `*:w-full` on the column gives every child an explicit width and takes
+the choice away. Third of a family now: a grid item needs `min-width: 0` to be
+allowed to shrink, a flex item needs a width to be made to fill, and neither
+default is the one a page layout wants.
+
+**The app says where it came from, on every screen.** Somebody can arrive in
+front of a running Activity Hub without having deployed it — a NAS in the
+house, a server set up years ago — and the running app is then their only
+clue, so the footer carries the link out to the project. Including on the
+screen that reports an unreachable API: a person whose stack will not come up
+is exactly the person who wants the repository, and that is where they are
+stuck.
+
 **A proportion bar that cannot show a proportion is decoration.** The zone rows
 are three columns where there is room, and on a phone the bar drops to its own
 line under the name and the time. Squeezed into a third of a 358px screen its

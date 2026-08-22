@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { errorMessage, fetchProfile } from './api/client'
 import Dashboard from './components/Dashboard'
 import FirstRunScreen from './components/FirstRunScreen'
+import Footer from './components/Footer'
 
 /**
  * Decides between the first-run screen and the dashboard.
@@ -26,6 +27,24 @@ export default function App() {
     }
   }, [])
 
+  // One shell around every state, so the footer is on all of them — and a
+  // column with a growing body rather than a full-height view plus a footer
+  // after it, which would push the footer below the fold on a short screen.
+  //
+  // `*:w-full` is load-bearing, in the same family as the `*:min-w-0` in the
+  // dashboard's grids. Whatever this box holds becomes a flex item, and a flex
+  // item's cross size is fit-content rather than "fill the parent" — so the
+  // activity table dragged the dashboard out to 339px inside a 320px column,
+  // and the document with it. An explicit width takes that away.
+  return (
+    <div className="flex min-h-screen flex-col">
+      <div className="flex flex-1 flex-col *:w-full">{view(state, setState)}</div>
+      <Footer />
+    </div>
+  )
+}
+
+function view(state, setState) {
   if (state.status === 'loading') {
     return (
       <p className="p-8 text-sm text-slate-600 dark:text-slate-400" role="status">
