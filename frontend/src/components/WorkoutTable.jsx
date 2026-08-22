@@ -54,7 +54,7 @@ export default function WorkoutTable({
         <p className="text-sm muted">
           {filtered
             ? 'No activities match these filters.'
-            : 'No activities yet. Upload a TCX or GPX file to get started.'}
+            : 'No activities yet. Upload a FIT, TCX or GPX file to get started.'}
         </p>
       </section>
     )

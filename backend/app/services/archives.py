@@ -23,7 +23,15 @@ from io import BytesIO
 
 #: What we recognise inside an archive. Anything else is reported as skipped:
 #: a real export is full of CSVs and images, which is not an error.
-ACTIVITY_SUFFIXES = (".tcx", ".gpx")
+#:
+#: Keep this in step with the parsers. While `.fit` was missing here, a Garmin
+#: bulk export — which keeps every activity in the format it was uploaded in,
+#: and that is FIT for anything off a Garmin watch — reported stored=0 and
+#: skipped=800 and looked like it had worked.
+ACTIVITY_SUFFIXES = (".tcx", ".gpx", ".fit")
+
+#: Named in the skipped reason, so the message cannot drift from the tuple.
+SUFFIX_LIST = ", ".join(ACTIVITY_SUFFIXES)
 
 ZIP_MAGIC = b"PK\x03\x04"
 READ_CHUNK = 64 * 1024
@@ -121,7 +129,7 @@ def read_archive(
                 yield ArchiveMember(name, None, "nested archives are not unpacked")
                 continue
             if _activity_name(name) is None:
-                yield ArchiveMember(name, None, "not a .tcx or .gpx file")
+                yield ArchiveMember(name, None, f"not one of {SUFFIX_LIST}")
                 continue
             if info.file_size > max_member_bytes:
                 yield ArchiveMember(name, None, f"larger than the {max_member_bytes} byte limit")

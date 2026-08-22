@@ -2,6 +2,7 @@
 
 import io
 import zipfile
+from datetime import UTC, datetime
 
 import pytest
 
@@ -12,12 +13,18 @@ from app.services.archives import (
     looks_like_zip,
     read_archive,
 )
+from tests.fit_builder import ride
 
 LIMITS = {
     "max_members": 100,
     "max_extracted_bytes": 10 * 1024 * 1024,
     "max_member_bytes": 1024 * 1024,
 }
+
+
+def fit(start: datetime) -> bytes:
+    """A FIT member, built rather than vendored: see tests/fit_builder.py."""
+    return ride(start)
 
 
 def gpx(when: str, sport: str = "cycling", name: str = "Ride") -> bytes:
@@ -62,6 +69,20 @@ def test_reads_activity_members():
     assert all(m.usable for m in found.values())
 
 
+def test_reads_a_fit_member():
+    """A Garmin bulk export is FIT, not GPX.
+
+    While `.fit` was missing from ACTIVITY_SUFFIXES an export of eight hundred
+    rides reported stored=0, skipped=800, and looked like it had worked.
+    """
+    content = make_zip({"activities/12345.fit": fit(datetime(2026, 6, 1, 7, 0, tzinfo=UTC))})
+
+    [member] = members_of(content)
+
+    assert member.usable
+    assert member.content[8:12] == b".FIT"
+
+
 def test_reads_a_gzipped_member():
     """Some exporters gzip each file inside the archive."""
     import gzip
@@ -99,7 +120,7 @@ def test_non_activity_files_are_skipped_not_failed():
     skipped = {m.name: m.skipped for m in members_of(content) if not m.usable}
 
     assert set(skipped) == {"activities.csv", "profile.jpg"}
-    assert all("not a .tcx or .gpx" in reason for reason in skipped.values())
+    assert all("not one of" in reason for reason in skipped.values())
 
 
 def test_nested_archives_are_refused_not_recursed():
@@ -195,6 +216,26 @@ def test_an_export_imports_every_activity(client, user):
     assert body["failed"] == 0
     assert {m["outcome"] for m in body["members"]} == {"stored"}
     assert all(m["workout_id"] for m in body["members"])
+
+
+def test_a_garmin_export_of_fit_files_imports(client, user):
+    """The end of the bug: a FIT-only export used to import nothing at all."""
+    content = make_zip(
+        {
+            "12345.fit": fit(datetime(2026, 6, 1, 7, 0, tzinfo=UTC)),
+            "12346.fit": fit(datetime(2026, 6, 2, 7, 0, tzinfo=UTC)),
+            "activities.csv": b"id,name\n12345,Ride\n",
+        }
+    )
+
+    body = post_archive(client, user["id"], content).json()
+
+    assert body["stored"] == 2
+    assert body["failed"] == 0
+    outcomes = {m["filename"]: m["outcome"] for m in body["members"]}
+    assert outcomes["12345.fit"] == "stored"
+    assert outcomes["12346.fit"] == "stored"
+    assert outcomes["activities.csv"] == "skipped"
 
 
 def test_reimporting_the_same_export_stores_nothing_twice(client, user):

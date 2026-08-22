@@ -186,7 +186,7 @@ describe('UploadForm pre-checks', () => {
       dataTransfer: { files: [file('notes.pdf')] },
     })
 
-    expect(await screen.findByText(/not a \.tcx, \.gpx or \.zip/)).toBeVisible()
+    expect(await screen.findByText(/not one of \.tcx, \.gpx, \.fit, \.zip/)).toBeVisible()
     expect(api.uploadWorkout).not.toHaveBeenCalled()
   })
 
@@ -206,7 +206,7 @@ describe('UploadForm pre-checks', () => {
 
     expect(screen.getByLabelText(/activity files/i)).toHaveAttribute(
       'accept',
-      '.tcx,.gpx,.zip',
+      '.tcx,.gpx,.fit,.zip',
     )
   })
 
@@ -219,7 +219,7 @@ describe('UploadForm pre-checks', () => {
     })
 
     expect(await screen.findByText('Added')).toBeVisible()
-    expect(screen.getByText(/not a \.tcx/)).toBeVisible()
+    expect(screen.getByText(/not one of \.tcx/)).toBeVisible()
     expect(api.uploadWorkout).toHaveBeenCalledOnce()
   })
 })

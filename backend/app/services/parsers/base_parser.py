@@ -1,4 +1,4 @@
-"""Parser contract shared by the TCX and GPX implementations."""
+"""Parser contract shared by every format implementation."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -52,7 +52,12 @@ class ParsedWorkout:
 
 
 class BaseParser(ABC):
-    """Namespace-agnostic XML parsing helpers plus the parse() contract."""
+    """Namespace-agnostic XML parsing helpers plus the parse() contract.
+
+    The helpers are for the XML formats; a binary format inherits the contract
+    and overrides `supports`, since sniffing a file that is not XML cannot work
+    by parsing it as XML.
+    """
 
     file_format: str = ""
     default_source: str = "unknown"

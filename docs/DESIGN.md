@@ -29,9 +29,45 @@ signal, and elevation gain and loss ignoring changes under 1 m as jitter.
 **Element lookups are namespace-agnostic.** Vendors vary the namespace and
 nothing else; matching on the local name means no per-vendor special cases.
 
+**FIT is not an optional third format.** It is what a Garmin watch records, and
+a bulk export keeps every activity in the format it was uploaded in — so for
+anyone arriving with their whole Garmin history, FIT is the *only* format in the
+box. While `.fit` was missing from the archive's suffix list an eight-hundred
+ride export reported `stored=0, skipped=800` and looked like it had worked,
+which is the worst way for an importer to fail.
+
+**Decoded with `fitdecode`, not Garmin's own SDK.** The official SDK is the
+better-maintained library, and it ships under the FIT Protocol License rather
+than an open-source one, which is not a licence this project can take a
+dependency on. `fitdecode` is MIT and reads the message types a training log
+needs.
+
+**Positions are converted by hand rather than by the library's unit
+processor.** `StandardUnitsDataProcessor` does convert semicircles to degrees —
+and also converts session distance from metres to kilometres, which would store
+every activity a thousand times shorter than it was, with nothing downstream
+noticing. Converting one field by hand is cheaper than auditing every field a
+processor touches, so the default processor is used and a semicircle is
+multiplied by `180 / 2^31` here.
+
+**`total_timer_time`, not `total_elapsed_time`.** The timer stops when you do,
+so it is the moving time the rest of the app means; elapsed time includes the
+twenty minutes at the café.
+
+**A record with no position is kept.** An indoor ride on a trainer has heart
+rate and cadence and no GPS at all, and dropping those samples would throw away
+the only traces it has.
+
+**FIT is recognised by its signature as well as its name.** The other two
+parsers decide by root element, which cannot work on a binary file; bytes 8–12
+of a FIT header are `.FIT`, and that is what identifies an archive member named
+by activity id with no extension at all.
+
 **Timestamps are stored as UTC, and the stated offset is kept beside them.**
 TCX and GPX normally write `Z`, which fixes the instant but says nothing about
-the local hour. Any offset a file *does* state goes in `utc_offset_minutes`, and
+the local hour. FIT is the one format that always says it, by writing each
+instant twice — once as UTC, once as local wall clock — so the difference is the
+offset. Any offset a file states goes in `utc_offset_minutes`, and
 `DISPLAY_TIMEZONE` is the fallback. Weekly totals bucket by local week: a 00:30
 Monday ride in Rome belongs to that Monday, not to the Sunday it falls on in UTC.
 
