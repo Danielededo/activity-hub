@@ -16,8 +16,8 @@ offers. This is the long half.
 - [Fitness, fatigue and form](#fitness-fatigue-and-form)
 - [Personal bests](#personal-bests)
 - [Comparing two activities](#comparing-two-activities)
-- [Filtering, deleting, exporting](#filtering-deleting-exporting)
 - [Narrow screens](#narrow-screens)
+- [Filtering, deleting, exporting](#filtering-deleting-exporting)
 
 ## Reading the files
 

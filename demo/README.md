@@ -3,6 +3,11 @@
 Synthetic TCX and GPX activities: five weeks of training plus a set of
 deliberately awkward files.
 
+No FIT file, though the app reads that too. FIT is binary and this generator
+writes text from one end to the other, so producing one would mean teaching it
+a second output mode. The FIT path is covered by the test suite instead, where
+`backend/tests/fit_builder.py` builds whatever bytes a test needs.
+
 ## Why synthetic
 
 Real GPS traces are personal data. A GPX exported from someone's watch
@@ -37,9 +42,10 @@ python -m scripts.generate_demo_data --out ../demo/activities --clean \
 Output is deterministic for a given `--seed`, and `--ending` is pinned so the
 committed files stay stable — which also means they age. The committed block
 ends **2026-06-28**, so a weekly chart run much later shows empty recent weeks.
-For a dashboard that looks alive, regenerate with `--ending today`. For something closer to real data — a full
-training year sampled every ten seconds, about 15 MB — write it somewhere
-untracked:
+For a dashboard that looks alive, regenerate with `--ending today`.
+
+For something closer to real data — a full training year sampled every ten
+seconds, about 15 MB — write it somewhere untracked:
 
 ```bash
 python -m scripts.generate_demo_data --out ../demo/generated \
