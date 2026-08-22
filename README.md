@@ -63,8 +63,7 @@ To try it without your own data, load the bundled demo set:
 - **Export** — the summary as CSV and every activity as GPX in one zip, both
   honouring whatever filters are set. The zip this app writes is a zip it can
   read back.
-- **Readable on a phone**, down to a 320px screen: the activity table keeps the
-  columns that fit and earns the rest as the screen widens.
+- **Readable on a phone**, down to a 320px screen.
 
 ## What it looks like
 
@@ -101,8 +100,8 @@ elapsed time, so the same hill lands in the same place on both lines:
   <img alt="Two rides compared: speed and elevation against distance travelled" src="docs/images/compare-light.png">
 </picture>
 
-It reads on a phone too, down to a 320px screen — the activity table keeps the
-columns that fit and earns the rest as the screen widens:
+The activity table keeps the columns that fit on a narrow screen and earns the
+rest as it widens, so nothing hides behind a sideways swipe:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/phone-dark.png">
@@ -174,7 +173,7 @@ Interactive docs at <http://localhost:8000/docs> when the stack is up.
 | GET | `/api/workouts/{id}/zones?user_id=X` | One activity's time in zone and the load it earned |
 | GET | `/api/workouts/{id}/export.gpx?user_id=X` | This activity as GPX, rebuilt from its samples |
 | DELETE | `/api/workouts/{id}?user_id=X` | Cascades to track points; 404 if owned by someone else |
-| POST | `/api/upload?user_id=X` | Multipart `file`: one `.tcx` or `.gpx` |
+| POST | `/api/upload?user_id=X` | Multipart `file`: one `.fit`, `.tcx` or `.gpx` |
 | POST | `/api/upload/archive?user_id=X` | Multipart `file`: a `.zip` export. Returns counts plus a per-file outcome |
 | GET | `/api/analysis/{user_id}` | Lifetime totals plus a per-sport breakdown |
 | GET | `/api/analysis/{user_id}/weekly?weeks=12` | One bucket per local week, quiet weeks zero-filled |
@@ -225,15 +224,11 @@ that Monday, not to the Sunday it falls on in UTC.
 summaries, counts. The samples live in `track_points`, so nothing is stored
 twice.
 
-Archive imports, duplicate detection and the reasoning behind both are in
-[docs/DESIGN.md](docs/DESIGN.md).
-
-## Why it works the way it does
-
 Most of the choices in here have a reason that is not obvious from the code, and
 several exist because the obvious alternative was tried and looked wrong on the
-rendered page. They are collected in **[docs/DESIGN.md](docs/DESIGN.md)** —
-worth a read before changing a chart, a colour or a derived figure.
+rendered page — archive imports and duplicate detection among them. They are
+collected in **[docs/DESIGN.md](docs/DESIGN.md)**, worth a read before changing
+a chart, a colour or a derived figure.
 
 ## Demo data
 
@@ -262,7 +257,7 @@ Docker is enough to run it; these are for working on it. You need **Python
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env             # point DATABASE_URL at a PostgreSQL instance
+cp .env.example .env             # then uncomment DATABASE_URL and point it at PostgreSQL
 alembic upgrade head
 uvicorn app.main:app --reload
 ```
@@ -274,9 +269,10 @@ npm install
 npm run dev
 ```
 
-The dev server proxies `/api`, and the nginx image serves the API on the same
-origin, so the browser never makes a cross-origin request and CORS never comes
-into it either way.
+The dev server proxies `/api` and the nginx image serves the API on the same
+origin, so in both cases the browser makes no cross-origin request at all. The
+CORS middleware is there for the other case — something that is not this
+dashboard calling the API — and `CORS_ORIGINS` is what it reads.
 
 For a headless setup that never opens a browser, `python -m scripts.ensure_user`
 creates the profile from `DEFAULT_FIRST_NAME` instead of the first-run screen.
@@ -284,7 +280,7 @@ creates the profile from `DEFAULT_FIRST_NAME` instead of the first-run screen.
 ### Tests
 
 ```bash
-cd backend && ruff check . && ruff format --check . && pytest   # 311 tests, no database needed
+cd backend && ruff check . && ruff format --check . && pytest   # 343 tests, no database needed
 cd frontend && npm run lint && npm test                        # 223 tests, jsdom
 ```
 
@@ -326,10 +322,13 @@ that day comes.
 backend/app/
 ├── main.py            FastAPI app, CORS, router wiring
 ├── config.py          pydantic-settings, reads .env
+├── database.py        engine, session, declarative base
 ├── models/            User, Workout, TrackPoint, WorkoutBest
+├── schemas/           the request and response shapes
 ├── routers/           health, users, workouts, upload, analysis, export
 └── services/
     ├── parsers/       base, FIT, TCX, GPX, factory
+    ├── archives.py    reading a zip without trusting the zip
     ├── analyzer.py    metric derivation and aggregate reporting
     ├── records.py     the window scan, and records over it
     ├── zones.py       the heart-rate histogram, and zones over it
@@ -339,6 +338,7 @@ backend/app/
 frontend/src/
 ├── theme.js           the validated palette, both modes
 ├── api/client.js      every call this app makes
+├── hooks/             whether the viewer is in dark mode
 ├── utils/             formatters, geo, track measurement, zone shares
 └── components/        one per panel of the dashboard
 ```
