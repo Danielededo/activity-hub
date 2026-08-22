@@ -38,3 +38,21 @@ body {
 .muted {
   color: var(--ink-muted);
 }
+
+/* A table wider than its panel scrolls inside this box, and only inside it.
+ *
+ * `contain: layout` is load-bearing, not decoration. Chromium lets a table
+ * descendant's min-content width reach the initial containing block even
+ * through an `overflow-x: auto` scroller, so the box scrolled correctly while
+ * the whole page also became draggable: the document had a hard 754px floor
+ * from 320px up, and a phone user swiping sideways slid the entire layout off
+ * screen and saw blank background. Layout containment stops the propagation
+ * without clipping anything, which `overflow-x` on any ancestor did not.
+ *
+ * Measured before and after on the activity table at 390px: document width
+ * 754 -> 390. Nothing else tried made a difference, including `overflow-x:
+ * hidden` on html, on body and on the page container. */
+@utility table-scroll {
+  overflow-x: auto;
+  contain: layout;
+}

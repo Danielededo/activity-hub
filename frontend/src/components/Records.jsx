@@ -88,27 +88,27 @@ function SportBlock({ sport, dark, onOpenWorkout }) {
       </dl>
 
       {sport.distance_bests.length > 0 && (
-        <div className="mt-3 overflow-x-auto">
+        <div className="mt-3 table-scroll">
           <table className="w-full text-sm">
             <caption className="sr-only">
               Fastest standard distances for {sportLabel(sport.sport_type)}
             </caption>
             <thead className="muted border-y border-[var(--border)] text-left text-xs uppercase tracking-wide">
               <tr>
-                <th scope="col" className="py-1 pr-4 font-medium">Distance</th>
-                <th scope="col" className="py-1 pr-4 text-right font-medium">Time</th>
-                <th scope="col" className="py-1 pr-4 text-right font-medium">Pace</th>
+                <th scope="col" className="py-1 pr-2 font-medium sm:pr-4">Distance</th>
+                <th scope="col" className="py-1 pr-2 text-right font-medium sm:pr-4">Time</th>
+                <th scope="col" className="py-1 pr-2 text-right font-medium sm:pr-4">Pace</th>
                 <th scope="col" className="py-1 font-medium">Set on</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
               {sport.distance_bests.map((best) => (
                 <tr key={best.distance_m}>
-                  <td className="whitespace-nowrap py-1 pr-4">{best.label}</td>
-                  <td className="py-1 pr-4 text-right tabular-nums">
+                  <td className="whitespace-nowrap py-1 pr-2 sm:pr-4">{best.label}</td>
+                  <td className="py-1 pr-2 text-right tabular-nums sm:pr-4">
                     {formatDuration(best.duration_s)}
                   </td>
-                  <td className="whitespace-nowrap py-1 pr-4 text-right tabular-nums">
+                  <td className="whitespace-nowrap py-1 pr-2 text-right tabular-nums sm:pr-4">
                     {formatPaceOrSpeed(sport.sport_type, best.distance_m, best.duration_s)}
                   </td>
                   <td className="py-1">

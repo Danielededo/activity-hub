@@ -17,6 +17,7 @@ offers. This is the long half.
 - [Personal bests](#personal-bests)
 - [Comparing two activities](#comparing-two-activities)
 - [Filtering, deleting, exporting](#filtering-deleting-exporting)
+- [Narrow screens](#narrow-screens)
 
 ## Reading the files
 
@@ -270,6 +271,41 @@ is well defined, in the summary above the charts.
 **The two summary figures carry the colour of their line.** Two numbers stacked
 under one label are anonymous otherwise, and the reader should not have to guess
 which activity the second one belongs to.
+
+## Narrow screens
+
+**A wide table drops columns rather than scrolling behind a window.** The
+activity table keeps date, activity and distance on a phone and earns sport and
+time at `sm`, pace at `md`, climb and heart rate at `lg`. It already scrolled
+inside its own box, which is the usual advice, but nine columns behind a 286px
+window is a reader swiping to find a number they cannot see. Three they can read
+beats nine they cannot, and nothing is lost: every hidden figure is in the CSV
+export and in the activity itself.
+
+**The sport survives its own column being dropped.** A coloured dot rides beside
+the activity name below `sm`, with the sport in text for a screen reader — the
+fact is kept even when the column carrying it is not, and identity is still
+never colour alone.
+
+**A grid item needs `min-width: 0` to be allowed to shrink.** Grid items default
+to `min-width: auto`, so they refuse to go below their own min-content width and
+push past the container instead. Every panel in the dashboard's two-column rows
+came out 315px wide inside a 288px column at a 320px viewport.
+
+**`overflow-x: auto` does not stop a table widening the page.** This one is
+counter-intuitive and cost the most to find. Chromium lets a table descendant's
+min-content width reach the initial containing block *through* a scroll
+container, so the box scrolled correctly while the whole document also gained a
+hard 754px floor — a phone user swiping sideways slid the entire layout off
+screen and saw blank background. `contain: layout` on the scroller stops the
+propagation without clipping anything; `overflow-x: hidden` on `html`, on `body`
+and on the page container all changed nothing. That is why the `table-scroll`
+utility exists instead of a bare `overflow-x-auto`.
+
+**A proportion bar that cannot show a proportion is decoration.** The zone rows
+are three columns where there is room, and on a phone the bar drops to its own
+line under the name and the time. Squeezed into a third of a 358px screen its
+track was 150px, which put 20h07m and 15h48m a few pixels apart.
 
 ## Filtering, deleting, exporting
 

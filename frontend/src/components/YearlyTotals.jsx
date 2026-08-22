@@ -24,7 +24,7 @@ export default function YearlyTotals({ years }) {
         By year
       </h2>
 
-      <div className="mt-3 overflow-x-auto">
+      <div className="mt-3 table-scroll">
         <table className="w-full text-sm">
           <thead className="muted border-y border-[var(--border)] text-left text-xs uppercase tracking-wide">
             <tr>

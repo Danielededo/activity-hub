@@ -186,14 +186,18 @@ export default function Dashboard({ profile }) {
       <div className="mt-6 space-y-6">
         <StatsCards summary={summary} />
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        {/* *:min-w-0 is load-bearing: a grid item defaults to min-width:auto, so
+            it refuses to shrink below its own min-content and pushes past the
+            container instead. At 320px these panels came out 315px wide inside a
+            288px column and dragged the document with them. */}
+        <div className="grid gap-6 *:min-w-0 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <TrendChart buckets={weekly?.buckets} weeks={weeks} onWeeksChange={setWeeks} />
           </div>
           <SportBreakdown bySport={summary?.by_sport} />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 *:min-w-0 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Records bySport={records?.by_sport} onOpenWorkout={openById} />
           </div>

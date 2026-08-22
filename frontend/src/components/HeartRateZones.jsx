@@ -66,8 +66,16 @@ export default function HeartRateZones({ summary, weeks, onWeeksChange }) {
 
       <dl className="mt-4 space-y-2">
         {bands.map((band) => (
-          <div key={band.zone} className="grid grid-cols-[7rem_1fr_4.5rem] items-center gap-2">
-            <dt className="flex items-center gap-2 text-xs">
+          // Three columns where there is room; on a phone the bar drops to its
+          // own line under the name and the time. Squeezed into a third of a
+          // 358px screen the track was 150px long, which put 20h07m and 15h48m
+          // a few pixels apart — a proportion bar that cannot show a
+          // proportion is decoration.
+          <div
+            key={band.zone}
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:grid sm:grid-cols-[7rem_1fr_4.5rem]"
+          >
+            <dt className="order-1 flex min-w-0 flex-1 items-center gap-2 text-xs sm:flex-none">
               <span
                 aria-hidden="true"
                 className="inline-block h-2 w-2 shrink-0 rounded-full"
@@ -77,7 +85,7 @@ export default function HeartRateZones({ summary, weeks, onWeeksChange }) {
                 Z{band.zone} {band.name}
               </span>
             </dt>
-            <dd className="flex items-center gap-2">
+            <dd className="order-3 flex w-full items-center gap-2 sm:order-2 sm:w-auto">
               <span className="h-2 flex-1 rounded-sm bg-[var(--surface-sunken)]">
                 <span
                   className="block h-2 rounded-sm"
@@ -86,7 +94,9 @@ export default function HeartRateZones({ summary, weeks, onWeeksChange }) {
               </span>
               <span className="shrink-0 text-xs muted">{zoneRange(band)}</span>
             </dd>
-            <dd className="text-right text-xs tabular-nums">{formatDuration(band.seconds)}</dd>
+            <dd className="order-2 shrink-0 text-right text-xs tabular-nums sm:order-3">
+              {formatDuration(band.seconds)}
+            </dd>
           </div>
         ))}
       </dl>
