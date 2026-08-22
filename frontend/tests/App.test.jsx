@@ -61,6 +61,21 @@ describe('App', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Network Error')
   })
 
+  it.each([
+    ['the first-run screen', () => api.fetchProfile.mockResolvedValue(null)],
+    ['the dashboard', () => api.fetchProfile.mockResolvedValue(PROFILE)],
+    // The one that earns the shell: somebody whose stack will not come up is
+    // exactly the person who wants the repository, and this is where they stop.
+    ['the unreachable-API screen', () => api.fetchProfile.mockRejectedValue(new Error('nope'))],
+  ])('shows where the project lives on %s', async (_name, arrange) => {
+    arrange()
+
+    render(<App />)
+
+    await waitFor(() => expect(screen.getByRole('contentinfo')).toBeVisible())
+    expect(screen.getByRole('link', { name: /source on github/i })).toBeVisible()
+  })
+
   it('moves on to the dashboard once the profile is created', async () => {
     api.fetchProfile.mockResolvedValue(null)
     api.createProfile.mockResolvedValue(PROFILE)
