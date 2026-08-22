@@ -1,7 +1,7 @@
 """Local-time handling: stated offsets, and local week bucketing."""
 
 import hashlib
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pytest
@@ -10,7 +10,8 @@ from pydantic import ValidationError
 from app.config import Settings
 from app.models import User, Workout
 from app.services.analyzer import local_start_date, weekly_summary
-from app.services.parsers import GpxParser, TcxParser
+from app.services.parsers import FitParser, GpxParser, TcxParser
+from tests.fit_builder import ride
 
 ROME = ZoneInfo("Europe/Rome")
 
@@ -48,6 +49,29 @@ def test_gpx_keeps_a_stated_offset():
 
 def test_tcx_keeps_a_stated_offset():
     assert TcxParser().parse(TCX_WITH_OFFSET).utc_offset_minutes == 120
+
+
+def test_fit_states_the_offset_outright(sample_fit):
+    """FIT writes the same instant twice, as UTC and as local wall clock.
+
+    That makes it the only one of the three formats that states the offset even
+    when every recorded timestamp is plain UTC.
+    """
+    workout = FitParser().parse(sample_fit)
+
+    assert workout.utc_offset_minutes == 120
+    assert workout.start_time == datetime(2026, 6, 1, 7, 0, tzinfo=UTC)
+
+
+def test_a_fit_offset_decides_the_calendar_date():
+    """A late ride belongs to the day it was ridden on, not the UTC one."""
+    late = ride(datetime(2026, 5, 31, 22, 30, tzinfo=UTC), local_offset_hours=2)
+    workout = FitParser().parse(late)
+
+    assert workout.start_time.date() == date(2026, 5, 31)
+    assert local_start_date(workout.start_time, workout.utc_offset_minutes, ROME) == date(
+        2026, 6, 1
+    )
 
 
 def test_a_z_timestamp_states_no_offset(sample_gpx, sample_tcx):

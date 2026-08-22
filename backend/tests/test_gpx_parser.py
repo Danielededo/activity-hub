@@ -87,4 +87,4 @@ def test_untimed_track_falls_back_to_metadata_time():
 
 def test_unknown_extension_is_rejected():
     with pytest.raises(UnsupportedFileError, match="Unsupported file"):
-        get_parser("workout.fit", b"not xml at all")
+        get_parser("workout.csv", b"not xml at all")

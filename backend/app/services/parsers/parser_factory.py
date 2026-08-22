@@ -1,10 +1,13 @@
 """Picks the parser for an uploaded file, by extension then by content."""
 
 from app.services.parsers.base_parser import BaseParser, ParsedWorkout, UnsupportedFileError
+from app.services.parsers.fit_parser import FitParser
 from app.services.parsers.gpx_parser import GpxParser
 from app.services.parsers.tcx_parser import TcxParser
 
-PARSERS: tuple[type[BaseParser], ...] = (TcxParser, GpxParser)
+#: FIT last: the XML parsers decide by root element, which is a cheaper and
+#: stricter test than a byte signature, so let them claim a file first.
+PARSERS: tuple[type[BaseParser], ...] = (TcxParser, GpxParser, FitParser)
 SUPPORTED_FORMATS = tuple(parser.file_format for parser in PARSERS)
 
 

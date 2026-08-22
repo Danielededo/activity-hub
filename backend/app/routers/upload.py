@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.schemas import ArchiveMemberRead, ArchiveUploadRead, WorkoutRead
-from app.services.archives import ArchiveError, looks_like_zip
+from app.services.archives import SUFFIX_LIST, ArchiveError, looks_like_zip
 from app.services.parsers import SUPPORTED_FORMATS, ParserError
 from app.services.uploads import EmptyUploadError, UploadTooLargeError, read_upload
 from app.services.workouts import (
@@ -72,7 +72,7 @@ def upload_workout(
 @router.post("/archive", response_model=ArchiveUploadRead, status_code=status.HTTP_200_OK)
 def upload_archive(
     user_id: int = Query(..., ge=1),
-    file: UploadFile = File(..., description="A .zip holding .tcx or .gpx files"),
+    file: UploadFile = File(..., description=f"A .zip holding {SUFFIX_LIST} files"),
     db: Session = Depends(get_db),
 ) -> ArchiveUploadRead:
     """Unpack an export archive and store every activity it holds.
@@ -96,7 +96,7 @@ def upload_archive(
     if not looks_like_zip(file.filename, content):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Not an archive. Send a single .tcx or .gpx to /api/upload instead.",
+            detail=f"Not an archive. Send a single {SUFFIX_LIST} file to /api/upload instead.",
         )
 
     try:

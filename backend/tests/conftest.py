@@ -1,5 +1,7 @@
 """Test fixtures: an in-memory SQLite database and sample activity files."""
 
+from datetime import UTC, datetime
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
@@ -8,6 +10,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.database import Base, get_db
 from app.main import app
+from tests.fit_builder import ride
 
 SAMPLE_TCX = b"""<?xml version="1.0" encoding="UTF-8"?>
 <TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
@@ -185,3 +188,9 @@ def sample_tcx() -> bytes:
 @pytest.fixture
 def sample_gpx() -> bytes:
     return SAMPLE_GPX
+
+
+@pytest.fixture
+def sample_fit() -> bytes:
+    """A FIT file cannot be a literal the way the others are: see fit_builder."""
+    return ride(datetime(2026, 6, 1, 7, 0, tzinfo=UTC))

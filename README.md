@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/Danielededo/activity-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/Danielededo/activity-hub/actions/workflows/ci.yml)
 
-Self-hosted training log. Feed it the TCX and GPX files your watch or Strava
-exports, and get your history back as numbers and charts that stay on your own
-machine.
+Self-hosted training log. Feed it the FIT, TCX and GPX files your watch or
+Strava exports, and get your history back as numbers and charts that stay on
+your own machine.
 
 One user, no accounts, no external services, no telemetry. Units are metric
 throughout.
@@ -37,10 +37,11 @@ To try it without your own data, load the bundled demo set:
 
 ## What you get
 
-- **Upload TCX and GPX** — one file, a folder, a drag and drop, or the whole
-  export as a `.zip`. Garmin, Strava, Komoot and anything else that writes
-  standard files. Re-uploading is safe: files already stored are skipped, and
-  each file is reported separately as it lands.
+- **Upload FIT, TCX and GPX** — one file, a folder, a drag and drop, or the
+  whole export as a `.zip`. FIT is what a Garmin watch records and what a Garmin
+  bulk export contains; TCX and GPX cover Strava, Komoot and everything else
+  that writes standard files. Re-uploading is safe: files already stored are
+  skipped, and each file is reported separately as it lands.
 - **Lifetime totals** — distance, moving time, elevation, heart rate, with
   per-sport breakdowns, and a weekly trend over 8 to 52 weeks.
 - **Heart-rate zones and training load** — how much time goes into each of five
@@ -207,7 +208,7 @@ costs nothing and leaves the door open to a second person.
 
 ```mermaid
 flowchart LR
-  A["a .tcx or .gpx file,<br/>or a .zip of them"] --> B["parser_factory<br/>by extension, then<br/>by XML root element"]
+  A["a .fit, .tcx or .gpx file,<br/>or a .zip of them"] --> B["parser_factory<br/>by extension, then<br/>by root element<br/>or file signature"]
   B --> C["ParsedWorkout<br/>header, stated totals,<br/>one point per sample"]
   C --> D["compute_metrics<br/>trusts the file's own totals,<br/>derives what is missing"]
   D --> E["workouts + track_points<br/>with the HR histogram and<br/>the distance bests"]
@@ -216,6 +217,7 @@ flowchart LR
 Timestamps are stored as UTC. TCX and GPX normally write `Z`, which fixes the
 instant but says nothing about the local hour, so any offset the file *does*
 state is kept in `utc_offset_minutes` and `DISPLAY_TIMEZONE` is the fallback.
+FIT is the one format that always states it, by writing each instant twice.
 Weekly totals are bucketed by local week: a 00:30 Monday ride in Rome belongs to
 that Monday, not to the Sunday it falls on in UTC.
 
@@ -327,7 +329,7 @@ backend/app/
 ├── models/            User, Workout, TrackPoint, WorkoutBest
 ├── routers/           health, users, workouts, upload, analysis, export
 └── services/
-    ├── parsers/       base, TCX, GPX, factory
+    ├── parsers/       base, FIT, TCX, GPX, factory
     ├── analyzer.py    metric derivation and aggregate reporting
     ├── records.py     the window scan, and records over it
     ├── zones.py       the heart-rate histogram, and zones over it

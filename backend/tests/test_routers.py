@@ -88,6 +88,20 @@ def test_upload_tcx(client, user, sample_tcx):
     assert body["raw_data"]["creator"] == "Garmin Edge 530"
 
 
+def test_upload_fit(client, user, sample_fit):
+    response = upload(client, user["id"], sample_fit, "12345.fit")
+
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["source"] == "garmin"
+    assert body["file_format"] == "fit"
+    assert body["sport_type"] == "cycling"
+    assert body["total_distance"] == 12340.0
+    assert body["max_heart_rate"] == 152
+    assert body["track_point_count"] == 3
+    assert body["raw_data"]["total_ascent"] == 210
+
+
 def test_upload_persists_track_points(client, db_session, user, sample_gpx):
     workout_id = upload(client, user["id"], sample_gpx, "run.gpx").json()["id"]
 
@@ -115,10 +129,18 @@ def test_upload_rejects_an_unknown_user(client, sample_tcx):
 
 
 def test_upload_rejects_an_unsupported_extension(client, user):
-    response = upload(client, user["id"], b"random bytes", "workout.fit")
+    response = upload(client, user["id"], b"random bytes", "workout.csv")
 
     assert response.status_code == 422
     assert "Unsupported file" in response.json()["detail"]
+
+
+def test_upload_rejects_a_fit_file_that_is_not_one(client, user):
+    """Named .fit, so the FIT parser claims it and then says what is wrong."""
+    response = upload(client, user["id"], b"random bytes", "workout.fit")
+
+    assert response.status_code == 422
+    assert "Malformed FIT" in response.json()["detail"]
 
 
 def test_upload_rejects_malformed_xml(client, user):

@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 import { errorMessage, uploadArchive, uploadWorkout } from '../api/client'
 
-const ACTIVITY_SUFFIXES = ['.tcx', '.gpx']
+const ACTIVITY_SUFFIXES = ['.tcx', '.gpx', '.fit']
 const ARCHIVE_SUFFIXES = ['.zip']
-const ACCEPT = [...ACTIVITY_SUFFIXES, ...ARCHIVE_SUFFIXES].join(',')
+const ALL_SUFFIXES = [...ACTIVITY_SUFFIXES, ...ARCHIVE_SUFFIXES]
+const ACCEPT = ALL_SUFFIXES.join(',')
 
 /**
  * Deliberately generous: this is only here to stop a pathological file being
@@ -15,12 +16,12 @@ const ABSURD_SIZE = 500 * 1024 * 1024
 
 function suffixOf(name) {
   const lowered = name.toLowerCase()
-  return [...ACTIVITY_SUFFIXES, ...ARCHIVE_SUFFIXES].find((s) => lowered.endsWith(s)) ?? null
+  return ALL_SUFFIXES.find((s) => lowered.endsWith(s)) ?? null
 }
 
 /** Why this file cannot be sent, or null if it can. */
 function precheck(file) {
-  if (!suffixOf(file.name)) return 'not a .tcx, .gpx or .zip file'
+  if (!suffixOf(file.name)) return `not one of ${ALL_SUFFIXES.join(', ')}`
   if (file.size === 0) return 'the file is empty'
   if (file.size > ABSURD_SIZE) return 'far too large to upload'
   return null
@@ -159,8 +160,8 @@ export default function UploadForm({ userId, onUploaded }) {
         Add activities
       </h2>
       <p className="mt-1 text-xs muted">
-        TCX from Garmin, GPX from Strava or Komoot, or the whole export as a .zip. Files
-        already stored are skipped.
+        FIT or TCX from Garmin, GPX from Strava or Komoot, or the whole export as a .zip.
+        Files already stored are skipped.
       </p>
 
       <div
